@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 336" width="520" height="336">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g font-family="Inter, Arial, sans-serif" font-size="15" fill="#122120" text-anchor="middle" dominant-baseline="middle">
+<rect x="60" y="24" width="400" height="288" fill="#ffffff" stroke="#122120" stroke-width="1.5"/>
+<path d="M 60 72 H 460 V 120 H 84 V 264 H 60 Z" fill="#DDEFEB" stroke="#122120" stroke-width="1.5" stroke-linejoin="miter"/>
+<path d="M 84 168 H 460 M 84 216 H 460 M 60 264 H 460" fill="none" stroke="#122120" stroke-width="1.5" stroke-linejoin="miter"/>
+<text x="260" y="48">Ввести a, b</text>
+<text x="260" y="96">поки b ≠ 0</text>
+<text x="272" y="144">r ← a mod b</text>
+<text x="272" y="192">a ← b</text>
+<text x="272" y="240">b ← r</text>
+<text x="260" y="288">Вивести a</text>
+</g>
+</svg>

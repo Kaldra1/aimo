@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 558" width="720" height="558">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#122120"/></marker></defs>
+<g font-family="Inter, Arial, sans-serif" font-size="15" fill="#122120" text-anchor="middle" dominant-baseline="middle">
+<rect x="24" y="42" width="60" height="40" rx="20" fill="#ffffff" stroke="#122120" stroke-width="1.5"/>
+<text x="104" y="52" text-anchor="start">Термінатор —</text>
+<text x="104" y="74" font-size="14" text-anchor="start">початок/кінець</text>
+<rect x="24" y="144" width="60" height="40" fill="#ffffff" stroke="#122120" stroke-width="1.5"/>
+<text x="104" y="154" text-anchor="start">Процес — обчислення,</text>
+<text x="104" y="176" font-size="14" text-anchor="start">присвоювання</text>
+<path d="M 54 246 L 84 266 54 286 24 266 Z" fill="#ffffff" stroke="#122120" stroke-width="1.5" stroke-linejoin="miter"/><text x="54" y="266"></text>
+<text x="104" y="256" text-anchor="start">Рішення —</text>
+<text x="104" y="278" font-size="14" text-anchor="start">перевірка умови</text>
+<path d="M 36 348 H 84 L 72 388 H 24 Z" fill="#ffffff" stroke="#122120" stroke-width="1.5" stroke-linejoin="miter"/>
+<text x="104" y="358" text-anchor="start">Дані —</text>
+<text x="104" y="380" font-size="14" text-anchor="start">введення/виведення</text>
+<rect x="24" y="450" width="60" height="40" fill="#ffffff" stroke="#122120" stroke-width="1.5"/>
+<path d="M 34 450 V 490 M 74 450 V 490" fill="none" stroke="#122120" stroke-width="1.5" stroke-linejoin="miter"/>
+<text x="104" y="460" text-anchor="start">Визначений процес —</text>
+<text x="104" y="482" font-size="14" text-anchor="start">виклик підпрограми</text>
+<path d="M 396 42 H 416 L 436 62 416 82 H 396 L 376 62 Z" fill="#ffffff" stroke="#122120" stroke-width="1.5" stroke-linejoin="miter"/><text x="406" y="62"></text>
+<text x="456" y="52" text-anchor="start">Підготовка — заголовок</text>
+<text x="456" y="74" font-size="14" text-anchor="start">циклу з параметром</text>
+<path d="M 376 150 L 386 140 H 426 L 436 150 V 180 H 376 Z" fill="#ffffff" stroke="#122120" stroke-width="1.5" stroke-linejoin="miter"/>
+<path d="M 376 188 H 436 V 218 L 426 228 H 386 L 376 218 Z" fill="#ffffff" stroke="#122120" stroke-width="1.5" stroke-linejoin="miter"/>
+<text x="456" y="173" text-anchor="start">Межа циклу —</text>
+<text x="456" y="195" font-size="14" text-anchor="start">початок і кінець циклу</text>
+<circle cx="406" cy="266" r="20" fill="#ffffff" stroke="#122120" stroke-width="1.5"/>
+<text x="456" y="256" text-anchor="start">З'єднувач —</text>
+<text x="456" y="278" font-size="14" text-anchor="start">розрив лінії потоку</text>
+<path d="M 436 348 H 416 V 388 H 436" fill="none" stroke="#122120" stroke-width="1.5" stroke-linejoin="miter"/>
+<path d="M 376 368 H 416" fill="none" stroke="#6B8480" stroke-width="1.5" stroke-dasharray="5 4"/>
+<rect x="370" y="358" width="12" height="20" fill="#ffffff" stroke="#122120" stroke-width="1.5"/>
+<text x="456" y="358" text-anchor="start">Коментар —</text>
+<text x="456" y="380" font-size="14" text-anchor="start">пояснення</text>
+<path d="M 376 470 H 436" fill="none" stroke="#122120" stroke-width="1.5" stroke-linejoin="miter" marker-end="url(#arrow)"/>
+<text x="456" y="460" text-anchor="start">Лінія потоку —</text>
+<text x="456" y="482" font-size="14" text-anchor="start">порядок дій</text>
+<text x="360" y="532" font-size="13">Основні символи схем за ГОСТ 19.701-90 (ISO 5807-85)</text>
+</g>
+</svg>

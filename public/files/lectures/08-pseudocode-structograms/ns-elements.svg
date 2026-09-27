@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 438" width="720" height="438">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g font-family="Inter, Arial, sans-serif" font-size="15" fill="#122120" text-anchor="middle" dominant-baseline="middle">
+<rect x="24" y="24" width="208" height="148" fill="#ffffff" stroke="#122120" stroke-width="1.5"/>
+<path d="M 24 73 H 232 M 24 122 H 232" fill="none" stroke="#122120" stroke-width="1.5" stroke-linejoin="miter"/>
+<text x="128" y="48.5">Дія 1</text>
+<text x="128" y="97.5">Дія 2</text>
+<text x="128" y="147">Дія 3</text>
+<text x="128" y="196" font-size="13">а) слідування</text>
+<rect x="256" y="24" width="208" height="148" fill="#ffffff" stroke="#122120" stroke-width="1.5"/>
+<rect x="256" y="24" width="208" height="76" fill="#DDEFEB" stroke="#122120" stroke-width="1.5"/>
+<path d="M 256 24 L 360 100 L 464 24 M 360 100 V 172" fill="none" stroke="#122120" stroke-width="1.5" stroke-linejoin="miter"/>
+<text x="360" y="43">умова</text>
+<text x="282" y="81" fill="#0D6E63">так</text>
+<text x="438" y="81" fill="#0D6E63">ні</text>
+<text x="308" y="136">Дія 1</text>
+<text x="412" y="136">Дія 2</text>
+<text x="360" y="196" font-size="13">б) розгалуження</text>
+<rect x="488" y="24" width="208" height="148" fill="#ffffff" stroke="#122120" stroke-width="1.5"/>
+<rect x="488" y="24" width="208" height="68" fill="#DDEFEB" stroke="#122120" stroke-width="1.5"/>
+<path d="M 488 60 H 696 M 557.333 60 V 172 M 626.667 60 V 172" fill="none" stroke="#122120" stroke-width="1.5" stroke-linejoin="miter"/>
+<text x="592" y="42">значення</text>
+<text x="522.667" y="76">1</text>
+<text x="592" y="76">2</text>
+<text x="661.333" y="76" font-size="14">інакше</text>
+<text x="522.667" y="132">Дія 1</text>
+<text x="592" y="132">Дія 2</text>
+<text x="661.333" y="132">Дія 3</text>
+<text x="592" y="196" font-size="13">в) вибір</text>
+<rect x="88" y="244" width="260" height="144" fill="#ffffff" stroke="#122120" stroke-width="1.5"/>
+<path d="M 88 244 H 348 V 292 H 112 V 388 H 88 Z" fill="#DDEFEB" stroke="#122120" stroke-width="1.5" stroke-linejoin="miter"/>
+<text x="218" y="268">поки умова</text>
+<text x="230" y="340">Тіло циклу</text>
+<text x="218" y="414" font-size="13">г) цикл з передумовою</text>
+<rect x="372" y="244" width="260" height="144" fill="#ffffff" stroke="#122120" stroke-width="1.5"/>
+<path d="M 372 244 H 396 V 340 H 632 V 388 H 372 Z" fill="#DDEFEB" stroke="#122120" stroke-width="1.5" stroke-linejoin="miter"/>
+<text x="514" y="292">Тіло циклу</text>
+<text x="502" y="364">поки умова</text>
+<text x="502" y="414" font-size="13">д) цикл з післяумовою</text>
+</g>
+</svg>
