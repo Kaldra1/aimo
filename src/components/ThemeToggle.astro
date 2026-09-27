@@ -1,0 +1,85 @@
+---
+import Icon from './Icon.astro';
+---
+
+<button type="button" class="theme-toggle" aria-pressed="false" data-theme-toggle>
+  <Icon name="moon" class="theme-toggle__icon theme-toggle__icon--moon" />
+  <Icon name="sun" class="theme-toggle__icon theme-toggle__icon--sun" />
+  <span class="theme-toggle__label">Темна тема</span>
+</button>
+
+<script>
+  // Ключ має збігатися з інлайн-скриптом у BaseLayout.astro.
+  const STORAGE_KEY = 'aimo-theme';
+  const root = document.documentElement;
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
+
+  function storedTheme(): string | null {
+    try {
+      return localStorage.getItem(STORAGE_KEY);
+    } catch {
+      return null;
+    }
+  }
+
+  function apply(theme: 'light' | 'dark'): void {
+    root.dataset.theme = theme;
+    for (const button of buttons) button.setAttribute('aria-pressed', String(theme === 'dark'));
+  }
+
+  apply(root.dataset.theme === 'dark' ? 'dark' : 'light');
+
+  for (const button of buttons) {
+    button.addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+      } catch {
+        // Сховище недоступне (приватний режим) — тема діє до перезавантаження.
+      }
+      apply(next);
+    });
+  }
+
+  // Поки користувач не обрав тему вручну, стежимо за системними налаштуваннями.
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
+    if (!storedTheme()) apply(event.matches ? 'dark' : 'light');
+  });
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: var(--space-2);
+    border: 1px solid transparent;
+    border-radius: var(--radius-control);
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .theme-toggle:hover {
+    background: var(--color-surface-strong);
+  }
+
+  .theme-toggle :global(.theme-toggle__icon) {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+
+  .theme-toggle :global(.theme-toggle__icon--sun) {
+    display: none;
+  }
+
+  :global(:root[data-theme='dark']) .theme-toggle :global(.theme-toggle__icon--sun) {
+    display: block;
+  }
+
+  :global(:root[data-theme='dark']) .theme-toggle :global(.theme-toggle__icon--moon) {
+    display: none;
+  }
+</style>

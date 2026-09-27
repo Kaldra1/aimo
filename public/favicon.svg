@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .cell { fill: #ddefeb; }
+    .line { fill: none; stroke: #0d6e63; stroke-width: 2; }
+    .head { fill: #0d6e63; }
+    @media (prefers-color-scheme: dark) {
+      .cell { fill: #173a36; }
+      .line { stroke: #5cc4b6; }
+      .head { fill: #5cc4b6; }
+    }
+  </style>
+  <rect class="cell" x="1.5" y="5.5" width="29" height="14" rx="3"/>
+  <path class="line" d="M1.5 8.5a3 3 0 0 1 3-3h23a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-23a3 3 0 0 1-3-3z M11.2 5.5v14 M20.8 5.5v14"/>
+  <rect class="head" x="13.5" y="9" width="5" height="7" rx="1"/>
+  <path d="M16 22.5l-4.5 6h9z" fill="#e8a33d" stroke="#241703" stroke-width="1.5" stroke-linejoin="round"/>
+</svg>

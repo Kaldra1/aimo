@@ -1,0 +1,7 @@
+dist/
+.astro/
+node_modules/
+package-lock.json
+public/files/
+# Навчальний контент форматує автор: Prettier може зіпсувати формули в Markdown.
+src/content/

@@ -1,0 +1,46 @@
+---
+import type { LinkTarget } from '../lib/content/course';
+import EntryTitle from './EntryTitle.astro';
+
+interface Props {
+  items: LinkTarget[];
+}
+
+const { items } = Astro.props;
+---
+
+{items.length > 0 && (
+  <section class="related" aria-labelledby="related-title">
+    <h2 id="related-title" class="related__title">
+      Пов'язані матеріали
+    </h2>
+    <ul class="related__list">
+      {items.map((item) => (
+        <li>
+          <EntryTitle href={item.path} title={item.title} draft={item.draft} />
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .related {
+    max-width: var(--width-prose);
+    margin-top: var(--space-7);
+    padding: var(--space-5);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+  }
+
+  .related__title {
+    margin-bottom: var(--space-3);
+    font-size: var(--text-lg);
+  }
+
+  .related__list {
+    display: grid;
+    gap: var(--space-2);
+    padding-left: 1.25em;
+  }
+</style>

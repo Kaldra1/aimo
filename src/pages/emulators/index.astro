@@ -1,0 +1,58 @@
+---
+import EntryTitle from '../../components/EntryTitle.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { MACHINE_META } from '../../lib/content/course';
+
+const machines = Object.values(MACHINE_META);
+---
+
+<BaseLayout
+  title="Емулятори"
+  description="Емулятори машини Поста, машини Тюрінга й нормальних алгоритмів Маркова в браузері."
+  section="emulators"
+  breadcrumbs={[{ label: 'Емулятори' }]}
+>
+  <div class="container page">
+    <header class="page-header">
+      <h1>Емулятори</h1>
+      <p class="lead">
+        Алгоритмічні машини працюють прямо в браузері: нічого встановлювати не треба, а програмою
+        можна поділитися посиланням.
+      </p>
+    </header>
+
+    <ul class="machines">
+      {machines.map((machine) => (
+        <li class="card machines__item">
+          <h2 class="machines__title">
+            <EntryTitle href={machine.path} title={machine.title} draft={!machine.ready} />
+          </h2>
+          <p>{machine.summary}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .machines {
+    display: grid;
+    gap: var(--space-5);
+    padding: 0;
+    list-style: none;
+  }
+
+  @media (min-width: 56rem) {
+    .machines {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .machines__title {
+    font-size: var(--text-xl);
+  }
+
+  .machines__item p {
+    color: var(--color-text-muted);
+  }
+</style>

@@ -1,0 +1,101 @@
+---
+import { url } from '../lib/url';
+import Icon from './Icon.astro';
+
+export interface NeighborLink {
+  href: string;
+  title: string;
+}
+
+interface Props {
+  prev?: NeighborLink | undefined;
+  next?: NeighborLink | undefined;
+  prevLabel: string;
+  nextLabel: string;
+}
+
+const { prev, next, prevLabel, nextLabel } = Astro.props;
+---
+
+{(prev || next) && (
+  <nav class="prev-next" aria-label="Сусідні матеріали">
+    {prev ? (
+      <a class="prev-next__link prev-next__link--prev" href={url(prev.href)} rel="prev">
+        <span class="prev-next__label">
+          <Icon name="arrowLeft" />
+          {prevLabel}
+        </span>
+        <span class="prev-next__title">{prev.title}</span>
+      </a>
+    ) : (
+      <span />
+    )}
+    {next && (
+      <a class="prev-next__link prev-next__link--next" href={url(next.href)} rel="next">
+        <span class="prev-next__label">
+          {nextLabel}
+          <Icon name="arrowRight" />
+        </span>
+        <span class="prev-next__title">{next.title}</span>
+      </a>
+    )}
+  </nav>
+)}
+
+<style>
+  .prev-next {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-7);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-border);
+  }
+
+  @media (min-width: 40rem) {
+    .prev-next {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .prev-next__link {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .prev-next__link:hover {
+    border-color: var(--color-primary);
+    color: var(--color-text);
+  }
+
+  .prev-next__link--next {
+    text-align: right;
+  }
+
+  .prev-next__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .prev-next__link--next .prev-next__label {
+    justify-content: flex-end;
+  }
+
+  .prev-next__label :global(svg) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .prev-next__title {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+</style>

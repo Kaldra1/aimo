@@ -1,0 +1,59 @@
+---
+import type { Crumb } from '../lib/nav';
+import { url } from '../lib/url';
+
+interface Props {
+  items: Crumb[];
+}
+
+const { items } = Astro.props;
+const trail: Crumb[] = [{ label: 'Головна', href: '/' }, ...items];
+---
+
+<nav class="breadcrumbs" aria-label="Навігаційний ланцюжок">
+  <ol>
+    {trail.map((item, index) => (
+      <li>
+        {item.href && index < trail.length - 1 ? (
+          <a href={url(item.href)}>{item.label}</a>
+        ) : (
+          <span aria-current="page">{item.label}</span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<style>
+  .breadcrumbs {
+    padding-top: var(--space-4);
+    font-size: var(--text-sm);
+  }
+
+  ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text-muted);
+  }
+
+  li + li::before {
+    content: '›';
+    content: '›' / '';
+    color: var(--color-text-muted);
+  }
+
+  [aria-current] {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+</style>

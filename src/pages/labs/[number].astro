@@ -1,0 +1,19 @@
+---
+import SessionPage from '../../components/SessionPage.astro';
+import { loadContent, type Session } from '../../lib/content/collections';
+
+export async function getStaticPaths() {
+  const { sessions } = await loadContent();
+  return sessions
+    .filter((session) => session.data.kind === 'lab')
+    .map((session) => ({ params: { number: String(session.data.number) }, props: { session } }));
+}
+
+interface Props {
+  session: Session;
+}
+
+const { session } = Astro.props;
+---
+
+<SessionPage session={session} />

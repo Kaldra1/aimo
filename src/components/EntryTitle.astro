@@ -1,0 +1,31 @@
+---
+import { SHOW_DRAFTS } from '../lib/content/collections';
+import { isPublished } from '../lib/content/course';
+import { url } from '../lib/url';
+import StatusBadge from './StatusBadge.astro';
+
+interface Props {
+  href: string;
+  title: string;
+  draft: boolean;
+}
+
+// Опублікований матеріал — посилання; неопублікований у продакшн-збірці — текст із міткою «Скоро».
+const { href, title, draft } = Astro.props;
+const linked = isPublished(draft, SHOW_DRAFTS);
+---
+
+<span class="entry-title">
+  {linked ? <a href={url(href)}>{title}</a> : <span>{title}</span>}
+  <StatusBadge draft={draft} />
+</span>
+
+<style>
+  .entry-title {
+    display: inline;
+  }
+
+  .entry-title :global(.badge) {
+    margin-left: var(--space-2);
+  }
+</style>

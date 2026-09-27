@@ -1,0 +1,106 @@
+/* Текст лекцій, занять і задач, що приходить з Markdown/MDX. */
+
+.prose {
+  max-width: var(--width-prose);
+  font-size: var(--text-lg);
+}
+
+.prose > * + * {
+  margin-top: 1em;
+}
+
+.prose h2 {
+  margin-top: 2em;
+  font-size: var(--text-2xl);
+}
+
+.prose h3 {
+  margin-top: 1.6em;
+  font-size: var(--text-xl);
+}
+
+.prose h2 + *,
+.prose h3 + * {
+  margin-top: 0.6em;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+}
+
+.prose li + li {
+  margin-top: 0.35em;
+}
+
+.prose blockquote {
+  margin-inline: 0;
+  padding: var(--space-3) var(--space-4);
+  border-left: 4px solid var(--color-primary);
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
+  background: var(--color-surface);
+}
+
+.prose table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: var(--text-base);
+}
+
+.prose th,
+.prose td {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose th {
+  background: var(--color-surface);
+  font-weight: 600;
+}
+
+.prose :not(pre) > code {
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: var(--color-surface);
+  font-size: 0.9em;
+}
+
+.prose pre {
+  padding: var(--space-4);
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.prose img {
+  height: auto;
+  border-radius: var(--radius-control);
+}
+
+.prose hr {
+  margin-block: 2em;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.prose .katex-display {
+  padding-block: var(--space-1);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Підсвітка коду Shiki: у темній темі беремо кольори з --shiki-dark. */
+:root[data-theme='dark'] .astro-code,
+:root[data-theme='dark'] .astro-code span {
+  background-color: var(--shiki-dark-bg) !important;
+  color: var(--shiki-dark) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}

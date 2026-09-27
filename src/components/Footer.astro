@@ -1,0 +1,48 @@
+---
+import { course } from '../lib/content/collections';
+---
+
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <p class="site-footer__title">{course.title}</p>
+    <p>{course.audience}</p>
+    <p>
+      Оцінки, реєстрація та здача робіт — у Moodle. Сайт не використовує cookies, аналітику й
+      трекери; прогрес задач зберігається лише у вашому браузері.
+    </p>
+    <p>
+      Код —{' '}
+      <a href="https://opensource.org/license/mit" rel="license">
+        MIT
+      </a>
+      . Навчальні матеріали —{' '}
+      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.uk" rel="license">
+        CC BY-NC-SA 4.0
+      </a>
+      . <a href="https://github.com/Kaldra1/aimo">Код сайту на GitHub</a>.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-8);
+    padding-block: var(--space-6);
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .site-footer__inner {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .site-footer__title {
+    color: var(--color-text);
+    font-family: var(--font-heading);
+    font-size: var(--text-base);
+    font-weight: 700;
+  }
+</style>

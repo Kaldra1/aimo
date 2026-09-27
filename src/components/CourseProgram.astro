@@ -1,0 +1,115 @@
+---
+import { course, loadContent } from '../lib/content/collections';
+import {
+  groupByTopic,
+  lectureLabel,
+  lecturePath,
+  moduleLabel,
+  sessionLabel,
+  sessionPath,
+  sessionShortLabel,
+  topicLabel,
+} from '../lib/content/course';
+import EntryTitle from './EntryTitle.astro';
+
+const { lectures, sessions } = await loadContent();
+const modules = groupByTopic(course, lectures, sessions);
+---
+
+<div class="program">
+  {modules.map((module) => (
+    <section class="program__module" aria-labelledby={`module-${module.number}`}>
+      <h3 id={`module-${module.number}`} class="program__module-title">
+        {moduleLabel(module.number)}. {module.title}
+      </h3>
+      {module.topics.map((group) => (
+        <div class="program__topic">
+          <h4 class="program__topic-title">
+            {topicLabel(group.topic.number)}. {group.topic.title}
+          </h4>
+          <ul class="program__list">
+            {group.lectures.map((lecture) => (
+              <li>
+                <span class="program__code" aria-hidden="true">
+                  Л{lecture.data.number}
+                </span>
+                <span class="visually-hidden">{lectureLabel(lecture.data.number)}.</span>
+                <EntryTitle
+                  href={lecturePath(lecture.id)}
+                  title={lecture.data.title}
+                  draft={lecture.data.draft}
+                />
+              </li>
+            ))}
+            {group.sessions.map((session) => (
+              <li>
+                <span class="program__code program__code--session" aria-hidden="true">
+                  {sessionShortLabel(session.data.kind, session.data.number)}
+                </span>
+                <span class="visually-hidden">
+                  {sessionLabel(session.data.kind, session.data.number)}.
+                </span>
+                <EntryTitle
+                  href={sessionPath(session.data.kind, session.data.number)}
+                  title={session.data.title}
+                  draft={session.data.draft}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </section>
+  ))}
+</div>
+
+<style>
+  .program {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .program__module {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .program__module-title {
+    font-size: var(--text-xl);
+  }
+
+  .program__topic {
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+  }
+
+  .program__topic-title {
+    margin-bottom: var(--space-3);
+    font-size: var(--text-lg);
+  }
+
+  .program__list {
+    display: grid;
+    gap: var(--space-2);
+    padding: 0;
+    list-style: none;
+  }
+
+  .program__list li {
+    display: grid;
+    grid-template-columns: 3.25rem 1fr;
+    align-items: baseline;
+  }
+
+  .program__code {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 700;
+  }
+
+  .program__code--session {
+    color: var(--color-primary);
+  }
+</style>

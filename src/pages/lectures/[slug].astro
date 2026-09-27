@@ -1,0 +1,84 @@
+---
+import { render } from 'astro:content';
+import EntryArticle from '../../components/EntryArticle.astro';
+import Icon from '../../components/Icon.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+  course,
+  loadContent,
+  loadLinkIndex,
+  published,
+  slidesHref,
+  type Lecture,
+} from '../../lib/content/collections';
+import {
+  findTopic,
+  lectureLabel,
+  lecturePath,
+  moduleLabel,
+  neighbors,
+  resolveRelated,
+  topicLabel,
+} from '../../lib/content/course';
+
+export async function getStaticPaths() {
+  const { lectures } = await loadContent();
+  return lectures.map((lecture) => ({ params: { slug: lecture.id }, props: { lecture } }));
+}
+
+interface Props {
+  lecture: Lecture;
+}
+
+const { lecture } = Astro.props;
+const { data } = lecture;
+const { lectures } = await loadContent();
+
+const isPublished = published(lecture);
+const { Content, headings } = await render(lecture);
+const topic = findTopic(course, data.topic);
+const module = course.modules.find((m) => m.number === data.module);
+const related = resolveRelated(data.related, await loadLinkIndex(), `Лекція «${lecture.id}»`);
+const slides = slidesHref(lecture);
+
+const { prev, next } = neighbors(lectures, (l) => l.id === lecture.id, published);
+const toLink = (entry: Lecture | undefined) =>
+  entry && {
+    href: lecturePath(entry.id),
+    title: `${lectureLabel(entry.data.number)}. ${entry.data.title}`,
+  };
+
+const meta = [
+  module && `${moduleLabel(module.number)}. ${module.title}`,
+  topic && `${topicLabel(topic.number)}. ${topic.title}`,
+].filter((item): item is string => Boolean(item));
+---
+
+<BaseLayout
+  title={`${lectureLabel(data.number)}. ${data.title}`}
+  section="lectures"
+  breadcrumbs={[{ label: 'Лекції', href: '/lectures/' }, { label: lectureLabel(data.number) }]}
+  noindex={!isPublished}
+>
+  <EntryArticle
+    eyebrow={lectureLabel(data.number)}
+    title={data.title}
+    meta={meta}
+    draft={data.draft}
+    published={isPublished}
+    headings={headings}
+    related={related}
+    prev={toLink(prev)}
+    next={toLink(next)}
+    prevLabel="Попередня лекція"
+    nextLabel="Наступна лекція"
+  >
+    {slides && (
+      <a class="button button--secondary" href={slides} slot="actions">
+        <Icon name="file" />
+        Слайди (PDF)
+      </a>
+    )}
+    <Content />
+  </EntryArticle>
+</BaseLayout>

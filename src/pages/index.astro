@@ -1,0 +1,218 @@
+---
+import Icon from '../components/Icon.astro';
+import SectionCard from '../components/SectionCard.astro';
+import TapeMotif from '../components/TapeMotif.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { course, loadContent } from '../lib/content/collections';
+import { MACHINE_META, SESSION_META } from '../lib/content/course';
+import { plural } from '../lib/plural';
+import { url } from '../lib/url';
+
+const { lectures, sessions } = await loadContent();
+const labs = sessions.filter((s) => s.data.kind === 'lab');
+const practicals = sessions.filter((s) => s.data.kind === 'practical');
+const emulatorsReady = Object.values(MACHINE_META).some((machine) => machine.ready);
+
+const steps = [
+  {
+    title: 'Перегляньте програму курсу',
+    text: 'Змістові модулі, теми, лекції й заняття зібрані на одній сторінці.',
+    href: '/about/',
+    link: 'Програма курсу',
+  },
+  {
+    title: 'Прочитайте лекцію перед заняттям',
+    text: 'Кожна лекція має веб-версію, до лекцій додаються слайди в PDF.',
+    href: '/lectures/',
+    link: 'Лекції',
+  },
+  {
+    title: 'Виконуйте заняття з емулятором',
+    text: 'Машини Поста й Тюрінга та алгоритми Маркова працюють просто в браузері — нічого встановлювати не треба.',
+    href: '/emulators/',
+    link: 'Емулятори',
+  },
+  {
+    title: 'Тренуйтеся на задачах',
+    text: 'Задачі необов’язкові й перевіряються автоматично. Прогрес зберігається лише у вашому браузері.',
+    href: '/tasks/',
+    link: 'Задачі',
+  },
+];
+---
+
+<BaseLayout>
+  <section class="hero">
+    <div class="container hero__inner">
+      <p class="eyebrow">{course.audience}</p>
+      <h1 class="hero__title">{course.title}</h1>
+      <p class="lead">
+        Усе для курсу в одному місці: лекції, лабораторні й практичні заняття, емулятори
+        алгоритмічних машин і задачі з автоматичною перевіркою. Без реєстрації.
+      </p>
+      <TapeMotif />
+    </div>
+  </section>
+
+  <div class="container page">
+    <section class="section" aria-labelledby="sections-title">
+      <h2 id="sections-title" class="visually-hidden">
+        Розділи курсу
+      </h2>
+      <div class="cards">
+        <SectionCard
+          title="Лекції"
+          href="/lectures/"
+          description="Веб-версії лекцій і слайди в PDF, згруповані за змістовими модулями й темами."
+          meta={`${plural(lectures.length, ['лекція', 'лекції', 'лекцій'])} · ${plural(course.modules.length, ['змістовий модуль', 'змістові модулі', 'змістових модулів'])}`}
+        >
+          <Icon name="book" slot="icon" />
+        </SectionCard>
+
+        <SectionCard
+          title="Лабораторні та практичні"
+          description="Тема, мета, теорія, хід роботи, варіанти й контрольні запитання кожного заняття."
+        >
+          <Icon name="clipboard" slot="icon" />
+          <div class="card-links">
+            <a class="button button--secondary" href={url('/labs/')}>
+              {SESSION_META.lab.plural} ({labs.length})
+            </a>
+            <a class="button button--secondary" href={url('/practicals/')}>
+              {SESSION_META.practical.plural} ({practicals.length})
+            </a>
+          </div>
+        </SectionCard>
+
+        <SectionCard
+          title="Емулятори"
+          href="/emulators/"
+          description="Машина Поста, машина Тюрінга й нормальні алгоритми Маркова працюють прямо в браузері."
+          soon={!emulatorsReady}
+        >
+          <Icon name="tape" slot="icon" />
+        </SectionCard>
+
+        <SectionCard
+          title="Задачі"
+          href="/tasks/"
+          description="Необов’язкові задачі для емуляторів з автоматичною перевіркою. Розв’язуйте, якщо цікаво."
+          soon
+        >
+          <Icon name="check" slot="icon" />
+        </SectionCard>
+      </div>
+    </section>
+
+    <section class="section start" aria-labelledby="start-title">
+      <h2 id="start-title" class="section-title">
+        З чого почати
+      </h2>
+      <ol class="steps">
+        {steps.map((step) => (
+          <li class="steps__item">
+            <h3 class="steps__title">{step.title}</h3>
+            <p>{step.text}</p>
+            <a href={url(step.href)}>{step.link}</a>
+          </li>
+        ))}
+      </ol>
+      <p class="start__note">Оцінки, реєстрація та здача робіт — у Moodle.</p>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .hero {
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .hero__inner {
+    display: grid;
+    gap: var(--space-4);
+    padding-block: var(--space-7) var(--space-4);
+  }
+
+  .hero__title {
+    max-width: 20ch;
+  }
+
+  .cards {
+    display: grid;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 40rem) {
+    .cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 72rem) {
+    .cards {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .card-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: auto;
+  }
+
+  .steps {
+    display: grid;
+    gap: var(--space-4);
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+
+  @media (min-width: 48rem) {
+    .steps {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .steps__item {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
+    padding: var(--space-5) var(--space-5) var(--space-5) 4.25rem;
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    counter-increment: step;
+  }
+
+  .steps__item::before {
+    content: counter(step);
+    position: absolute;
+    top: var(--space-5);
+    left: var(--space-5);
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    font-family: var(--font-heading);
+    font-weight: 700;
+  }
+
+  .steps__title {
+    font-size: var(--text-lg);
+  }
+
+  .steps__item p {
+    color: var(--color-text-muted);
+  }
+
+  .start__note {
+    margin-top: var(--space-4);
+    color: var(--color-text-muted);
+  }
+</style>

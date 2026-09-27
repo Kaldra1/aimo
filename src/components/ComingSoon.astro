@@ -1,0 +1,27 @@
+---
+interface Props {
+  message?: string;
+}
+
+const { message = 'Матеріал готується.' } = Astro.props;
+---
+
+<div class="coming-soon">
+  <span class="badge badge--soon">Скоро</span>
+  <p>{message}</p>
+  <slot />
+</div>
+
+<style>
+  .coming-soon {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-3);
+    max-width: var(--width-prose);
+    padding: var(--space-6);
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    font-size: var(--text-lg);
+  }
+</style>

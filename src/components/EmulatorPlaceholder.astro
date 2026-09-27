@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import type { MachineId } from '../lib/content/schemas';
+import { MACHINE_META } from '../lib/content/course';
+import ComingSoon from './ComingSoon.astro';
+
+interface Props {
+  machine: MachineId;
+}
+
+// Тимчасова сторінка: емулятор з'явиться на наступних етапах розробки.
+const machine = MACHINE_META[Astro.props.machine];
+---
+
+<BaseLayout
+  title={machine.title}
+  description={`Емулятор: ${machine.title}.`}
+  section="emulators"
+  breadcrumbs={[{ label: 'Емулятори', href: '/emulators/' }, { label: machine.title }]}
+  noindex
+>
+  <div class="container page">
+    <header class="page-header">
+      <p class="eyebrow">Емулятор</p>
+      <h1>{machine.title}</h1>
+      <p class="lead">{machine.summary}</p>
+    </header>
+    <ComingSoon message="Емулятор готується." />
+  </div>
+</BaseLayout>

@@ -1,0 +1,122 @@
+---
+import 'katex/dist/katex.min.css';
+import '../styles/prose.css';
+import type { MarkdownHeading } from 'astro';
+import type { LinkTarget } from '../lib/content/course';
+import ComingSoon from './ComingSoon.astro';
+import PrevNext, { type NeighborLink } from './PrevNext.astro';
+import RelatedLinks from './RelatedLinks.astro';
+import StatusBadge from './StatusBadge.astro';
+import Toc from './Toc.astro';
+
+interface Props {
+  eyebrow: string;
+  title: string;
+  meta: string[];
+  draft: boolean;
+  published: boolean;
+  headings: MarkdownHeading[];
+  related?: LinkTarget[];
+  prev?: NeighborLink | undefined;
+  next?: NeighborLink | undefined;
+  prevLabel: string;
+  nextLabel: string;
+}
+
+const {
+  eyebrow,
+  title,
+  meta,
+  draft,
+  published,
+  headings,
+  related = [],
+  prev,
+  next,
+  prevLabel,
+  nextLabel,
+} = Astro.props;
+---
+
+<article class="container page entry">
+  <header class="page-header">
+    <p class="eyebrow entry__eyebrow">
+      {eyebrow}
+      {published && <StatusBadge draft={draft} />}
+    </p>
+    <h1>{title}</h1>
+    {meta.length > 0 && (
+      <ul class="entry__meta">
+        {meta.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    )}
+    {published && Astro.slots.has('actions') && (
+      <div class="entry__actions">
+        <slot name="actions" />
+      </div>
+    )}
+  </header>
+
+  {published ? (
+    <div class="entry__layout">
+      <Toc headings={headings} />
+      <div class="prose entry__body">
+        <slot />
+      </div>
+    </div>
+  ) : (
+    <ComingSoon />
+  )}
+
+  <RelatedLinks items={related} />
+  <PrevNext prev={prev} next={next} prevLabel={prevLabel} nextLabel={nextLabel} />
+</article>
+
+<style>
+  .entry__eyebrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .entry__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+    padding: 0;
+    color: var(--color-text-muted);
+    list-style: none;
+  }
+
+  .entry__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+
+  .entry__layout {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 64rem) {
+    .entry__layout {
+      grid-template-columns: minmax(0, var(--width-prose)) minmax(12rem, 16rem);
+      justify-content: space-between;
+    }
+
+    .entry__layout > :global(.toc) {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .entry__body {
+      grid-column: 1;
+      grid-row: 1;
+    }
+  }
+</style>

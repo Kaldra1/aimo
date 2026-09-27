@@ -1,0 +1,79 @@
+---
+import EntryTitle from '../../components/EntryTitle.astro';
+import Icon from '../../components/Icon.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { course, loadContent, published, slidesHref } from '../../lib/content/collections';
+import {
+  groupByTopic,
+  lectureLabel,
+  lecturePath,
+  moduleLabel,
+  topicLabel,
+} from '../../lib/content/course';
+
+const { lectures } = await loadContent();
+const modules = groupByTopic(course, lectures, []);
+---
+
+<BaseLayout
+  title="Лекції"
+  description={`Лекції курсу «${course.title}» за змістовими модулями й темами.`}
+  section="lectures"
+  breadcrumbs={[{ label: 'Лекції' }]}
+>
+  <div class="container page">
+    <header class="page-header">
+      <h1>Лекції</h1>
+      <p class="lead">
+        Веб-версії лекцій і слайди в PDF, згруповані за змістовими модулями й темами.
+      </p>
+    </header>
+
+    {modules.map((module) => (
+      <section class="section" aria-labelledby={`module-${module.number}`}>
+        <h2 id={`module-${module.number}`} class="section-title">
+          {moduleLabel(module.number)}. {module.title}
+        </h2>
+        {module.topics.map((group) => (
+          <section class="topic" aria-labelledby={`topic-${group.topic.number}`}>
+            <h3 id={`topic-${group.topic.number}`} class="topic__title">
+              {topicLabel(group.topic.number)}. {group.topic.title}
+            </h3>
+            <ol class="entry-list">
+              {group.lectures.map((lecture) => {
+                const slides = published(lecture) ? slidesHref(lecture) : undefined;
+                return (
+                  <li class="entry-list__item">
+                    <span class="entry-list__label">{lectureLabel(lecture.data.number)}</span>
+                    <EntryTitle
+                      href={lecturePath(lecture.id)}
+                      title={lecture.data.title}
+                      draft={lecture.data.draft}
+                    />
+                    {slides && (
+                      <a class="entry-list__extra" href={slides}>
+                        <Icon name="file" />
+                        Слайди (PDF)
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        ))}
+      </section>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .topic + .topic {
+    margin-top: var(--space-5);
+  }
+
+  .topic__title {
+    margin-bottom: var(--space-3);
+    font-size: var(--text-lg);
+  }
+</style>

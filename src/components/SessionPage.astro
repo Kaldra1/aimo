@@ -1,0 +1,100 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import {
+  course,
+  loadContent,
+  published,
+  SHOW_DRAFTS,
+  type Session,
+} from '../lib/content/collections';
+import {
+  findTopic,
+  isPublished as isVisible,
+  MACHINE_META,
+  neighbors,
+  SESSION_META,
+  sessionLabel,
+  sessionPath,
+  topicLabel,
+} from '../lib/content/course';
+import { plural } from '../lib/plural';
+import { url } from '../lib/url';
+import EntryArticle from './EntryArticle.astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  session: Session;
+}
+
+const { session } = Astro.props;
+const { data } = session;
+const meta = SESSION_META[data.kind];
+
+const { sessions } = await loadContent();
+const sameKind = sessions.filter((s) => s.data.kind === data.kind);
+
+const isPublished = published(session);
+const { Content, headings } = await render(session);
+const topic = findTopic(course, data.topic);
+const machine = data.emulator ? MACHINE_META[data.emulator] : undefined;
+const machineAvailable = machine ? isVisible(!machine.ready, SHOW_DRAFTS) : false;
+
+const { prev, next } = neighbors(sameKind, (s) => s.id === session.id, published);
+const toLink = (entry: Session | undefined) =>
+  entry && {
+    href: sessionPath(entry.data.kind, entry.data.number),
+    title: `${sessionLabel(entry.data.kind, entry.data.number)}. ${entry.data.title}`,
+  };
+
+const details = [
+  topic && `${topicLabel(topic.number)}. ${topic.title}`,
+  plural(data.hours, ['година', 'години', 'годин']),
+].filter((item): item is string => Boolean(item));
+---
+
+<BaseLayout
+  title={`${sessionLabel(data.kind, data.number)}. ${data.title}`}
+  section={meta.segment === 'labs' ? 'labs' : 'practicals'}
+  breadcrumbs={[
+    { label: meta.plural, href: `/${meta.segment}/` },
+    { label: sessionLabel(data.kind, data.number) },
+  ]}
+  noindex={!isPublished}
+>
+  <EntryArticle
+    eyebrow={sessionLabel(data.kind, data.number)}
+    title={data.title}
+    meta={details}
+    draft={data.draft}
+    published={isPublished}
+    headings={headings}
+    prev={toLink(prev)}
+    next={toLink(next)}
+    prevLabel={meta.prev}
+    nextLabel={meta.next}
+  >
+    {machine &&
+      (machineAvailable ? (
+        <a class="button button--primary" href={url(machine.path)} slot="actions">
+          <Icon name="play" />
+          Відкрити емулятор
+        </a>
+      ) : (
+        <p class="emulator-soon" slot="actions">
+          Емулятор «{machine.title}» <span class="badge badge--soon">Скоро</span>
+        </p>
+      ))}
+    <Content />
+  </EntryArticle>
+</BaseLayout>
+
+<style>
+  .emulator-soon {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text-muted);
+  }
+</style>

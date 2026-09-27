@@ -1,0 +1,82 @@
+---
+import { Font } from 'astro:assets';
+import '../styles/global.css';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { course } from '../lib/content/collections';
+import type { Crumb, Section } from '../lib/nav';
+import { url } from '../lib/url';
+
+interface Props {
+  title?: string;
+  description?: string;
+  section?: Section;
+  breadcrumbs?: Crumb[];
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = `Лекції, лабораторні й практичні заняття, емулятори й задачі курсу «${course.title}».`,
+  section,
+  breadcrumbs,
+  noindex = false,
+} = Astro.props;
+
+const fullTitle = title ? `${title} — ${course.short}` : `${course.short} — ${course.title}`;
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+---
+
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {canonical && <link rel="canonical" href={canonical} />}
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <meta name="theme-color" content="#0d6e63" />
+    <script is:inline>
+      // Тема до першого малювання: збережений вибір (aimo-theme) або системне налаштування.
+      (() => {
+        const root = document.documentElement;
+        root.classList.add('js');
+        let stored = null;
+        try {
+          stored = localStorage.getItem('aimo-theme');
+        } catch {
+          // Сховище недоступне — беремо системну тему.
+        }
+        const system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        root.setAttribute('data-theme', stored === 'light' || stored === 'dark' ? stored : system);
+      })();
+    </script>
+    <Font cssVariable="--font-body" preload={[{ weight: 400 }]} />
+    <Font cssVariable="--font-heading" preload />
+    <Font cssVariable="--font-mono" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">
+      Перейти до змісту
+    </a>
+    <Header section={section} />
+    <main id="main" tabindex="-1">
+      {breadcrumbs && (
+        <div class="container">
+          <Breadcrumbs items={breadcrumbs} />
+        </div>
+      )}
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  main:focus {
+    outline: none;
+  }
+</style>

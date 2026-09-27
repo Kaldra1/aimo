@@ -1,0 +1,17 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { url } from '../lib/url';
+---
+
+<BaseLayout title="Сторінку не знайдено" noindex>
+  <div class="container page">
+    <header class="page-header">
+      <p class="eyebrow">Помилка 404</p>
+      <h1>Сторінку не знайдено</h1>
+      <p class="lead">Можливо, адреса змінилася або в ній помилка.</p>
+    </header>
+    <a class="button button--primary" href={url('/')}>
+      На головну
+    </a>
+  </div>
+</BaseLayout>

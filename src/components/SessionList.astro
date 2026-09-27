@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { course, loadContent } from '../lib/content/collections';
+import type { SessionKind } from '../lib/content/schemas';
+import {
+  findTopic,
+  MACHINE_META,
+  SESSION_META,
+  sessionLabel,
+  sessionPath,
+  topicLabel,
+} from '../lib/content/course';
+import { plural } from '../lib/plural';
+import EntryTitle from './EntryTitle.astro';
+
+interface Props {
+  kind: SessionKind;
+  lead: string;
+}
+
+const { kind, lead } = Astro.props;
+const meta = SESSION_META[kind];
+const { sessions } = await loadContent();
+const items = sessions.filter((session) => session.data.kind === kind);
+---
+
+<BaseLayout
+  title={meta.plural}
+  description={`${meta.plural} курсу «${course.title}».`}
+  section={kind === 'lab' ? 'labs' : 'practicals'}
+  breadcrumbs={[{ label: meta.plural }]}
+>
+  <div class="container page">
+    <header class="page-header">
+      <h1>{meta.plural}</h1>
+      <p class="lead">{lead}</p>
+    </header>
+
+    <ol class="entry-list">
+      {items.map((session) => {
+        const topic = findTopic(course, session.data.topic);
+        const details = [
+          topic && `${topicLabel(topic.number)}. ${topic.title}`,
+          plural(session.data.hours, ['година', 'години', 'годин']),
+          session.data.emulator && `Емулятор: ${MACHINE_META[session.data.emulator].title}`,
+        ].filter(Boolean);
+        return (
+          <li class="entry-list__item">
+            <span class="entry-list__label">
+              <span aria-hidden="true">№{session.data.number}</span>
+              <span class="visually-hidden">{sessionLabel(kind, session.data.number)}.</span>
+            </span>
+            <div class="session">
+              <EntryTitle
+                href={sessionPath(kind, session.data.number)}
+                title={session.data.title}
+                draft={session.data.draft}
+              />
+              <p class="entry-list__meta">{details.join(' · ')}</p>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  </div>
+</BaseLayout>
+
+<style>
+  .session {
+    display: grid;
+    gap: var(--space-1);
+  }
+</style>

@@ -1,0 +1,22 @@
+---
+import ComingSoon from '../../components/ComingSoon.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Задачі"
+  description="Необов’язкові задачі для емуляторів з автоматичною перевіркою."
+  section="tasks"
+  breadcrumbs={[{ label: 'Задачі' }]}
+>
+  <div class="container page">
+    <header class="page-header">
+      <h1>Задачі</h1>
+      <p class="lead">
+        Необов’язкові задачі для емуляторів з автоматичною перевіркою. Прогрес зберігається лише у
+        вашому браузері.
+      </p>
+    </header>
+    <ComingSoon message="Задачі готуються." />
+  </div>
+</BaseLayout>

@@ -1,0 +1,222 @@
+---
+import { NAV_ITEMS, type Section } from '../lib/nav';
+import { url } from '../lib/url';
+import BrandMark from './BrandMark.astro';
+import Icon from './Icon.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+interface Props {
+  section?: Section | undefined;
+}
+
+const { section } = Astro.props;
+const path = Astro.url.pathname;
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="brand" href={url('/')}>
+      <BrandMark />
+      <span class="brand__short">АІМО</span>
+      <span class="brand__full">Алгоритми і методи обчислень</span>
+    </a>
+
+    <button
+      type="button"
+      class="menu-toggle"
+      aria-expanded="false"
+      aria-controls="site-nav"
+      data-menu-toggle
+    >
+      <Icon name="menu" />
+      <span>Меню</span>
+    </button>
+
+    <nav id="site-nav" class="site-nav" aria-label="Розділи сайту" data-open="false">
+      <ul class="site-nav__list">
+        {NAV_ITEMS.map((item) => {
+          const href = url(item.href);
+          const current = path === href ? 'page' : item.key === section ? 'true' : undefined;
+          return (
+            <li>
+              <a class="site-nav__link" href={href} aria-current={current}>
+                {item.label}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+      <ThemeToggle />
+    </nav>
+  </div>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const nav = document.getElementById('site-nav');
+
+  if (toggle && nav) {
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      nav.dataset.open = String(open);
+    };
+
+    toggle.addEventListener('click', () => {
+      setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        setOpen(false);
+        toggle.focus();
+      }
+    });
+  }
+</script>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg);
+  }
+
+  .site-header__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-4);
+    min-height: var(--header-height);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.75rem;
+    margin-right: auto;
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .brand:hover {
+    color: var(--color-text);
+  }
+
+  .brand__short {
+    font-family: var(--font-heading);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .brand__full {
+    display: none;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .menu-toggle {
+    display: none;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.75rem;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .menu-toggle :global(svg) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .site-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .site-nav__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-nav__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-control);
+    color: var(--color-text);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .site-nav__link:hover {
+    background: var(--color-surface-strong);
+    color: var(--color-text);
+  }
+
+  .site-nav__link[aria-current] {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .site-nav :global(.theme-toggle__label) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* Вузькі екрани: меню ховається за кнопкою (лише коли працює JS). */
+  @media (max-width: 63.99rem) {
+    :global(.js) .menu-toggle {
+      display: inline-flex;
+    }
+
+    :global(.js) .site-nav {
+      flex-basis: 100%;
+      flex-direction: column;
+      align-items: stretch;
+      padding-bottom: var(--space-3);
+    }
+
+    :global(.js) .site-nav[data-open='false'] {
+      display: none;
+    }
+
+    :global(.js) .site-nav__list {
+      flex-direction: column;
+    }
+
+    :global(.js) .site-nav :global(.theme-toggle) {
+      align-self: flex-start;
+    }
+
+    :global(.js) .site-nav :global(.theme-toggle__label) {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip: auto;
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .brand__full {
+      display: inline;
+    }
+  }
+</style>

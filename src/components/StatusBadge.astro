@@ -1,0 +1,17 @@
+---
+import { SHOW_DRAFTS } from '../lib/content/collections';
+
+interface Props {
+  draft: boolean;
+}
+
+// У dev-режимі чернетку видно повністю й позначено «Чернетка», у продакшн-збірці — «Скоро».
+const { draft } = Astro.props;
+---
+
+{draft &&
+  (SHOW_DRAFTS ? (
+    <span class="badge badge--draft">Чернетка</span>
+  ) : (
+    <span class="badge badge--soon">Скоро</span>
+  ))}

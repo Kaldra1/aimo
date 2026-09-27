@@ -1,0 +1,39 @@
+---
+import '../styles/prose.css';
+import { getEntry, render } from 'astro:content';
+import CourseProgram from '../components/CourseProgram.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { course } from '../lib/content/collections';
+
+const about = await getEntry('pages', 'about');
+if (!about) throw new Error('Не знайдено src/content/pages/about.md');
+const { Content } = await render(about);
+---
+
+<BaseLayout
+  title={about.data.title}
+  description={`Програма курсу «${course.title}», оцінювання, література й контакти.`}
+  section="about"
+  breadcrumbs={[{ label: about.data.title }]}
+>
+  <div class="container page">
+    <header class="page-header">
+      <h1>{about.data.title}</h1>
+      <p class="lead">
+        Курс «{course.title}». {course.audience}. Сайт — відкритий довідник і тренажер без
+        реєстрації; оцінки, реєстрація та здача робіт — у Moodle.
+      </p>
+    </header>
+
+    <section class="section" aria-labelledby="program-title">
+      <h2 id="program-title" class="section-title">
+        Програма курсу
+      </h2>
+      <CourseProgram />
+    </section>
+
+    <div class="section prose">
+      <Content />
+    </div>
+  </div>
+</BaseLayout>

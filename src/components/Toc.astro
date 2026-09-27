@@ -1,0 +1,59 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const sections = Astro.props.headings.filter((heading) => heading.depth === 2);
+---
+
+{sections.length >= 2 && (
+  <nav class="toc" aria-labelledby="toc-title">
+    <h2 id="toc-title" class="toc__title">
+      Зміст
+    </h2>
+    <ol class="toc__list">
+      {sections.map((heading) => (
+        <li>
+          <a href={`#${heading.slug}`}>{heading.text}</a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<style>
+  .toc {
+    align-self: start;
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+  }
+
+  .toc__title {
+    margin-bottom: var(--space-2);
+    font-size: var(--text-base);
+  }
+
+  .toc__list {
+    display: grid;
+    gap: var(--space-1);
+    padding-left: 1.25em;
+  }
+
+  .toc__list a {
+    color: var(--color-text);
+  }
+
+  .toc__list a:hover {
+    color: var(--color-primary);
+  }
+
+  @media (min-width: 64rem) {
+    .toc {
+      position: sticky;
+      top: var(--space-4);
+    }
+  }
+</style>

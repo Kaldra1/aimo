@@ -1,0 +1,22 @@
+# Збірка
+dist/
+.astro/
+
+# Залежності
+node_modules/
+
+# Логи
+npm-debug.log*
+
+# Тести
+test-results/
+playwright-report/
+coverage/
+
+# Оточення
+.env
+.env.*
+
+# Системні файли
+.DS_Store
+Thumbs.db

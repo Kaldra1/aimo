@@ -1,0 +1,89 @@
+---
+import { url } from '../lib/url';
+
+interface Props {
+  title: string;
+  description: string;
+  href?: string;
+  meta?: string;
+  soon?: boolean;
+  level?: 2 | 3;
+}
+
+const { title, description, href, meta, soon = false, level = 2 } = Astro.props;
+const Heading = `h${level}` as 'h2' | 'h3';
+---
+
+<article class:list={['card', 'section-card', { 'card--link': Boolean(href) }]}>
+  {Astro.slots.has('icon') && (
+    <div class="section-card__icon">
+      <slot name="icon" />
+    </div>
+  )}
+  <Heading class="section-card__title">
+    {href ? (
+      <a class="card__link section-card__link" href={url(href)}>
+        {title}
+      </a>
+    ) : (
+      title
+    )}
+  </Heading>
+  <p class="section-card__text">{description}</p>
+  {(meta || soon) && (
+    <p class="section-card__meta">
+      {meta}
+      {soon && <span class="badge badge--soon">Скоро</span>}
+    </p>
+  )}
+  <slot />
+</article>
+
+<style>
+  .section-card {
+    height: 100%;
+  }
+
+  .section-card__icon {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-control);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+  }
+
+  .section-card__icon :global(svg) {
+    width: 1.625rem;
+    height: 1.625rem;
+  }
+
+  .section-card__title {
+    font-size: var(--text-xl);
+  }
+
+  .section-card__link {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .section-card__link:hover {
+    color: var(--color-primary);
+  }
+
+  .section-card__text {
+    color: var(--color-text-muted);
+  }
+
+  .section-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: auto;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+</style>
