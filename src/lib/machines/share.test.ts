@@ -1,10 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { decodeShareHash, encodeShareHash, readEnvelope, writeEnvelope } from './share';
+import {
+  decodeShareHash,
+  encodeShareHash,
+  readEnvelope,
+  stringField,
+  writeEnvelope,
+} from './share';
 
 describe('формат збереження', () => {
   it('записує поле machine і version', () => {
     const text = writeEnvelope('post', { program: 'p', input: 'i' });
     expect(JSON.parse(text)).toEqual({ machine: 'post', version: 1, program: 'p', input: 'i' });
+  });
+
+  it('зберігає не лише текстові поля', () => {
+    const text = writeEnvelope('turing', { states: 2, table: { q0: { '1': 'R' } } });
+    expect(readEnvelope('turing', text)).toMatchObject({ states: 2, table: { q0: { '1': 'R' } } });
   });
 
   it.each([
@@ -13,10 +24,14 @@ describe('формат збереження', () => {
     ['{"version": 1}', /поле machine/],
     ['{"machine": "post"}', /поле version/],
     ['{"machine": "post", "version": 2, "program": ""}', /новішою версією/],
-    ['{"machine": "post", "version": 1}', /немає поля program/],
     ['{"machine": "markov", "version": 1}', /нормальних алгоритмів Маркова/],
   ])('відхиляє %s', (text, message) => {
-    expect(() => readEnvelope('post', text, ['program'])).toThrow(message);
+    expect(() => readEnvelope('post', text)).toThrow(message);
+  });
+
+  it('повідомляє про відсутнє поле', () => {
+    const record = readEnvelope('post', '{"machine": "post", "version": 1}');
+    expect(() => stringField(record, 'program')).toThrow('У файлі немає поля program.');
   });
 });
 

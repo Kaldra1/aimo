@@ -85,14 +85,16 @@ export function useRunner<S extends BaseState, P, E>(
 
 export type StatusKind = 'idle' | 'running' | 'paused' | 'halted' | 'crashed' | 'limit' | 'error';
 
-/** Текст статус-бару за станом виконання. */
+export const PROGRAM_ERRORS = 'У програмі є помилки — виправте їх, щоб запустити.';
+
+/** Текст статус-бару за станом виконання. problem — чому запуск неможливий (помилки тощо). */
 export function statusOf(
   snapshot: RunnerSnapshot<BaseState, unknown>,
-  hasErrors: boolean,
+  problem: string | null,
 ): { kind: StatusKind; text: string } {
   const { state } = snapshot;
-  if (hasErrors || state === null) {
-    return { kind: 'error', text: 'У програмі є помилки — виправте їх, щоб запустити.' };
+  if (problem !== null || state === null) {
+    return { kind: 'error', text: problem ?? PROGRAM_ERRORS };
   }
   if (state.status === 'halted') {
     return { kind: 'halted', text: `Зупинка. Виконано кроків: ${formatNumber(state.steps)}.` };

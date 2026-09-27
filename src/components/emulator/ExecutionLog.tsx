@@ -15,6 +15,8 @@ interface Props<E> {
   columns: readonly LogColumn<E>[];
   rowKey: (entry: E) => string | number;
   defaultOpen?: boolean;
+  /** Перший рядок (початкова конфігурація); показується, поки журнал не обрізано. */
+  leading?: E | undefined;
 }
 
 /** Журнал виконання: таблиця кроків у згортальному блоці. Рядки малюються, лише коли він відкритий. */
@@ -24,6 +26,7 @@ export function ExecutionLog<E>({
   columns,
   rowKey,
   defaultOpen = false,
+  leading,
 }: Props<E>) {
   const [open, setOpen] = useState(defaultOpen);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -35,6 +38,7 @@ export function ExecutionLog<E>({
   }, [open, entries]);
 
   const hidden = total - entries.length;
+  const rows = leading !== undefined && hidden === 0 ? [leading, ...entries] : entries;
 
   return (
     <details class="log" open={defaultOpen} onToggle={(event) => setOpen(event.currentTarget.open)}>
@@ -42,7 +46,7 @@ export function ExecutionLog<E>({
         Журнал виконання <span class="log__count">({formatNumber(total)})</span>
       </summary>
       {open &&
-        (entries.length === 0 ? (
+        (rows.length === 0 ? (
           <p class="log__empty">Кроків ще не було.</p>
         ) : (
           <>
@@ -63,7 +67,7 @@ export function ExecutionLog<E>({
                   </tr>
                 </thead>
                 <tbody>
-                  {entries.map((entry) => (
+                  {rows.map((entry) => (
                     <tr key={rowKey(entry)}>
                       {columns.map((column) => (
                         <td key={column.header} class={column.mono ? 'mono' : undefined}>

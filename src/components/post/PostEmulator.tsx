@@ -18,7 +18,7 @@ import {
   type PostEvent,
   type PostRow,
   type PostSaved,
-  type PostTape as Tape,
+  type PostTape,
 } from '../../lib/machines/post';
 import { decodeShareHash, shareUrl } from '../../lib/machines/share';
 import { CodeEditor } from '../emulator/CodeEditor';
@@ -31,6 +31,7 @@ import {
   DEFAULT_SPEED_INDEX,
   downloadText,
   errorText,
+  PROGRAM_ERRORS,
   readStorage,
   speedAt,
   statusOf,
@@ -38,15 +39,15 @@ import {
   writeStorage,
 } from '../emulator/support';
 import { INSTANT } from '../../lib/machines/runner';
+import { Tape } from '../emulator/Tape';
 import { PostTableEditor } from './PostTableEditor';
-import { PostTape } from './PostTape';
 
 const STORAGE_KEY = 'aimo:emulator:post';
 const MACHINE = { step, run };
 const DEFAULT = POST_EXAMPLES[0]!;
-const EMPTY_TAPE: Tape = { marks: new Set(), head: 0 };
+const EMPTY_TAPE: PostTape = { marks: new Set(), head: 0 };
 
-function tapeOrEmpty(text: string): Tape {
+function tapeOrEmpty(text: string): PostTape {
   const parsed = parseTape(text);
   return parsed.ok ? parsed.value : EMPTY_TAPE;
 }
@@ -64,7 +65,7 @@ const LOG_COLUMNS: readonly LogColumn<PostEvent>[] = [
 export default function PostEmulator() {
   const [source, setSource] = useState(DEFAULT.program);
   const [inputText, setInputText] = useState(DEFAULT.input);
-  const [inputTape, setInputTape] = useState<Tape>(() => tapeOrEmpty(DEFAULT.input));
+  const [inputTape, setInputTape] = useState<PostTape>(() => tapeOrEmpty(DEFAULT.input));
   const [inputError, setInputError] = useState<string | null>(null);
   const [mode, setMode] = useState<'text' | 'table'>('text');
   const [rows, setRows] = useState<PostRow[]>([]);
@@ -142,7 +143,7 @@ export default function PostEmulator() {
   }, [restored, source, inputText]);
 
   const { state, playing, limitReached } = snapshot;
-  const tape: Tape = state ?? inputTape;
+  const tape: PostTape = state ?? inputTape;
   const started = state !== null && state.steps > 0;
   const cellsEditable = !playing && !started;
   const canContinue = state !== null && state.status === 'running' && !limitReached;
@@ -156,7 +157,7 @@ export default function PostEmulator() {
   const errors = parsed.ok ? [] : parsed.errors;
   const errorLines = new Set(errors.map((e) => e.line));
 
-  const editTape = (next: Tape) => {
+  const editTape = (next: PostTape) => {
     setInputTape(next);
     setInputText(formatTape(next));
     setInputError(null);
@@ -254,13 +255,26 @@ export default function PostEmulator() {
         <h2 id="post-tape-title" class="visually-hidden">
           Стрічка
         </h2>
-        <PostTape
-          marks={tape.marks}
+        <Tape
           head={tape.head}
+          cellAt={(index) => {
+            const marked = tape.marks.has(index);
+            return {
+              text: marked ? 'V' : '',
+              filled: marked,
+              pressed: marked,
+              label: `Комірка ${index}: ${marked ? 'мітка' : 'порожня'}`,
+            };
+          }}
           editable={cellsEditable}
           transitionMs={transitionMs}
-          onToggle={toggleCell}
+          onCellClick={toggleCell}
           onHeadChange={(head) => editTape({ marks: inputTape.marks, head })}
+          onCaretKey={(key) => {
+            if (key !== ' ' && key !== 'Enter') return false;
+            toggleCell(inputTape.head);
+            return true;
+          }}
           describedBy="post-tape-help post-tape-notation"
         />
         <div class="tape-panel__footer">
@@ -310,7 +324,7 @@ export default function PostEmulator() {
         limit={snapshot.limit}
         onLimit={(limit) => runner.setLimit(limit)}
         steps={state?.steps ?? 0}
-        status={statusOf(snapshot, !parsed.ok)}
+        status={statusOf(snapshot, parsed.ok ? null : PROGRAM_ERRORS)}
       />
 
       <div class="emulator__workspace">

@@ -14,6 +14,11 @@
   gap: var(--space-5);
 }
 
+/* Елементи сітки не повинні розпирати сторінку на вузьких екранах. */
+.emulator > * {
+  min-width: 0;
+}
+
 .emulator__workspace {
   display: grid;
   align-items: start;
@@ -132,6 +137,18 @@ input[type='range'] {
   gap: var(--space-2);
 }
 
+.program-actions .field {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.program-actions select {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  text-overflow: ellipsis;
+}
+
 .program-actions__notice {
   flex-basis: 100%;
   min-height: 1.5em;
@@ -206,8 +223,14 @@ input[type='range'] {
   line-height: 1;
 }
 
-.tape__cell.is-marked {
+.tape__cell.is-filled {
   background: var(--color-primary-soft);
+}
+
+/* Порожній символ λ машини Тюрінга — приглушено. */
+.tape__cell:not(.is-filled) {
+  color: var(--color-text-muted);
+  font-weight: 400;
 }
 
 .tape.is-editable .tape__cell {
@@ -218,7 +241,7 @@ input[type='range'] {
   background: var(--color-surface-strong);
 }
 
-.tape.is-editable .tape__cell.is-marked:hover {
+.tape.is-editable .tape__cell.is-filled:hover {
   background: var(--color-primary-soft);
   box-shadow: inset 0 0 0 2px var(--color-primary);
 }
@@ -252,6 +275,23 @@ input[type='range'] {
   border: 3px solid var(--color-accent);
   border-radius: 4px;
   box-shadow: 0 0 0 2px var(--color-on-accent);
+}
+
+/* Стан машини Тюрінга над кареткою. */
+.tape__badge {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  padding: 0 0.45em;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.45;
+  white-space: nowrap;
+  transform: translateX(-50%);
 }
 
 .tape__pointer {
@@ -523,7 +563,9 @@ input[type='range'] {
 
 .code-editor__mark.is-current {
   background: var(--color-accent-soft);
-  box-shadow: inset 4px 0 0 var(--color-accent);
+  box-shadow:
+    inset 4px 0 0 var(--color-accent),
+    inset 5px 0 0 var(--color-on-accent);
 }
 
 .code-editor__input {
@@ -635,6 +677,84 @@ input[type='range'] {
 
 .program-table tr.is-current td {
   background: var(--color-accent-soft);
+}
+
+/* Таблиця переходів машини Тюрінга */
+
+.turing-table {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.turing-table__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.turing-table__scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.turing-table table {
+  border-collapse: collapse;
+}
+
+.turing-table th {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  text-align: center;
+}
+
+.turing-table td {
+  padding: 0;
+  border: 1px solid var(--color-border);
+}
+
+.turing-table__cell {
+  display: block;
+  width: 5.5rem;
+  min-height: 2.5rem;
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  text-align: center;
+}
+
+.turing-table__cell:focus {
+  outline: 3px solid var(--color-focus);
+  outline-offset: -3px;
+}
+
+.turing-table td.is-error,
+.turing-table td.is-crash {
+  background: var(--color-danger-soft);
+}
+
+.turing-table td.is-error .turing-table__cell {
+  box-shadow: inset 0 0 0 2px var(--color-danger);
+}
+
+.turing-table td.is-crash .turing-table__cell {
+  box-shadow: inset 0 0 0 3px var(--color-danger);
+}
+
+.turing-table td.is-current {
+  background: var(--color-accent-soft);
+}
+
+/* Бурштинова рамка з темною лінією: помітна і в світлій, і в темній темі. */
+.turing-table td.is-current .turing-table__cell {
+  box-shadow:
+    inset 0 0 0 3px var(--color-accent),
+    inset 0 0 0 4px var(--color-on-accent);
 }
 
 /* Журнал виконання */

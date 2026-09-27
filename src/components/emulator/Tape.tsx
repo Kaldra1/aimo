@@ -1,18 +1,33 @@
 /**
- * Стрічка машини Поста. Каретка стоїть по центру вікна, стрічка плавно зсувається під нею.
- * Редагування (до запуску): клік по комірці ставить/знімає мітку, каретку можна перетягнути.
- * З клавіатури фокус стає на каретку: стрілки рухають її, пробіл ставить або стирає мітку під нею.
+ * Стрічка емулятора. Каретка стоїть по центру вікна, стрічка плавно зсувається під нею.
+ * Редагування (до запуску): клік по комірці, перетягування каретки. З клавіатури фокус стає
+ * на каретку: стрілки рухають її, інші клавіші машина обробляє сама (onCaretKey).
  */
 import { useEffect, useRef, useState } from 'preact/hooks';
 
+export interface TapeCell {
+  /** Що показати в комірці. */
+  text: string;
+  /** Непорожня комірка (виділяється кольором). */
+  filled: boolean;
+  /** Опис комірки для екранних зчитувачів. */
+  label: string;
+  /** Стан перемикача (мітка в машині Поста). */
+  pressed?: boolean;
+}
+
 interface Props {
-  marks: ReadonlySet<number>;
   head: number;
+  cellAt: (index: number) => TapeCell;
   editable: boolean;
   /** Тривалість анімації зсуву, мс; 0 — без анімації. */
   transitionMs: number;
-  onToggle: (index: number) => void;
+  onCellClick: (index: number) => void;
   onHeadChange: (index: number) => void;
+  /** Додаткові клавіші на каретці; true — клавішу оброблено. */
+  onCaretKey?: (key: string) => boolean;
+  /** Підпис над кареткою (стан машини Тюрінга). */
+  caretBadge?: string;
   describedBy?: string;
 }
 
@@ -28,13 +43,15 @@ interface Drag {
   index: number;
 }
 
-export function PostTape({
-  marks,
+export function Tape({
   head,
+  cellAt,
   editable,
   transitionMs,
-  onToggle,
+  onCellClick,
   onHeadChange,
+  onCaretKey,
+  caretBadge,
   describedBy,
 }: Props) {
   const viewportRef = useRef<HTMLDivElement>(null);
@@ -82,9 +99,8 @@ export function PostTape({
     if (['ArrowLeft', 'ArrowDown', 'ArrowRight', 'ArrowUp'].includes(event.key)) {
       event.preventDefault();
       onHeadChange(head + (event.key === 'ArrowLeft' || event.key === 'ArrowDown' ? -1 : 1));
-    } else if (event.key === ' ' || event.key === 'Enter') {
+    } else if (onCaretKey?.(event.key)) {
       event.preventDefault();
-      onToggle(head);
     }
   };
 
@@ -103,30 +119,33 @@ export function PostTape({
         }}
       >
         {indices.map((index) => {
-          const marked = marks.has(index);
+          const content = cellAt(index);
+          const className = `tape__cell${content.filled ? ' is-filled' : ''}`;
           const style = { left: `${index * cell}px` };
+          const inner = (
+            <>
+              <span class="tape__index" aria-hidden="true">
+                {index}
+              </span>
+              {content.text}
+            </>
+          );
           return editable ? (
             <button
               key={index}
               type="button"
-              class={`tape__cell${marked ? ' is-marked' : ''}`}
+              class={className}
               style={style}
               tabIndex={-1}
-              aria-pressed={marked}
-              aria-label={`Комірка ${index}`}
-              onClick={() => onToggle(index)}
+              aria-pressed={content.pressed}
+              aria-label={content.label}
+              onClick={() => onCellClick(index)}
             >
-              <span class="tape__index" aria-hidden="true">
-                {index}
-              </span>
-              {marked ? 'V' : ''}
+              {inner}
             </button>
           ) : (
-            <div key={index} class={`tape__cell${marked ? ' is-marked' : ''}`} style={style}>
-              <span class="tape__index" aria-hidden="true">
-                {index}
-              </span>
-              {marked ? 'V' : ''}
+            <div key={index} class={className} style={style}>
+              {inner}
             </div>
           );
         })}
@@ -139,7 +158,7 @@ export function PostTape({
         tabIndex={editable ? 0 : -1}
         aria-label="Каретка"
         aria-valuenow={head}
-        aria-valuetext={`комірка ${head}, ${marks.has(head) ? 'мітка' : 'порожня'}`}
+        aria-valuetext={cellAt(head).label}
         aria-readonly={!editable}
         aria-describedby={describedBy}
         onKeyDown={onKeyDown}
@@ -166,6 +185,7 @@ export function PostTape({
         }}
         onPointerCancel={() => setDrag(null)}
       >
+        {caretBadge && <span class="tape__badge">{caretBadge}</span>}
         <span class="tape__frame" />
         <svg class="tape__pointer" viewBox="0 0 24 16" width="24" height="16" aria-hidden="true">
           <path d="M12 1L23 15H1z" />

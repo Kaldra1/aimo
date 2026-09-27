@@ -24,7 +24,7 @@ export const MACHINE_META: Record<
     genitive: 'машини Тюрінга',
     path: '/emulators/turing/',
     summary: 'Власний алфавіт, таблиця переходів і журнал конфігурацій.',
-    ready: false,
+    ready: true,
   },
   markov: {
     title: 'Нормальні алгоритми Маркова',

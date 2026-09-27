@@ -1,5 +1,26 @@
 ---
-import EmulatorPlaceholder from '../../components/EmulatorPlaceholder.astro';
+import '../../styles/emulator.css';
+import '../../styles/prose.css';
+import TuringEmulator from '../../components/turing/TuringEmulator';
+import TuringHelp from '../../components/turing/TuringHelp.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { MACHINE_META } from '../../lib/machines/meta';
+
+const machine = MACHINE_META.turing;
 ---
 
-<EmulatorPlaceholder machine="turing" />
+<BaseLayout
+  title={machine.title}
+  description="Емулятор машини Тюрінга в браузері: таблиця переходів, покрокове виконання, журнал конфігурацій, збереження й посилання на програму."
+  section="emulators"
+  breadcrumbs={[{ label: 'Емулятори', href: '/emulators/' }, { label: machine.title }]}
+>
+  <div class="container page page--emulator">
+    <header class="page-header page-header--compact">
+      <p class="eyebrow">Емулятор</p>
+      <h1>{machine.title}</h1>
+    </header>
+    <TuringEmulator client:load />
+    <TuringHelp />
+  </div>
+</BaseLayout>

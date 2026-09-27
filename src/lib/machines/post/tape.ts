@@ -5,6 +5,7 @@
  * `[1]` чи `[0]` — каретка навпроти цієї комірки (`[1]^3` — на першій з трьох). Якщо позначки
  * немає, каретка стоїть на першому символі запису. Приклад: `1^2 0 [1] 1` = 11011.
  */
+import { parseCells } from '../notation';
 
 export interface PostTape {
   /** Номери комірок із мітками. Стрічка нескінченна в обидва боки. */
@@ -18,85 +19,20 @@ export type TapeParseResult = { ok: true; value: PostTape } | { ok: false; error
 /** Найбільша довжина стрічки в нотації — захист від записів на кшталт `1^999999999`. */
 export const MAX_TAPE_CELLS = 10_000;
 
-const SUPERSCRIPT_DIGITS = new Map(
-  [...'⁰¹²³⁴⁵⁶⁷⁸⁹'].map((digit, value) => [digit, String(value)] as const),
-);
-
 export function parseTape(text: string): TapeParseResult {
-  const cells: boolean[] = [];
-  let head: number | null = null;
-  let i = 0;
-
-  const fail = (message: string): TapeParseResult => ({ ok: false, error: message });
-  const skipSpaces = () => {
-    while (i < text.length && /\s/.test(text[i]!)) i++;
-  };
-  const describe = (index: number) =>
-    index < text.length ? `«${text[index]}» (позиція ${index + 1})` : 'кінець запису';
-
-  while (true) {
-    skipSpaces();
-    if (i >= text.length) break;
-
-    let bracketed = false;
-    if (text[i] === '[') {
-      bracketed = true;
-      i++;
-      skipSpaces();
-    }
-    const symbol = text[i];
-    if (symbol !== '0' && symbol !== '1') {
-      return fail(
-        bracketed
-          ? `Після «[» очікується 0 або 1, а знайдено ${describe(i)}.`
-          : `Незрозумілий символ ${describe(i)}: використовуйте 0, 1, ^ і [ ].`,
-      );
-    }
-    i++;
-    if (bracketed) {
-      skipSpaces();
-      if (text[i] !== ']') return fail(`Очікується «]», а знайдено ${describe(i)}.`);
-      i++;
-    }
-
-    let count = 1;
-    const beforeExponent = i;
-    skipSpaces();
-    if (text[i] === '^') {
-      i++;
-      skipSpaces();
-      const start = i;
-      while (i < text.length && /[0-9]/.test(text[i]!)) i++;
-      if (start === i)
-        return fail(`Після «^» потрібне число повторень, а знайдено ${describe(i)}.`);
-      count = Number(text.slice(start, i));
-    } else if (SUPERSCRIPT_DIGITS.has(text[i] ?? '')) {
-      let digits = '';
-      while (i < text.length && SUPERSCRIPT_DIGITS.has(text[i]!)) {
-        digits += SUPERSCRIPT_DIGITS.get(text[i]!);
-        i++;
-      }
-      count = Number(digits);
-    } else {
-      i = beforeExponent;
-    }
-
-    if (count < 1) return fail('Кількість повторень має бути щонайменше 1.');
-    if (cells.length + count > MAX_TAPE_CELLS) {
-      return fail(`Задовгий запис: стрічка в нотації — до ${MAX_TAPE_CELLS} комірок.`);
-    }
-    if (bracketed) {
-      if (head !== null) return fail('Каретку можна позначити лише один раз.');
-      head = cells.length;
-    }
-    for (let k = 0; k < count; k++) cells.push(symbol === '1');
-  }
-
-  const marks = new Set<number>();
-  cells.forEach((marked, index) => {
-    if (marked) marks.add(index);
+  const parsed = parseCells(text, {
+    isSymbol: (symbol) => symbol === '0' || symbol === '1',
+    unknown: (symbol, position) =>
+      `Незрозумілий символ «${symbol}» (позиція ${position}): використовуйте 0, 1, ^ і [ ].`,
+    expected: '0 або 1',
+    maxCells: MAX_TAPE_CELLS,
   });
-  return { ok: true, value: { marks, head: head ?? 0 } };
+  if (!parsed.ok) return parsed;
+  const marks = new Set<number>();
+  parsed.cells.forEach((symbol, index) => {
+    if (symbol === '1') marks.add(index);
+  });
+  return { ok: true, value: { marks, head: parsed.head } };
 }
 
 interface Segment {

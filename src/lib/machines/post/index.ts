@@ -7,7 +7,7 @@
  *   run(state, { maxSteps })  → до зупинки, аварії або ліміту кроків
  *   serialize / deserialize   → збереження програми й вхідних даних
  */
-import { readEnvelope, writeEnvelope } from '../share';
+import { readEnvelope, stringField, writeEnvelope } from '../share';
 
 export { parse, formatCommand, renumber, rowsFromSource, sourceFromRows, ROW_OPS } from './program';
 export type { PostCommand, PostOp, PostProgram, PostRow } from './program';
@@ -30,5 +30,6 @@ export function serialize(program: string, input: string): string {
 }
 
 export function deserialize(text: string): PostSaved {
-  return readEnvelope('post', text, ['program', 'input']);
+  const record = readEnvelope('post', text);
+  return { program: stringField(record, 'program'), input: stringField(record, 'input') };
 }

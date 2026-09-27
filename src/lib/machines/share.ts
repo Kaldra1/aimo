@@ -9,16 +9,15 @@ export const FORMAT_VERSION = 1;
 
 const HASH_KEY = 's';
 
-export function writeEnvelope(machine: MachineId, fields: Record<string, string>): string {
+export function writeEnvelope(machine: MachineId, fields: Record<string, unknown>): string {
   return `${JSON.stringify({ machine, version: FORMAT_VERSION, ...fields }, null, 2)}\n`;
 }
 
-/** Читає й перевіряє збережену програму. Помилки — українською, їх показують користувачу. */
-export function readEnvelope<K extends string>(
-  machine: MachineId,
-  text: string,
-  fields: readonly K[],
-): Record<K, string> {
+/**
+ * Читає й перевіряє збережену програму: JSON, поле machine і версію формату.
+ * Поля самої машини перевіряє її модуль. Помилки — українською, їх показують користувачу.
+ */
+export function readEnvelope(machine: MachineId, text: string): Record<string, unknown> {
   let data: unknown;
   try {
     data = JSON.parse(text);
@@ -43,13 +42,14 @@ export function readEnvelope<K extends string>(
   if (record.version > FORMAT_VERSION) {
     throw new Error('Файл створено новішою версією сайту. Оновіть сторінку.');
   }
-  const result = {} as Record<K, string>;
-  for (const field of fields) {
-    const value = record[field];
-    if (typeof value !== 'string') throw new Error(`У файлі немає поля ${field}.`);
-    result[field] = value;
-  }
-  return result;
+  return record;
+}
+
+/** Текстове поле збереженої програми. */
+export function stringField(record: Record<string, unknown>, field: string): string {
+  const value = record[field];
+  if (typeof value !== 'string') throw new Error(`У файлі немає поля ${field}.`);
+  return value;
 }
 
 /** Частина адреси після `#`: стиснений стан емулятора. */
