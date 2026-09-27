@@ -100,6 +100,8 @@ const {
 
   .entry__layout {
     display: grid;
+    /* minmax(0, …): широкі таблиці й код прокручуються всередині, а не розпирають сторінку. */
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-6);
   }
 
