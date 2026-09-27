@@ -1,5 +1,26 @@
 ---
-import EmulatorPlaceholder from '../../components/EmulatorPlaceholder.astro';
+import '../../styles/emulator.css';
+import '../../styles/prose.css';
+import PostEmulator from '../../components/post/PostEmulator';
+import PostHelp from '../../components/post/PostHelp.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { MACHINE_META } from '../../lib/machines/meta';
+
+const machine = MACHINE_META.post;
 ---
 
-<EmulatorPlaceholder machine="post" />
+<BaseLayout
+  title={machine.title}
+  description="Емулятор машини Поста в браузері: стрічка з мітками, покрокове виконання, журнал, збереження й посилання на програму."
+  section="emulators"
+  breadcrumbs={[{ label: 'Емулятори', href: '/emulators/' }, { label: machine.title }]}
+>
+  <div class="container page page--emulator">
+    <header class="page-header page-header--compact">
+      <p class="eyebrow">Емулятор</p>
+      <h1>{machine.title}</h1>
+    </header>
+    <PostEmulator client:load />
+    <PostHelp />
+  </div>
+</BaseLayout>

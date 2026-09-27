@@ -1,10 +1,10 @@
 import { z } from 'astro/zod';
+import { MACHINES } from '../machines/meta';
+
+export { MACHINES, type MachineId } from '../machines/meta';
 
 // Повідомлення про помилки валідації — українською: їх бачить автор контенту.
 z.config(z.locales.uk());
-
-export const MACHINES = ['post', 'turing', 'markov'] as const;
-export type MachineId = (typeof MACHINES)[number];
 
 export const SESSION_KINDS = ['lab', 'practical'] as const;
 export type SessionKind = (typeof SESSION_KINDS)[number];

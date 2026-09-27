@@ -1,13 +1,15 @@
 import { parse as parseYaml } from 'yaml';
+import { MACHINE_META } from '../machines/meta';
 import {
   courseSchema,
   type Course,
   type LectureData,
-  type MachineId,
   SESSION_KINDS,
   type SessionData,
   type SessionKind,
 } from './schemas';
+
+export { MACHINE_META };
 
 export interface Topic {
   number: number;
@@ -51,31 +53,6 @@ export const SESSION_META: Record<
     segment: 'practicals',
     prev: 'Попереднє заняття',
     next: 'Наступне заняття',
-  },
-};
-
-/** Емулятори. `ready: false` — сторінка-заглушка «Скоро», емулятор ще в розробці. */
-export const MACHINE_META: Record<
-  MachineId,
-  { title: string; path: string; summary: string; ready: boolean }
-> = {
-  post: {
-    title: 'Машина Поста',
-    path: '/emulators/post/',
-    summary: 'Стрічка з мітками, каретка й програма з команд →, ←, V, X, ? та !.',
-    ready: false,
-  },
-  turing: {
-    title: 'Машина Тюрінга',
-    path: '/emulators/turing/',
-    summary: 'Власний алфавіт, таблиця переходів і журнал конфігурацій.',
-    ready: false,
-  },
-  markov: {
-    title: 'Нормальні алгоритми Маркова',
-    path: '/emulators/markov/',
-    summary: 'Схема підстановок, підсвітка заміни й трасувальна таблиця.',
-    ready: false,
   },
 };
 

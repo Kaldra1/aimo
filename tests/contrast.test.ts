@@ -50,10 +50,16 @@ const PAIRS: Array<[string, string, number]> = [
   ['text', 'accent-soft', 4.5],
   ['accent-text', 'bg', 4.5],
   ['accent-text', 'accent-soft', 4.5],
+  ['danger', 'bg', 4.5],
+  ['danger', 'surface', 4.5],
+  ['danger', 'danger-soft', 4.5],
+  ['text', 'danger-soft', 4.5],
+  ['text', 'primary-soft', 4.5],
   ['border-strong', 'bg', 3],
   ['border-strong', 'surface', 3],
   ['focus', 'bg', 3],
   ['focus', 'surface', 3],
+  ['primary', 'primary-soft', 3],
 ];
 
 describe.each(Object.entries(themes))('тема: %s', (_name, palette) => {
@@ -63,5 +69,14 @@ describe.each(Object.entries(themes))('тема: %s', (_name, palette) => {
     expect(fg, `немає токена --color-${foreground}`).toBeDefined();
     expect(bg, `немає токена --color-${background}`).toBeDefined();
     expect(contrast(fg!, bg!)).toBeGreaterThanOrEqual(min);
+  });
+
+  // Каретка емулятора — бурштинова рамка з темним обведенням: помітною має бути хоча б одна лінія.
+  it.each(['bg', 'surface'])('каретка помітна на %s', (background) => {
+    const best = Math.max(
+      contrast(palette['accent']!, palette[background]!),
+      contrast(palette['on-accent']!, palette[background]!),
+    );
+    expect(best).toBeGreaterThanOrEqual(3);
   });
 });
