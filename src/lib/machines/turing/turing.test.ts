@@ -319,13 +319,25 @@ describe('збереження й посилання', () => {
     expect(programOf(restored.table).rules).toEqual(programOf(table).rules);
   });
 
-  it('відновлює стан з посилання «Поділитися»', () => {
+  it('відновлює стан з посилання «Поділитися» разом із коментарем', () => {
+    const comment = 'q0 позначає одиницю, q1 дописує копію.';
     const url = shareUrl(
       'https://kaldra1.github.io/aimo/emulators/turing/',
-      serialize(table, input),
+      serialize(table, input, comment),
     );
     const restored = deserialize(decodeShareHash(new URL(url).hash)!);
     expect(restored.table.cells).toEqual(table.cells);
+    expect(restored.comment).toBe(comment);
+  });
+
+  it('файл без коментаря (старий формат) відкривається з порожнім коментарем', () => {
+    const old = JSON.parse(serialize(table, input)) as Record<string, unknown>;
+    delete old.comment;
+    expect(deserialize(JSON.stringify(old)).comment).toBe('');
+  });
+
+  it('кожен вбудований приклад має опис логіки розв’язання', () => {
+    for (const example of TURING_EXAMPLES) expect(example.comment.length).toBeGreaterThan(80);
   });
 
   it('зберігає й невалідні клітинки, щоб не губити незавершену роботу', () => {

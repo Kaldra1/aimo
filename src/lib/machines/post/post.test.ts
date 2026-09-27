@@ -364,22 +364,32 @@ describe('вбудовані приклади', () => {
 describe('збереження й посилання', () => {
   const program = '1. → 2 // коментар з «лапками» і \\ скісною\n2. !';
   const input = '0^3 [1]';
+  const comment = 'Ідея: крок праворуч і зупинка.\nДругий рядок.';
 
-  it('serialize / deserialize зберігають програму й вхідні дані', () => {
-    const text = serialize(program, input);
-    expect(JSON.parse(text)).toMatchObject({ machine: 'post', version: 1 });
-    expect(deserialize(text)).toEqual({ program, input });
+  it('serialize / deserialize зберігають програму, вхідні дані й коментар', () => {
+    const text = serialize(program, input, comment);
+    expect(JSON.parse(text)).toMatchObject({ machine: 'post', version: 1, comment });
+    expect(deserialize(text)).toEqual({ program, input, comment });
+  });
+
+  it('файл без коментаря (старий формат) відкривається з порожнім коментарем', () => {
+    const old = JSON.stringify({ machine: 'post', version: 1, program, input });
+    expect(deserialize(old)).toEqual({ program, input, comment: '' });
   });
 
   it('відновлює стан з посилання «Поділитися»', () => {
     const url = shareUrl(
       'https://kaldra1.github.io/aimo/emulators/post/',
-      serialize(program, input),
+      serialize(program, input, comment),
     );
     expect(url).toMatch(/^https:\/\/kaldra1\.github\.io\/aimo\/emulators\/post\/#s=/);
     const restored = decodeShareHash(new URL(url).hash);
     expect(restored).not.toBeNull();
-    expect(deserialize(restored!)).toEqual({ program, input });
+    expect(deserialize(restored!)).toEqual({ program, input, comment });
+  });
+
+  it('кожен вбудований приклад має опис логіки розв’язання', () => {
+    for (const example of POST_EXAMPLES) expect(example.comment.length).toBeGreaterThan(80);
   });
 
   it('відхиляє програму іншої машини', () => {

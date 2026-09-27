@@ -7,7 +7,7 @@
  *   step(state) / run(state, { maxSteps })
  *   serialize / deserialize    → збереження таблиці й вхідних даних
  */
-import { readEnvelope, stringField, writeEnvelope } from '../share';
+import { optionalStringField, readEnvelope, stringField, writeEnvelope } from '../share';
 import { cellKey, MAX_STATES, type TuringTable } from './program';
 
 export { BLANK, parseAlphabet } from './alphabet';
@@ -76,14 +76,17 @@ export interface TuringSaved {
   table: TuringTable;
   /** Вхідна стрічка в нотації. */
   input: string;
+  /** Коментар до програми: опис ідеї розв'язання. */
+  comment: string;
 }
 
-export function serialize(table: TuringTable, input: string): string {
+export function serialize(table: TuringTable, input: string, comment = ''): string {
   return writeEnvelope('turing', {
     alphabet: table.alphabet,
     states: table.states,
     table: nestTable(table),
     input,
+    comment,
   });
 }
 
@@ -105,5 +108,6 @@ export function deserialize(text: string): TuringSaved {
       cells: flattenTable(record.table),
     },
     input: stringField(record, 'input'),
+    comment: optionalStringField(record, 'comment'),
   };
 }

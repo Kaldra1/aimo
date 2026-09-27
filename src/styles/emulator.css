@@ -837,3 +837,12 @@ input[type='range'] {
 .help__body > :first-child {
   margin-top: 0;
 }
+
+/* Коментар до програми */
+
+.comment-panel__input {
+  width: 100%;
+  min-height: 9rem;
+  line-height: 1.5;
+  resize: vertical;
+}

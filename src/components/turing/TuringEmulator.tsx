@@ -33,6 +33,7 @@ import {
   type TuringTape,
 } from '../../lib/machines/turing';
 import { CodeEditor } from '../emulator/CodeEditor';
+import { CommentPanel } from '../emulator/CommentPanel';
 import { ExecutionLog, type LogColumn } from '../emulator/ExecutionLog';
 import { IconLeft, IconRight } from '../emulator/icons';
 import { ProgramActions, type Notice } from '../emulator/ProgramActions';
@@ -90,6 +91,7 @@ type Mode = 'table' | 'text';
 export default function TuringEmulator() {
   const [table, setTable] = useState<TuringTable>(() => tableOf(DEFAULT));
   const [inputText, setInputText] = useState(DEFAULT.input);
+  const [comment, setComment] = useState(DEFAULT.comment);
   const [mode, setMode] = useState<Mode>('table');
   const [text, setText] = useState('');
   const [speedIndex, setSpeedIndex] = useState(DEFAULT_SPEED_INDEX);
@@ -130,6 +132,7 @@ export default function TuringEmulator() {
   const load = (saved: TuringSaved) => {
     setTable(saved.table);
     setInputText(saved.input);
+    setComment(saved.comment);
     setMode('table');
   };
 
@@ -174,9 +177,12 @@ export default function TuringEmulator() {
 
   useEffect(() => {
     if (!restored) return;
-    const timer = setTimeout(() => writeStorage(STORAGE_KEY, serialize(table, inputText)), 400);
+    const timer = setTimeout(
+      () => writeStorage(STORAGE_KEY, serialize(table, inputText, comment)),
+      400,
+    );
     return () => clearTimeout(timer);
-  }, [restored, table, inputText]);
+  }, [restored, table, inputText, comment]);
 
   const { state, playing, limitReached } = snapshot;
   const tape: TuringTape = state ?? inputTape ?? EMPTY_TAPE;
@@ -263,12 +269,12 @@ export default function TuringEmulator() {
       !window.confirm('Замінити поточну програму прикладом? Зміни буде втрачено.')
     )
       return;
-    load({ table: tableOf(example), input: example.input });
+    load({ table: tableOf(example), input: example.input, comment: example.comment });
     setNotice({ kind: 'info', text: `Завантажено приклад «${example.title}».` });
   };
 
   const onSave = () => {
-    downloadText('turing-machine.json', serialize(table, inputText));
+    downloadText('turing-machine.json', serialize(table, inputText, comment));
     setNotice({ kind: 'info', text: 'Програму збережено у файл turing-machine.json.' });
   };
 
@@ -282,7 +288,7 @@ export default function TuringEmulator() {
   };
 
   const onShare = async () => {
-    const url = shareUrl(window.location.href, serialize(table, inputText));
+    const url = shareUrl(window.location.href, serialize(table, inputText, comment));
     try {
       await navigator.clipboard.writeText(url);
       setNotice({ kind: 'info', text: 'Посилання скопійовано в буфер обміну.' });
@@ -521,6 +527,8 @@ export default function TuringEmulator() {
               поспіль. Без позначки каретка стоїть на першому символі.
             </p>
           </section>
+
+          <CommentPanel id="turing-comment" value={comment} onInput={setComment} />
 
           <ExecutionLog
             entries={snapshot.log}

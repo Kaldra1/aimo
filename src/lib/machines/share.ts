@@ -52,6 +52,14 @@ export function stringField(record: Record<string, unknown>, field: string): str
   return value;
 }
 
+/** Необов'язкове текстове поле: у старих файлах його може не бути. */
+export function optionalStringField(record: Record<string, unknown>, field: string): string {
+  const value = record[field];
+  if (value === undefined) return '';
+  if (typeof value !== 'string') throw new Error(`Поле ${field} має бути текстом.`);
+  return value;
+}
+
 /** Частина адреси після `#`: стиснений стан емулятора. */
 export function encodeShareHash(serialized: string): string {
   return `${HASH_KEY}=${LZString.compressToEncodedURIComponent(serialized)}`;

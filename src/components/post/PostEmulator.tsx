@@ -22,6 +22,7 @@ import {
 } from '../../lib/machines/post';
 import { decodeShareHash, shareUrl } from '../../lib/machines/share';
 import { CodeEditor } from '../emulator/CodeEditor';
+import { CommentPanel } from '../emulator/CommentPanel';
 import { ExecutionLog, type LogColumn } from '../emulator/ExecutionLog';
 import { IconLeft, IconNumbers, IconRight } from '../emulator/icons';
 import { ProgramActions, type Notice } from '../emulator/ProgramActions';
@@ -65,6 +66,7 @@ const LOG_COLUMNS: readonly LogColumn<PostEvent>[] = [
 export default function PostEmulator() {
   const [source, setSource] = useState(DEFAULT.program);
   const [inputText, setInputText] = useState(DEFAULT.input);
+  const [comment, setComment] = useState(DEFAULT.comment);
   const [inputTape, setInputTape] = useState<PostTape>(() => tapeOrEmpty(DEFAULT.input));
   const [inputError, setInputError] = useState<string | null>(null);
   const [mode, setMode] = useState<'text' | 'table'>('text');
@@ -93,6 +95,7 @@ export default function PostEmulator() {
     const tape = parseTape(saved.input);
     setInputTape(tape.ok ? tape.value : EMPTY_TAPE);
     setInputError(tape.ok ? null : tape.error);
+    setComment(saved.comment);
     setMode('text');
   };
 
@@ -138,9 +141,12 @@ export default function PostEmulator() {
 
   useEffect(() => {
     if (!restored) return;
-    const timer = setTimeout(() => writeStorage(STORAGE_KEY, serialize(source, inputText)), 400);
+    const timer = setTimeout(
+      () => writeStorage(STORAGE_KEY, serialize(source, inputText, comment)),
+      400,
+    );
     return () => clearTimeout(timer);
-  }, [restored, source, inputText]);
+  }, [restored, source, inputText, comment]);
 
   const { state, playing, limitReached } = snapshot;
   const tape: PostTape = state ?? inputTape;
@@ -211,12 +217,12 @@ export default function PostEmulator() {
     const modified = source.trim() !== '' && !POST_EXAMPLES.some((e) => e.program === source);
     if (modified && !window.confirm('Замінити поточну програму прикладом? Зміни буде втрачено.'))
       return;
-    load({ program: example.program, input: example.input });
+    load({ program: example.program, input: example.input, comment: example.comment });
     setNotice({ kind: 'info', text: `Завантажено приклад «${example.title}».` });
   };
 
   const onSave = () => {
-    downloadText('post-machine.json', serialize(source, inputText));
+    downloadText('post-machine.json', serialize(source, inputText, comment));
     setNotice({ kind: 'info', text: 'Програму збережено у файл post-machine.json.' });
   };
 
@@ -230,7 +236,7 @@ export default function PostEmulator() {
   };
 
   const onShare = async () => {
-    const url = shareUrl(window.location.href, serialize(source, inputText));
+    const url = shareUrl(window.location.href, serialize(source, inputText, comment));
     try {
       await navigator.clipboard.writeText(url);
       setNotice({ kind: 'info', text: 'Посилання скопійовано в буфер обміну.' });
@@ -437,6 +443,8 @@ export default function PostEmulator() {
               <code>[1]</code> — каретка. Приклад: <code>1^2 0 [1] 1</code>.
             </p>
           </section>
+
+          <CommentPanel id="post-comment" value={comment} onInput={setComment} />
 
           <ExecutionLog
             entries={snapshot.log}
