@@ -1,16 +1,22 @@
 ---
 import { course } from '../lib/content/collections';
+import BrandMark from './BrandMark.astro';
 ---
 
 <footer class="site-footer">
   <div class="container site-footer__inner">
-    <p class="site-footer__title">{course.title}</p>
-    <p>{course.audience}</p>
-    <p>
+    <div class="site-footer__brand">
+      <p class="site-footer__title">
+        <BrandMark /> {course.short}
+      </p>
+      <p>{course.title}</p>
+      <p>{course.audience}</p>
+    </div>
+    <p class="site-footer__note">
       Оцінки, реєстрація та здача робіт — у Moodle. Сайт не використовує cookies, аналітику й
       трекери; прогрес задач зберігається лише у вашому браузері.
     </p>
-    <p>
+    <p class="site-footer__legal">
       Код —{' '}
       <a href="https://opensource.org/license/mit" rel="license">
         MIT
@@ -26,23 +32,49 @@ import { course } from '../lib/content/collections';
 
 <style>
   .site-footer {
-    margin-top: var(--space-8);
+    margin-top: var(--space-6);
     padding-block: var(--space-6);
     border-top: 1px solid var(--color-border);
-    background: var(--color-surface);
+    background: var(--color-bg);
     color: var(--color-text-muted);
     font-size: var(--text-sm);
   }
 
   .site-footer__inner {
     display: grid;
-    gap: var(--space-2);
+    gap: var(--space-5) var(--space-7);
   }
 
   .site-footer__title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
     color: var(--color-text);
     font-family: var(--font-heading);
     font-size: var(--text-base);
     font-weight: 700;
+  }
+
+  .site-footer__brand {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .site-footer__note {
+    max-width: 50ch;
+  }
+  .site-footer__legal {
+    grid-column: 1 / -1;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+    font-size: 0.75rem;
+  }
+  @media (min-width: 48rem) {
+    .site-footer__inner {
+      grid-template-columns: 1fr 1fr;
+    }
+    .site-footer__note {
+      justify-self: end;
+      align-self: center;
+    }
   }
 </style>

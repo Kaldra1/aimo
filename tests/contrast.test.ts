@@ -35,6 +35,23 @@ const themes = {
 
 /** [колір, фон, мінімальний контраст]: 4.5 — текст, 3 — межі й елементи інтерфейсу. */
 const PAIRS: Array<[string, string, number]> = [
+  ['text', 'card', 4.5],
+  ['text-muted', 'card', 4.5],
+  ['text', 'mint-card', 4.5],
+  ['text', 'blue-card', 4.5],
+  ['text', 'amber-card', 4.5],
+  ['text-muted', 'mint-card', 4.5],
+  ['text-muted', 'blue-card', 4.5],
+  ['text-muted', 'amber-card', 4.5],
+  ['primary', 'mint-card', 4.5],
+  ['primary', 'amber-card', 4.5],
+  ['blue-text', 'blue-card', 4.5],
+  ['blue-text', 'blue-icon', 4.5],
+  ['hero-text', 'hero-bg', 4.5],
+  ['hero-muted', 'hero-bg', 4.5],
+  ['hero-accent', 'hero-bg', 4.5],
+  ['hero-border', 'hero-bg', 3],
+  ['on-accent', 'hero-accent', 4.5],
   ['text', 'bg', 4.5],
   ['text', 'surface', 4.5],
   ['text', 'surface-strong', 4.5],

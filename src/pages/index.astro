@@ -4,215 +4,418 @@ import SectionCard from '../components/SectionCard.astro';
 import TapeMotif from '../components/TapeMotif.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { course, loadContent } from '../lib/content/collections';
-import { MACHINE_META, SESSION_META } from '../lib/content/course';
+import { MACHINE_META } from '../lib/content/course';
 import { plural } from '../lib/plural';
 import { url } from '../lib/url';
 
 const { lectures, sessions } = await loadContent();
 const labs = sessions.filter((s) => s.data.kind === 'lab');
 const practicals = sessions.filter((s) => s.data.kind === 'practical');
-const emulatorsReady = Object.values(MACHINE_META).some((machine) => machine.ready);
-
-const steps = [
-  {
-    title: 'Перегляньте програму курсу',
-    text: 'Змістові модулі, теми, лекції й заняття зібрані на одній сторінці.',
-    href: '/about/',
-    link: 'Програма курсу',
-  },
-  {
-    title: 'Прочитайте лекцію перед заняттям',
-    text: 'Кожна лекція має веб-версію, до лекцій додаються слайди в PDF.',
-    href: '/lectures/',
-    link: 'Лекції',
-  },
-  {
-    title: 'Виконуйте заняття з емулятором',
-    text: 'Машини Поста й Тюрінга та алгоритми Маркова працюють просто в браузері — нічого встановлювати не треба.',
-    href: '/emulators/',
-    link: 'Емулятори',
-  },
-  {
-    title: 'Тренуйтеся на задачах',
-    text: 'Задачі необов’язкові й перевіряються автоматично. Прогрес зберігається лише у вашому браузері.',
-    href: '/tasks/',
-    link: 'Задачі',
-  },
-];
+const readyMachines = Object.values(MACHINE_META).filter((machine) => machine.ready);
+const route = [
+  { title: 'Основи', description: 'Як мислити алгоритмічно', icon: 'book', topic: 1 },
+  { title: 'Машини', description: 'Від команди до результату', icon: 'tape', topic: 2 },
+  { title: 'Алгоритми', description: 'Структури й сортування', icon: 'clipboard', topic: 3 },
+  { title: 'Чисельні методи', description: 'Обчислення на практиці', icon: 'check', topic: 4 },
+] as const;
 ---
 
 <BaseLayout>
-  <section class="hero">
-    <div class="container hero__inner">
-      <p class="eyebrow">{course.audience}</p>
-      <h1 class="hero__title">{course.title}</h1>
-      <p class="lead">
-        Усе для курсу в одному місці: лекції, лабораторні й практичні заняття, емулятори
-        алгоритмічних машин і задачі з автоматичною перевіркою. Без реєстрації.
-      </p>
-      <TapeMotif />
-    </div>
-  </section>
+  <div class="container home">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero__copy">
+        <p class="hero__eyebrow">Курс комп’ютерної інженерії</p>
+        <h1 id="hero-title" class="hero__title">
+          <span>Алгоритми</span> і<br />
+          методи обчислень
+        </h1>
+        <p class="hero__lead">Читай. Досліджуй. Практикуйся.</p>
+        <div class="hero__actions">
+          <a class="button hero__primary" href={url('/about/')}>
+            Переглянути програму <Icon name="arrowRight" />
+          </a>
+          <a class="button hero__secondary" href={url('/lectures/')}>
+            До лекцій
+          </a>
+        </div>
+        <p class="hero__note">Без реєстрації · У твоєму темпі</p>
+      </div>
+      <div class="hero__visual">
+        <TapeMotif />
+        <p class="hero__caption">Великі ідеї починаються з простих кроків</p>
+      </div>
+    </section>
 
-  <div class="container page">
-    <section class="section" aria-labelledby="sections-title">
-      <h2 id="sections-title" class="visually-hidden">
-        Розділи курсу
-      </h2>
+    <section class="section explore" aria-labelledby="sections-title">
+      <div class="section-heading">
+        <h2 id="sections-title">Обери наступний крок</h2>
+        <p>Від теорії — до практики</p>
+      </div>
       <div class="cards">
         <SectionCard
           title="Лекції"
           href="/lectures/"
-          description="Веб-версії лекцій і слайди в PDF, згруповані за змістовими модулями й темами."
-          meta={`${plural(lectures.length, ['лекція', 'лекції', 'лекцій'])} · ${plural(course.modules.length, ['змістовий модуль', 'змістові модулі', 'змістових модулів'])}`}
+          description="Теорія у зрозумілих кроках"
+          meta={`${plural(lectures.length, ['лекція', 'лекції', 'лекцій'])} · ${plural(course.modules.length, ['модуль', 'модулі', 'модулів'])}`}
+          tone="mint"
+          level={3}
         >
           <Icon name="book" slot="icon" />
         </SectionCard>
-
-        <SectionCard
-          title="Лабораторні та практичні"
-          description="Тема, мета, теорія, хід роботи, варіанти й контрольні запитання кожного заняття."
-        >
+        <SectionCard title="Практика" description="Спробуй власноруч" tone="blue" level={3}>
           <Icon name="clipboard" slot="icon" />
           <div class="card-links">
-            <a class="button button--secondary" href={url('/labs/')}>
-              {SESSION_META.lab.plural} ({labs.length})
+            <a href={url('/labs/')} aria-label={`Лабораторні роботи (${labs.length})`}>
+              Лабораторні <Icon name="arrowRight" />
             </a>
-            <a class="button button--secondary" href={url('/practicals/')}>
-              {SESSION_META.practical.plural} ({practicals.length})
+            <a href={url('/practicals/')} aria-label={`Практичні заняття (${practicals.length})`}>
+              Практичні <Icon name="arrowRight" />
             </a>
           </div>
         </SectionCard>
-
         <SectionCard
           title="Емулятори"
           href="/emulators/"
-          description="Машина Поста, машина Тюрінга й нормальні алгоритми Маркова працюють прямо в браузері."
-          soon={!emulatorsReady}
+          description="Побач, як працює алгоритм"
+          meta={
+            readyMachines.length
+              ? `${plural(readyMachines.length, ['машина', 'машини', 'машин'])} у браузері`
+              : undefined
+          }
+          soon={readyMachines.length === 0}
+          tone="amber"
+          level={3}
         >
           <Icon name="tape" slot="icon" />
-        </SectionCard>
-
-        <SectionCard
-          title="Задачі"
-          href="/tasks/"
-          description="Необов’язкові задачі для емуляторів з автоматичною перевіркою. Розв’язуйте, якщо цікаво."
-          soon
-        >
-          <Icon name="check" slot="icon" />
         </SectionCard>
       </div>
     </section>
 
-    <section class="section start" aria-labelledby="start-title">
-      <h2 id="start-title" class="section-title">
-        З чого почати
-      </h2>
-      <ol class="steps">
-        {steps.map((step) => (
-          <li class="steps__item">
-            <h3 class="steps__title">{step.title}</h3>
-            <p>{step.text}</p>
-            <a href={url(step.href)}>{step.link}</a>
+    <section class="section journey" aria-labelledby="route-title">
+      <div class="section-heading">
+        <h2 id="route-title">Маршрут курсу</h2>
+        <a href={url('/about/')}>
+          Уся програма <Icon name="arrowRight" />
+        </a>
+      </div>
+      <ol class="route">
+        {route.map((step, index) => (
+          <li>
+            <a class="route__step" href={`${url('/lectures/')}#topic-${step.topic}`}>
+              <span class="route__icon">
+                <Icon name={step.icon} />
+              </span>
+              <span class="route__copy">
+                <span class="route__number">0{index + 1}</span>
+                <span class="route__title">{step.title}</span>
+                <span class="route__description">{step.description}</span>
+              </span>
+              <Icon name="arrowRight" class="route__arrow" />
+            </a>
           </li>
         ))}
       </ol>
-      <p class="start__note">Оцінки, реєстрація та здача робіт — у Moodle.</p>
     </section>
+    <aside class="home-note" aria-label="Про навчання">
+      <p>
+        <Icon name="check" /> Оцінки та здача робіт — у Moodle
+      </p>
+      <a href={url('/tasks/')}>
+        До задач <Icon name="arrowRight" />
+      </a>
+    </aside>
   </div>
 </BaseLayout>
 
 <style>
+  .home {
+    padding-block: var(--space-4) var(--space-6);
+  }
   .hero {
-    background: var(--color-surface);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .hero__inner {
+    position: relative;
+    isolation: isolate;
     display: grid;
-    gap: var(--space-4);
-    padding-block: var(--space-7) var(--space-4);
+    gap: var(--space-6);
+    padding: clamp(1.5rem, 3.5vw, 2.5rem);
+    border: 1px solid var(--color-hero-bg);
+    border-radius: 24px;
+    background: var(--color-hero-bg);
+    color: var(--color-hero-text);
+    overflow: hidden;
   }
-
+  .hero::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: radial-gradient(ellipse at 85% 15%, rgb(53 131 111 / 22%), transparent 65%);
+    pointer-events: none;
+  }
+  .hero__copy,
+  .hero__visual {
+    min-width: 0;
+  }
+  .hero__eyebrow {
+    display: inline-block;
+    margin-bottom: var(--space-5);
+    padding: 0.5rem 0.875rem;
+    border: 1px solid var(--color-hero-border);
+    border-radius: var(--radius-pill);
+    color: var(--color-hero-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
   .hero__title {
-    max-width: 20ch;
+    font-size: clamp(1.875rem, 4.05vw, 3.5rem);
+    line-height: 1.13;
+    letter-spacing: -0.045em;
+    text-wrap: initial;
   }
-
-  .cards {
-    display: grid;
-    gap: var(--space-5);
+  .hero__title span {
+    color: var(--color-hero-accent);
   }
-
-  @media (min-width: 40rem) {
-    .cards {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  .hero__lead {
+    margin-top: var(--space-5);
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
   }
-
-  @media (min-width: 72rem) {
-    .cards {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-  }
-
-  .card-links {
+  .hero__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2);
-    margin-top: auto;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
   }
-
-  .steps {
+  .hero__actions .button {
+    min-height: 3.125rem;
+    justify-content: center;
+    padding-inline: 1.25rem;
+  }
+  .hero__primary {
+    background: var(--color-hero-accent);
+    color: var(--color-on-accent);
+  }
+  .hero__primary:hover {
+    background: #f4bd68;
+    color: var(--color-on-accent);
+  }
+  .hero__secondary {
+    border-color: var(--color-hero-border);
+    color: var(--color-hero-text);
+  }
+  .hero__secondary:hover {
+    background: rgb(255 255 255 / 8%);
+    color: var(--color-hero-text);
+  }
+  .hero :global(:focus-visible) {
+    outline-color: var(--color-hero-accent);
+  }
+  .hero__note {
+    margin-top: var(--space-3);
+    color: var(--color-hero-muted);
+    font-size: var(--text-sm);
+  }
+  .hero__visual {
+    align-self: center;
+  }
+  .hero__caption {
+    margin-top: var(--space-4);
+    color: var(--color-hero-muted);
+    font-size: 0.75rem;
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
+  .explore {
+    margin-top: var(--space-7);
+  }
+  .section-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+  }
+  .section-heading p {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+  .section-heading a,
+  .home-note a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.75rem;
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+  .section-heading :global(svg),
+  .home-note :global(svg) {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex: none;
+  }
+  .cards {
     display: grid;
     gap: var(--space-4);
-    padding: 0;
-    list-style: none;
-    counter-reset: step;
   }
-
-  @media (min-width: 48rem) {
-    .steps {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  .card-links {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    align-self: end;
   }
-
-  .steps__item {
-    position: relative;
-    display: grid;
-    align-content: start;
+  .card-links a {
+    display: inline-flex;
+    align-items: center;
     gap: var(--space-2);
-    padding: var(--space-5) var(--space-5) var(--space-5) 4.25rem;
-    border-radius: var(--radius-card);
-    background: var(--color-surface);
-    counter-increment: step;
+    min-height: 2.75rem;
+    color: var(--color-blue-text);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    text-decoration: none;
   }
-
-  .steps__item::before {
-    content: counter(step);
-    position: absolute;
-    top: var(--space-5);
-    left: var(--space-5);
+  .card-links a:hover {
+    text-decoration: underline;
+  }
+  .card-links :global(svg) {
+    width: 1rem;
+    height: 1rem;
+  }
+  .journey h2 {
+    font-size: var(--text-xl);
+  }
+  .route {
     display: grid;
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+  }
+  .route__step {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    height: 100%;
+    min-height: 6rem;
+    padding: var(--space-3);
+    border-radius: var(--radius-card);
+    color: var(--color-text);
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .route__step:hover {
+    background: var(--color-surface-strong);
+    color: var(--color-text);
+  }
+  .route__icon {
+    display: grid;
+    flex: none;
     place-items: center;
-    width: 2rem;
-    height: 2rem;
+    width: 3rem;
+    height: 3rem;
     border-radius: 50%;
-    background: var(--color-primary);
-    color: var(--color-on-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+  }
+  .route li:nth-child(even) .route__icon {
+    color: var(--color-blue-text);
+    background: var(--color-blue-icon);
+  }
+  .route__copy {
+    display: grid;
+    gap: 0.125rem;
+  }
+  .route__number {
+    color: var(--color-text-muted);
+    font: 0.75rem var(--font-mono);
+  }
+  .route__title {
     font-family: var(--font-heading);
     font-weight: 700;
   }
-
-  .steps__title {
-    font-size: var(--text-lg);
+  .route__description {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
   }
-
-  .steps__item p {
+  .route__step :global(.route__arrow) {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+    margin-left: auto;
     color: var(--color-text-muted);
   }
-
-  .start__note {
-    margin-top: var(--space-4);
+  .home-note {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
     color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+  .home-note p {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  @media (min-width: 40rem) {
+    .route {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 56rem) {
+    .cards {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .hero {
+      grid-template-columns: 1.18fr 1fr;
+      gap: var(--space-7);
+      min-height: 25rem;
+      align-items: center;
+    }
+    .route {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 39.99rem) {
+    .hero {
+      border-radius: 20px;
+    }
+    .hero__eyebrow {
+      font-size: 0.625rem;
+      letter-spacing: 0.075em;
+    }
+    .hero__actions {
+      gap: var(--space-2);
+    }
+    .hero__actions .button {
+      width: 100%;
+    }
+    .hero__actions .hero__secondary {
+      display: none;
+    }
+    .hero__caption,
+    .section-heading > p {
+      display: none;
+    }
+    .hero__note {
+      text-align: center;
+    }
+    .section-heading h2 {
+      font-size: 1.5rem;
+    }
+    .journey .section-heading h2 {
+      font-size: var(--text-xl);
+    }
+    .route__step {
+      padding-block: var(--space-2);
+      min-height: 5rem;
+    }
   }
 </style>

@@ -1,82 +1,171 @@
 ---
-/** Декоративна стрічка машини Тюрінга для головної сторінки. */
-const cells = ['λ', '1', '0', '1', '1', '0', '1', 'λ', 'λ'];
-const head = 4;
+import { MACHINE_META } from '../lib/machines/meta';
+import { url } from '../lib/url';
+import Icon from './Icon.astro';
+
+const cells = ['λ', '1', '0', '1', '0', '1', 'λ'];
+const head = 3;
+const machine = MACHINE_META.turing;
 ---
 
-<div class="tape" aria-hidden="true">
-  <div class="tape__track">
-    {cells.map((symbol, index) => (
-      <span class:list={['tape__cell', { 'tape__cell--head': index === head }]}>
-        {index === head && (
-          <span class="tape__state">
-            q<sub>0</sub>
-          </span>
-        )}
-        {symbol}
-        {index === head && (
-          <svg class="tape__caret" viewBox="0 0 20 14" width="20" height="14">
-            <path d="M10 1L19 13H1z" />
-          </svg>
-        )}
-      </span>
-    ))}
+<section class="machine-preview" aria-labelledby="machine-preview-title">
+  <div class="machine-preview__header">
+    <h2 id="machine-preview-title">Машина Тюрінга</h2>
+    <span class="machine-preview__badge">Крок за кроком</span>
   </div>
-</div>
+  <div
+    class="tape"
+    role="img"
+    aria-label="Стрічка машини Тюрінга: λ, 1, 0, 1, 0, 1, λ. Каретка на четвертій комірці, стан q₀."
+  >
+    <div class="tape__track" aria-hidden="true">
+      {cells.map((symbol, index) => (
+        <span class:list={['tape__cell', { 'tape__cell--head': index === head }]}>
+          {index === head && (
+            <span class="tape__state">
+              q<sub>0</sub>
+            </span>
+          )}
+          {symbol}
+          {index === head && <span class="tape__caret" />}
+        </span>
+      ))}
+    </div>
+  </div>
+  <div class="machine-preview__footer">
+    <span class="machine-preview__state">
+      Стан{' '}
+      <span>
+        q<sub>0</sub>
+      </span>
+    </span>
+    {machine.ready ? (
+      <a href={url(machine.path)}>
+        Спробувати <Icon name="arrowRight" />
+      </a>
+    ) : (
+      <span class="machine-preview__badge">У розробці</span>
+    )}
+  </div>
+</section>
 
 <style>
+  .machine-preview {
+    padding: clamp(1rem, 2.5vw, 1.75rem);
+    border: 1px solid var(--color-hero-border);
+    border-radius: var(--radius-card);
+    background-color: var(--color-hero-bg);
+    background-image:
+      linear-gradient(rgb(137 191 172 / 6%) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(137 191 172 / 6%) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .machine-preview__header,
+  .machine-preview__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+  .machine-preview h2 {
+    font-size: clamp(1rem, 1.7vw, 1.25rem);
+  }
+  .machine-preview__badge {
+    padding: 0.25rem 0.625rem;
+    border: 1px solid var(--color-hero-border);
+    border-radius: var(--radius-pill);
+    color: var(--color-hero-muted);
+    font-size: 0.6875rem;
+  }
   .tape {
-    display: flex;
-    justify-content: center;
-    padding-block: var(--space-6) var(--space-5);
-    overflow: hidden;
-    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    padding-block: 3.75rem 3.25rem;
   }
-
   .tape__track {
-    display: flex;
-    flex: none;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
   }
-
   .tape__cell {
     position: relative;
     display: grid;
     place-items: center;
-    width: 3.25rem;
-    height: 3.25rem;
-    margin-left: -2px;
-    border: 2px solid var(--color-primary);
-    background: var(--color-bg);
-    color: var(--color-text);
+    aspect-ratio: 1;
+    border: 1px solid var(--color-hero-border);
+    margin-left: -1px;
+    color: var(--color-hero-text);
     font-family: var(--font-mono);
-    font-size: var(--text-xl);
-    font-weight: 700;
+    font-size: clamp(1rem, 2vw, 1.5rem);
   }
-
+  .tape__cell:first-child {
+    border-radius: 4px 0 0 4px;
+  }
+  .tape__cell:last-child {
+    border-radius: 0 4px 4px 0;
+  }
   .tape__cell--head {
     z-index: 1;
-    background: var(--color-accent-soft);
-    outline: 3px solid var(--color-accent);
-    outline-offset: -1px;
-    box-shadow: 0 0 0 5px var(--color-on-accent);
+    background: var(--color-hero-accent);
+    border-color: var(--color-hero-accent);
+    color: var(--color-on-accent);
+    font-weight: 700;
+    box-shadow: 0 0 0 3px rgb(240 180 88 / 15%);
   }
-
   .tape__state {
     position: absolute;
-    bottom: calc(100% + 0.5rem);
-    color: var(--color-primary);
-    font-size: var(--text-base);
+    bottom: calc(100% + 0.625rem);
+    color: var(--color-hero-text);
+    font-size: 1rem;
   }
-
   .tape__caret {
     position: absolute;
     top: calc(100% + 0.5rem);
-    width: 1.25rem;
-    height: 0.875rem;
-    fill: var(--color-accent);
-    stroke: var(--color-on-accent);
-    stroke-width: 1.5;
-    stroke-linejoin: round;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 11px solid var(--color-hero-accent);
+  }
+  .machine-preview__state {
+    color: var(--color-hero-muted);
+    font-size: var(--text-sm);
+  }
+  .machine-preview__state > span {
+    margin-left: var(--space-2);
+    color: var(--color-hero-text);
+    font: 1rem var(--font-mono);
+  }
+  .machine-preview__footer a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.75rem;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-hero-border);
+    border-radius: var(--radius-control);
+    color: var(--color-hero-text);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .machine-preview__footer a:hover {
+    background: rgb(255 255 255 / 8%);
+  }
+  .machine-preview__footer a:focus-visible {
+    outline-color: var(--color-hero-accent);
+  }
+  .machine-preview__footer :global(svg) {
+    width: 1rem;
+    height: 1rem;
+  }
+  @media (max-width: 39.99rem) {
+    .machine-preview__header {
+      align-items: flex-start;
+    }
+    .machine-preview__badge {
+      font-size: 0.625rem;
+    }
+    .tape {
+      padding-block: 2.25rem 1.75rem;
+    }
   }
 </style>

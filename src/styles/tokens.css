@@ -10,7 +10,8 @@
 :root {
   color-scheme: light;
 
-  --color-bg: #ffffff;
+  --color-bg: #fafaf6;
+  --color-card: #ffffff;
   --color-surface: #f2f7f6;
   --color-surface-strong: #e3eeec;
   --color-border: #c9dbd8;
@@ -29,11 +30,23 @@
   --color-danger: #b3261e;
   --color-danger-soft: #fbe9e7;
 
+  /* Виразна головна сторінка; кольори логотипа лишаються попередніми. */
+  --color-hero-bg: #102d2a;
+  --color-hero-text: #f5f8f2;
+  --color-hero-muted: #c1d6cf;
+  --color-hero-border: #81aea2;
+  --color-hero-accent: #f0b458;
+  --color-mint-card: #f0f6f0;
+  --color-blue-card: #edf5fa;
+  --color-blue-icon: #d4e9f5;
+  --color-blue-text: #215d7d;
+  --color-amber-card: #faf5ec;
+
   --shadow-card: 0 1px 2px rgb(13 40 37 / 6%), 0 6px 20px rgb(13 40 37 / 6%);
   --shadow-card-hover: 0 2px 4px rgb(13 40 37 / 8%), 0 10px 28px rgb(13 40 37 / 10%);
 
-  --radius-card: 12px;
-  --radius-control: 8px;
+  --radius-card: 18px;
+  --radius-control: 10px;
   --radius-pill: 999px;
 
   --space-1: 0.25rem;
@@ -55,16 +68,17 @@
   --leading-body: 1.6;
   --leading-heading: 1.2;
 
-  --width-page: 72rem;
+  --width-page: 80rem;
   --width-prose: 44rem;
   --gutter: 1rem;
-  --header-height: 4rem;
+  --header-height: 4.75rem;
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
 
   --color-bg: #0d1615;
+  --color-card: #142120;
   --color-surface: #142120;
   --color-surface-strong: #1c2d2b;
   --color-border: #2a3f3c;
@@ -82,6 +96,12 @@
   --color-focus: #7dd3c7;
   --color-danger: #ff8a80;
   --color-danger-soft: #3b1d1b;
+
+  --color-mint-card: #142822;
+  --color-blue-card: #14262f;
+  --color-blue-icon: #203d4e;
+  --color-blue-text: #9acfea;
+  --color-amber-card: #2a241a;
 
   --shadow-card: 0 1px 2px rgb(0 0 0 / 30%), 0 6px 20px rgb(0 0 0 / 25%);
   --shadow-card-hover: 0 2px 4px rgb(0 0 0 / 35%), 0 10px 28px rgb(0 0 0 / 35%);
