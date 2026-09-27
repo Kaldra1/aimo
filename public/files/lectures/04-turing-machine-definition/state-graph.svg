@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 230" width="640" height="230" font-family="Inter, Arial, sans-serif" font-size="15" fill="#122120">
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#122120"/>
+    </marker>
+  </defs>
+  <!-- стартова стрілка -->
+  <line x1="70" y1="140" x2="176" y2="140" stroke="#122120" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="112" y="128" text-anchor="middle" font-size="13" fill="#6B8480">старт</text>
+  <!-- петля над q0 -->
+  <path d="M 196 112 C 160 30, 260 30, 224 112" fill="none" stroke="#122120" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="210" y="30" text-anchor="middle" fill="#0D6E63">0 / 1, R</text>
+  <text x="210" y="50" text-anchor="middle" fill="#0D6E63">1 / 0, R</text>
+  <!-- стан q0 -->
+  <circle cx="210" cy="140" r="32" fill="#DDEFEB" stroke="#122120" stroke-width="1.5"/>
+  <text x="210" y="141" text-anchor="middle" dominant-baseline="middle" font-size="18">q₀</text>
+  <!-- перехід у зупинку -->
+  <line x1="242" y1="140" x2="446" y2="140" stroke="#122120" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="344" y="128" text-anchor="middle" fill="#0D6E63">λ / λ, N</text>
+  <!-- стан зупинки -->
+  <circle cx="480" cy="140" r="32" fill="#FBEBD0" stroke="#122120" stroke-width="1.5"/>
+  <circle cx="480" cy="140" r="26" fill="none" stroke="#122120" stroke-width="1.5"/>
+  <text x="480" y="141" text-anchor="middle" dominant-baseline="middle" font-size="18">!</text>
+  <text x="320" y="210" text-anchor="middle" font-size="13" fill="#6B8480">Підпис переходу «a / b, D»: прочитано a, записати b, рух D</text>
+</svg>
