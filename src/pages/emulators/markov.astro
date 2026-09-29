@@ -1,5 +1,27 @@
 ---
-import EmulatorPlaceholder from '../../components/EmulatorPlaceholder.astro';
+import '../../styles/emulator.css';
+import '../../styles/markov.css';
+import '../../styles/prose.css';
+import MarkovEmulator from '../../components/markov/MarkovEmulator';
+import MarkovHelp from '../../components/markov/MarkovHelp.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { MACHINE_META } from '../../lib/machines/meta';
+
+const machine = MACHINE_META.markov;
 ---
 
-<EmulatorPlaceholder machine="markov" />
+<BaseLayout
+  title={machine.title}
+  description="Емулятор нормальних алгоритмів Маркова в браузері: схема підстановок, покрокове виконання, підсвітка заміни й трасувальна таблиця для звіту."
+  section="emulators"
+  breadcrumbs={[{ label: 'Емулятори', href: '/emulators/' }, { label: machine.title }]}
+>
+  <div class="container page page--emulator">
+    <header class="page-header page-header--compact">
+      <p class="eyebrow">Емулятор</p>
+      <h1>{machine.title}</h1>
+    </header>
+    <MarkovEmulator client:load />
+    <MarkovHelp />
+  </div>
+</BaseLayout>

@@ -31,6 +31,6 @@ export const MACHINE_META: Record<
     genitive: 'нормальних алгоритмів Маркова',
     path: '/emulators/markov/',
     summary: 'Схема підстановок, підсвітка заміни й трасувальна таблиця.',
-    ready: false,
+    ready: true,
   },
 };
