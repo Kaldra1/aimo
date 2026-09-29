@@ -1,0 +1,101 @@
+---
+import 'katex/dist/katex.min.css';
+import '../../styles/emulator.css';
+import '../../styles/prose.css';
+import '../../styles/tasks.css';
+import { render } from 'astro:content';
+import PrevNext from '../../components/PrevNext.astro';
+import PostHelp from '../../components/post/PostHelp.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import TaskWorkbench, { type TaskView } from '../../components/tasks/TaskWorkbench';
+import TuringHelp from '../../components/turing/TuringHelp.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { loadLinkIndex, loadTasks, type Task } from '../../lib/content/collections';
+import { neighbors, resolveRelated, topicLabel } from '../../lib/content/course';
+import { MACHINE_META } from '../../lib/machines/meta';
+import { DEFAULT_MAX_STEPS } from '../../lib/tasks/check';
+import { difficultyText, stars, taskPath } from '../../lib/tasks/meta';
+
+export async function getStaticPaths() {
+  const tasks = await loadTasks();
+  return tasks.map((task) => ({ params: { id: task.id }, props: { task } }));
+}
+
+interface Props {
+  task: Task;
+}
+
+const { task } = Astro.props;
+const { data } = task;
+const { Content } = await render(task);
+
+if (data.machine === 'markov') {
+  throw new Error(`Задача «${task.id}»: перевірка для алгоритмів Маркова ще не реалізована.`);
+}
+
+const tasks = await loadTasks();
+const { prev, next } = neighbors(
+  tasks,
+  (t) => t.id === task.id,
+  () => true,
+);
+const link = (t: Task | undefined) =>
+  t ? { href: taskPath(t.id), title: t.data.title } : undefined;
+
+const related = resolveRelated(data.related, await loadLinkIndex(), `Задача «${task.id}»`);
+const machine = MACHINE_META[data.machine];
+
+const view: TaskView = {
+  id: task.id,
+  machine: data.machine,
+  alphabet: data.alphabet,
+  starter: data.starter,
+  tests: data.tests,
+  hints: data.hints,
+  maxSteps: data.maxSteps ?? DEFAULT_MAX_STEPS,
+};
+---
+
+<BaseLayout
+  title={data.title}
+  description={`Задача для емулятора: ${machine.title.toLowerCase()}, ${difficultyText(data.difficulty).toLowerCase()}. Автоматична перевірка на тестах.`}
+  section="tasks"
+  breadcrumbs={[{ label: 'Задачі', href: '/tasks/' }, { label: data.title }]}
+>
+  <article class="container page page--emulator task-page">
+    <header class="page-header page-header--compact">
+      <p class="eyebrow">Задача · {machine.title}</p>
+      <h1>{data.title}</h1>
+      <ul class="task-meta">
+        <li>
+          <span class="task-stars" aria-hidden="true">
+            {stars(data.difficulty)}
+          </span>
+          <span class="visually-hidden">{difficultyText(data.difficulty)}</span>
+        </li>
+        <li>{topicLabel(data.topic)}</li>
+        {data.machine === 'turing' && (
+          <li>
+            Алфавіт задачі: <code>{data.alphabet}</code> (можна додати допоміжні символи)
+          </li>
+        )}
+      </ul>
+    </header>
+
+    <div class="prose task-statement">
+      <Content />
+    </div>
+
+    <TaskWorkbench client:load task={view} />
+
+    {data.machine === 'post' ? <PostHelp /> : <TuringHelp />}
+
+    <RelatedLinks items={related} />
+    <PrevNext
+      prev={link(prev)}
+      next={link(next)}
+      prevLabel="Попередня задача"
+      nextLabel="Наступна задача"
+    />
+  </article>
+</BaseLayout>

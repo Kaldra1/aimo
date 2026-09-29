@@ -1,11 +1,29 @@
 ---
-import ComingSoon from '../../components/ComingSoon.astro';
+import '../../styles/emulator.css';
+import '../../styles/tasks.css';
+import TaskCatalog from '../../components/tasks/TaskCatalog';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { loadTasks } from '../../lib/content/collections';
+import { MACHINE_META, MACHINES } from '../../lib/machines/meta';
+import { taskPath } from '../../lib/tasks/meta';
+import { url } from '../../lib/url';
+
+const tasks = await loadTasks();
+const catalog = tasks.map((task) => ({
+  id: task.id,
+  title: task.data.title,
+  machine: task.data.machine,
+  difficulty: task.data.difficulty,
+  href: url(taskPath(task.id)),
+}));
+const machines = MACHINES.filter((id) => tasks.some((task) => task.data.machine === id)).map(
+  (id) => ({ id, title: MACHINE_META[id].title }),
+);
 ---
 
 <BaseLayout
   title="Задачі"
-  description="Необов’язкові задачі для емуляторів з автоматичною перевіркою."
+  description="Необов’язкові задачі для емуляторів машин Поста й Тюрінга з автоматичною перевіркою."
   section="tasks"
   breadcrumbs={[{ label: 'Задачі' }]}
 >
@@ -13,10 +31,37 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     <header class="page-header">
       <h1>Задачі</h1>
       <p class="lead">
-        Необов’язкові задачі для емуляторів з автоматичною перевіркою. Прогрес зберігається лише у
-        вашому браузері.
+        Необов’язкові задачі для емуляторів з автоматичною перевіркою: складіть програму, натисніть
+        «Перевірити» — і сайт запустить її на всіх тестах задачі.
       </p>
     </header>
-    <ComingSoon message="Задачі готуються." />
+
+    <TaskCatalog client:load tasks={catalog} machines={machines} />
+
+    <section class="task-howto" aria-labelledby="task-howto-title">
+      <h2 id="task-howto-title">Як це працює</h2>
+      <ol>
+        <li>
+          Відкрийте задачу й прочитайте умову. Складність: ★ — базова, ★★ — середня, ★★★ —
+          підвищена.
+        </li>
+        <li>
+          Складіть програму у вбудованому емуляторі й перевірте її вручну: вхідні дані першого тесту
+          вже підставлено.
+        </li>
+        <li>
+          Натисніть «Перевірити»: програму буде запущено на всіх тестах. Для кожного тесту видно
+          вхідні дані, очікуваний і отриманий результат, а в разі невдачі — причину.
+        </li>
+        <li>
+          Застрягли — відкрийте підказку. Вони відкриваються по одній, тож не підглядайте всі
+          одразу.
+        </li>
+      </ol>
+      <p>
+        Програми й прогрес зберігаються лише у вашому браузері — реєстрація не потрібна. Щоб
+        перенести прогрес на інший комп’ютер, експортуйте його у файл і імпортуйте там.
+      </p>
+    </section>
   </div>
 </BaseLayout>

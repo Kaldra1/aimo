@@ -1,4 +1,5 @@
 /** Острів емулятора машини Тюрінга: ядро з src/lib/machines/turing, UI лише малює стан. */
+import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { INSTANT } from '../../lib/machines/runner';
 import { decodeShareHash, shareUrl } from '../../lib/machines/share';
@@ -26,6 +27,7 @@ import {
   tableFromProgram,
   TURING_EXAMPLES,
   type TuringExample,
+  type TuringProgram,
   type TuringRule,
   type TuringSaved,
   type TuringState,
@@ -42,6 +44,7 @@ import {
   DEFAULT_LIMIT,
   DEFAULT_SPEED_INDEX,
   downloadText,
+  type EmulatorApi,
   errorText,
   PROGRAM_ERRORS,
   readStorage,
@@ -55,7 +58,6 @@ import { TransitionTable } from './TransitionTable';
 
 const STORAGE_KEY = 'aimo:emulator:turing';
 const MACHINE = { step, run };
-const DEFAULT = TURING_EXAMPLES[0]!;
 const EMPTY_TAPE: TuringTape = { cells: new Map(), head: 0 };
 
 const tableOf = (example: TuringExample): TuringTable => ({
@@ -63,6 +65,9 @@ const tableOf = (example: TuringExample): TuringTable => ({
   states: example.states,
   cells: flattenTable(example.table),
 });
+
+const FIRST = TURING_EXAMPLES[0]!;
+const DEFAULT: TuringSaved = { table: tableOf(FIRST), input: FIRST.input, comment: FIRST.comment };
 
 /** Рядок журналу: крок 0 — початкова конфігурація без правила. */
 interface LogEntry {
@@ -88,10 +93,35 @@ const LOG_COLUMNS: readonly LogColumn<LogEntry>[] = [
 
 type Mode = 'table' | 'text';
 
-export default function TuringEmulator() {
-  const [table, setTable] = useState<TuringTable>(() => tableOf(DEFAULT));
-  const [inputText, setInputText] = useState(DEFAULT.input);
-  const [comment, setComment] = useState(DEFAULT.comment);
+export interface TuringEmulatorProps {
+  /** Ключ автозбереження в localStorage; у кожної задачі — свій. */
+  storageKey?: string;
+  /** Таблиця й вхідні дані, якщо нічого не збережено. */
+  initial?: TuringSaved;
+  /** Вбудовані приклади; на сторінці задачі їх немає. */
+  examples?: readonly TuringExample[];
+  /** Ім'я файлу для кнопки «Зберегти». */
+  fileName?: string;
+  /** Повідомляє про зміни: програма, яку буде виконано (null — у ній помилки), і все, що зберігається. */
+  onChange?: (program: TuringProgram | null, saved: TuringSaved) => void;
+  /** Передає сторінці задачі керування вхідними даними. */
+  onReady?: (api: EmulatorApi) => void;
+  /** Додаткові кнопки в панелі дій. */
+  actions?: ComponentChildren;
+}
+
+export default function TuringEmulator({
+  storageKey = STORAGE_KEY,
+  initial: start = DEFAULT,
+  examples = TURING_EXAMPLES,
+  fileName = 'turing-machine.json',
+  onChange,
+  onReady,
+  actions,
+}: TuringEmulatorProps) {
+  const [table, setTable] = useState<TuringTable>(start.table);
+  const [inputText, setInputText] = useState(start.input);
+  const [comment, setComment] = useState(start.comment);
   const [mode, setMode] = useState<Mode>('table');
   const [text, setText] = useState('');
   const [speedIndex, setSpeedIndex] = useState(DEFAULT_SPEED_INDEX);
@@ -126,7 +156,9 @@ export default function TuringEmulator() {
     limit: DEFAULT_LIMIT,
     speed: speedAt(DEFAULT_SPEED_INDEX),
   });
-  useEffect(() => runner.reset(initial), [runner, initial]);
+  // Лічильник скидань: ті самі вхідні дані, підставлені ззовні, теж повертають машину до початку.
+  const [resets, setResets] = useState(0);
+  useEffect(() => runner.reset(initial), [runner, initial, resets]);
   useEffect(() => runner.setSpeed(speedAt(speedIndex)), [runner, speedIndex]);
 
   const load = (saved: TuringSaved) => {
@@ -155,7 +187,7 @@ export default function TuringEmulator() {
   useEffect(() => {
     let saved = readShared();
     if (saved === null) {
-      const stored = readStorage(STORAGE_KEY);
+      const stored = readStorage(storageKey);
       if (stored !== null) {
         try {
           saved = deserialize(stored);
@@ -173,16 +205,31 @@ export default function TuringEmulator() {
     };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
-  }, []);
+  }, [storageKey]);
 
   useEffect(() => {
     if (!restored) return;
     const timer = setTimeout(
-      () => writeStorage(STORAGE_KEY, serialize(table, inputText, comment)),
+      () => writeStorage(storageKey, serialize(table, inputText, comment)),
       400,
     );
     return () => clearTimeout(timer);
-  }, [restored, table, inputText, comment]);
+  }, [storageKey, restored, table, inputText, comment]);
+
+  // Сторінка задачі дізнається про кожну зміну програми, щоб перевіряти саме її.
+  useEffect(() => {
+    onChange?.(program, { table, input: inputText, comment });
+  }, [onChange, program, table, inputText, comment]);
+
+  // Функція використовує лише сетери стану, тож лишається правильною, поки острів відкритий.
+  useEffect(() => {
+    onReady?.({
+      loadInput: (text) => {
+        setInputText(text);
+        setResets((count) => count + 1);
+      },
+    });
+  }, [onReady]);
 
   const { state, playing, limitReached } = snapshot;
   const tape: TuringTape = state ?? inputTape ?? EMPTY_TAPE;
@@ -255,9 +302,9 @@ export default function TuringEmulator() {
   };
 
   const onExample = (id: string) => {
-    const example = TURING_EXAMPLES.find((e) => e.id === id);
+    const example = examples.find((e) => e.id === id);
     if (!example) return;
-    const isExample = TURING_EXAMPLES.some(
+    const isExample = examples.some(
       (e) =>
         e.alphabet === table.alphabet &&
         JSON.stringify(flattenTable(e.table)) === JSON.stringify(table.cells),
@@ -274,8 +321,8 @@ export default function TuringEmulator() {
   };
 
   const onSave = () => {
-    downloadText('turing-machine.json', serialize(table, inputText, comment));
-    setNotice({ kind: 'info', text: 'Програму збережено у файл turing-machine.json.' });
+    downloadText(fileName, serialize(table, inputText, comment));
+    setNotice({ kind: 'info', text: `Програму збережено у файл ${fileName}.` });
   };
 
   const onOpenFile = (content: string) => {
@@ -307,8 +354,9 @@ export default function TuringEmulator() {
     <div class="emulator">
       <ProgramActions
         idPrefix="turing"
-        examples={TURING_EXAMPLES}
+        examples={examples}
         onExample={onExample}
+        extra={actions}
         onSave={onSave}
         onOpenFile={onOpenFile}
         onShare={() => void onShare()}

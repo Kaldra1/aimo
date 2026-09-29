@@ -49,6 +49,14 @@ export function writeStorage(key: string, value: string): void {
   }
 }
 
+export function removeStorage(key: string): void {
+  try {
+    window.localStorage.removeItem(key);
+  } catch {
+    // Сховище недоступне — видаляти нічого.
+  }
+}
+
 /** Пропонує браузеру зберегти текст у файл. */
 export function downloadText(fileName: string, text: string): void {
   const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
@@ -59,6 +67,12 @@ export function downloadText(fileName: string, text: string): void {
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+/** Що острів емулятора дозволяє робити сторінці задачі. */
+export interface EmulatorApi {
+  /** Підставити вхідні дані (наприклад, тесту задачі) і повернутися до початку виконання. */
+  loadInput: (text: string) => void;
 }
 
 export function errorText(error: unknown): string {

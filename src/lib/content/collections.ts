@@ -2,9 +2,12 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { getCollection, type CollectionEntry } from 'astro:content';
 import courseSource from '../../data/course.yaml?raw';
+import { MACHINES } from '../machines/meta';
+import { validateTask } from '../tasks/validate';
 import { url } from '../url';
 import {
   buildLinkIndex,
+  findTopic,
   isPublished,
   parseCourse,
   sortLectures,
@@ -14,6 +17,7 @@ import {
 
 export type Lecture = CollectionEntry<'lectures'>;
 export type Session = CollectionEntry<'sessions'>;
+export type Task = CollectionEntry<'tasks'>;
 
 /** Чернетки показуємо повністю лише в dev-режимі (`npm run dev`). */
 export const SHOW_DRAFTS = import.meta.env.DEV;
@@ -53,4 +57,25 @@ export function slidesHref(lecture: Lecture): string | undefined {
     );
   }
   return url(slides);
+}
+
+/** Опубліковані задачі, перевірені й упорядковані: за машиною, потім за номером. */
+export async function loadTasks(): Promise<Task[]> {
+  const tasks = await getCollection('tasks');
+  const problems = tasks.flatMap((task) => [
+    ...validateTask(task.id, task.data),
+    ...(findTopic(course, task.data.topic)
+      ? []
+      : [`Задача «${task.id}»: теми ${task.data.topic} немає в course.yaml`]),
+  ]);
+  if (problems.length > 0) {
+    throw new Error(`Помилки в задачах:\n- ${problems.join('\n- ')}`);
+  }
+  return tasks
+    .filter(published)
+    .sort(
+      (a, b) =>
+        MACHINES.indexOf(a.data.machine) - MACHINES.indexOf(b.data.machine) ||
+        a.id.localeCompare(b.id),
+    );
 }

@@ -1,6 +1,6 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { lectureSchema, pageSchema, sessionSchema } from './lib/content/schemas';
+import { lectureSchema, pageSchema, sessionSchema, taskSchema } from './lib/content/schemas';
 
 // Файли, що починаються з «_», — шаблони для копіювання, на сайт вони не потрапляють.
 const CONTENT_FILES = '**/[^_]*.{md,mdx}';
@@ -20,4 +20,9 @@ const pages = defineCollection({
   schema: pageSchema,
 });
 
-export const collections = { lectures, sessions, pages };
+const tasks = defineCollection({
+  loader: glob({ pattern: CONTENT_FILES, base: './src/content/tasks' }),
+  schema: taskSchema,
+});
+
+export const collections = { lectures, sessions, pages, tasks };

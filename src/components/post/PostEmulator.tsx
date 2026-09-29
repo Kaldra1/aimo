@@ -1,4 +1,5 @@
 /** Острів емулятора машини Поста: ядро з src/lib/machines/post, UI лише малює стан. */
+import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import {
   createState,
@@ -16,6 +17,8 @@ import {
   sourceFromRows,
   step,
   type PostEvent,
+  type PostExample,
+  type PostProgram,
   type PostRow,
   type PostSaved,
   type PostTape,
@@ -32,6 +35,7 @@ import {
   DEFAULT_SPEED_INDEX,
   downloadText,
   errorText,
+  type EmulatorApi,
   PROGRAM_ERRORS,
   readStorage,
   speedAt,
@@ -45,7 +49,8 @@ import { PostTableEditor } from './PostTableEditor';
 
 const STORAGE_KEY = 'aimo:emulator:post';
 const MACHINE = { step, run };
-const DEFAULT = POST_EXAMPLES[0]!;
+const FIRST = POST_EXAMPLES[0]!;
+const DEFAULT: PostSaved = { program: FIRST.program, input: FIRST.input, comment: FIRST.comment };
 const EMPTY_TAPE: PostTape = { marks: new Set(), head: 0 };
 
 function tapeOrEmpty(text: string): PostTape {
@@ -63,11 +68,36 @@ const LOG_COLUMNS: readonly LogColumn<PostEvent>[] = [
   { header: 'Стрічка після кроку', cell: (event) => formatTape(event.state), mono: true },
 ];
 
-export default function PostEmulator() {
-  const [source, setSource] = useState(DEFAULT.program);
-  const [inputText, setInputText] = useState(DEFAULT.input);
-  const [comment, setComment] = useState(DEFAULT.comment);
-  const [inputTape, setInputTape] = useState<PostTape>(() => tapeOrEmpty(DEFAULT.input));
+export interface PostEmulatorProps {
+  /** Ключ автозбереження в localStorage; у кожної задачі — свій. */
+  storageKey?: string;
+  /** Програма й вхідні дані, якщо нічого не збережено. */
+  initial?: PostSaved;
+  /** Вбудовані приклади; на сторінці задачі їх немає. */
+  examples?: readonly PostExample[];
+  /** Ім'я файлу для кнопки «Зберегти». */
+  fileName?: string;
+  /** Повідомляє про зміни: розібрана програма (null — у ній помилки) і все, що зберігається. */
+  onChange?: (program: PostProgram | null, saved: PostSaved) => void;
+  /** Передає сторінці задачі керування вхідними даними. */
+  onReady?: (api: EmulatorApi) => void;
+  /** Додаткові кнопки в панелі дій. */
+  actions?: ComponentChildren;
+}
+
+export default function PostEmulator({
+  storageKey = STORAGE_KEY,
+  initial: start = DEFAULT,
+  examples = POST_EXAMPLES,
+  fileName = 'post-machine.json',
+  onChange,
+  onReady,
+  actions,
+}: PostEmulatorProps) {
+  const [source, setSource] = useState(start.program);
+  const [inputText, setInputText] = useState(start.input);
+  const [comment, setComment] = useState(start.comment);
+  const [inputTape, setInputTape] = useState<PostTape>(() => tapeOrEmpty(start.input));
   const [inputError, setInputError] = useState<string | null>(null);
   const [mode, setMode] = useState<'text' | 'table'>('text');
   const [rows, setRows] = useState<PostRow[]>([]);
@@ -118,7 +148,7 @@ export default function PostEmulator() {
   useEffect(() => {
     let saved = readShared();
     if (saved === null) {
-      const stored = readStorage(STORAGE_KEY);
+      const stored = readStorage(storageKey);
       if (stored !== null) {
         try {
           saved = deserialize(stored);
@@ -137,16 +167,34 @@ export default function PostEmulator() {
     };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
-  }, []);
+  }, [storageKey]);
 
   useEffect(() => {
     if (!restored) return;
     const timer = setTimeout(
-      () => writeStorage(STORAGE_KEY, serialize(source, inputText, comment)),
+      () => writeStorage(storageKey, serialize(source, inputText, comment)),
       400,
     );
     return () => clearTimeout(timer);
-  }, [restored, source, inputText, comment]);
+  }, [storageKey, restored, source, inputText, comment]);
+
+  // Сторінка задачі дізнається про кожну зміну програми, щоб перевіряти саме її.
+  useEffect(() => {
+    onChange?.(parsed.ok ? parsed.value : null, { program: source, input: inputText, comment });
+  }, [onChange, parsed, source, inputText, comment]);
+
+  // Функція використовує лише сетери стану, тож лишається правильною, поки острів відкритий.
+  // Нова стрічка — новий початковий стан, тому виконання починається спочатку.
+  useEffect(() => {
+    onReady?.({
+      loadInput: (text) => {
+        setInputText(text);
+        const tape = parseTape(text);
+        setInputTape(tape.ok ? tape.value : EMPTY_TAPE);
+        setInputError(tape.ok ? null : tape.error);
+      },
+    });
+  }, [onReady]);
 
   const { state, playing, limitReached } = snapshot;
   const tape: PostTape = state ?? inputTape;
@@ -212,9 +260,9 @@ export default function PostEmulator() {
   };
 
   const onExample = (id: string) => {
-    const example = POST_EXAMPLES.find((e) => e.id === id);
+    const example = examples.find((e) => e.id === id);
     if (!example) return;
-    const modified = source.trim() !== '' && !POST_EXAMPLES.some((e) => e.program === source);
+    const modified = source.trim() !== '' && !examples.some((e) => e.program === source);
     if (modified && !window.confirm('Замінити поточну програму прикладом? Зміни буде втрачено.'))
       return;
     load({ program: example.program, input: example.input, comment: example.comment });
@@ -222,8 +270,8 @@ export default function PostEmulator() {
   };
 
   const onSave = () => {
-    downloadText('post-machine.json', serialize(source, inputText, comment));
-    setNotice({ kind: 'info', text: 'Програму збережено у файл post-machine.json.' });
+    downloadText(fileName, serialize(source, inputText, comment));
+    setNotice({ kind: 'info', text: `Програму збережено у файл ${fileName}.` });
   };
 
   const onOpenFile = (text: string) => {
@@ -249,8 +297,9 @@ export default function PostEmulator() {
     <div class="emulator">
       <ProgramActions
         idPrefix="post"
-        examples={POST_EXAMPLES}
+        examples={examples}
         onExample={onExample}
+        extra={actions}
         onSave={onSave}
         onOpenFile={onOpenFile}
         onShare={() => void onShare()}

@@ -1,0 +1,309 @@
+/* Задачі: каталог і сторінка задачі. */
+
+/* Каталог */
+
+.task-catalog {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.task-catalog__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
+
+.task-catalog__count {
+  margin-right: auto;
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.task-catalog__transfer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.task-catalog__notice {
+  flex-basis: 100%;
+  min-height: 1.5em;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.task-catalog__notice.is-error {
+  color: var(--color-danger);
+}
+
+.task-catalog__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-5);
+}
+
+.task-filter {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.task-filter__legend {
+  margin-bottom: var(--space-1);
+  padding: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.task-filter .segmented {
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.task-catalog__empty {
+  color: var(--color-text-muted);
+}
+
+.task-group {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.task-group__title {
+  font-size: var(--text-xl);
+}
+
+.task-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.task-card {
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+
+.task-card.is-solved {
+  border-color: var(--color-primary);
+}
+
+.task-card__title {
+  font-size: var(--text-lg);
+}
+
+.task-card__title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.task-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.task-card__stars,
+.task-stars {
+  color: var(--color-accent-text);
+  letter-spacing: 0.1em;
+}
+
+.task-howto {
+  max-width: var(--width-prose);
+  margin-top: var(--space-7);
+  padding: var(--space-5);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.task-howto h2 {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-lg);
+}
+
+.task-howto ol {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: 1.5em;
+}
+
+/* Сторінка задачі */
+
+.task-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  padding: 0;
+  color: var(--color-text-muted);
+  list-style: none;
+}
+
+.task-meta code {
+  font-family: var(--font-mono);
+}
+
+.task-statement {
+  margin-bottom: var(--space-6);
+}
+
+.task-workbench {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.task-workbench > * {
+  min-width: 0;
+}
+
+.task-section-title {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-xl);
+}
+
+.task-hints {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+  max-width: var(--width-prose);
+}
+
+.task-hints .task-section-title {
+  margin-bottom: 0;
+}
+
+.task-hints__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: 1.5em;
+}
+
+.task-hints__list li {
+  padding: var(--space-2) var(--space-3);
+  border-left: 4px solid var(--color-accent);
+  border-radius: var(--radius-control);
+  background: var(--color-accent-soft);
+}
+
+.task-check {
+  scroll-margin-top: var(--space-5);
+}
+
+.task-emulator {
+  scroll-margin-top: var(--space-5);
+}
+
+.task-check__summary {
+  min-height: 1.5em;
+  font-weight: 600;
+}
+
+.task-check__summary.is-solved {
+  color: var(--color-primary);
+}
+
+.task-check__summary.is-error {
+  color: var(--color-danger);
+}
+
+.task-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task-result {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-left-width: 4px;
+  border-radius: var(--radius-card);
+  background: var(--color-bg);
+}
+
+.task-result.is-passed {
+  border-left-color: var(--color-primary);
+}
+
+.task-result.is-failed {
+  border-left-color: var(--color-danger);
+}
+
+.task-result__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-weight: 600;
+}
+
+.task-result__mark {
+  font-weight: 700;
+}
+
+.is-passed .task-result__mark {
+  color: var(--color-primary);
+}
+
+.is-failed .task-result__mark {
+  color: var(--color-danger);
+}
+
+.task-result__steps {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 400;
+}
+
+.task-result__tapes {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.task-result__tapes div {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.task-result__tapes dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.task-result__tapes dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.task-result__tapes code {
+  font-family: var(--font-mono);
+}
+
+.task-result__reason {
+  font-size: var(--text-sm);
+}
+
+.task-result__open {
+  justify-self: start;
+  min-height: 2.25rem;
+  padding-block: var(--space-1);
+  font-size: var(--text-sm);
+}

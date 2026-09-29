@@ -25,7 +25,14 @@ export {
   tableFromProgram,
 } from './program';
 export type { Move, TableMessage, TuringProgram, TuringRule, TuringTable } from './program';
-export { formatConfiguration, formatTape, parseTape, readCell, subscript } from './tape';
+export {
+  formatConfiguration,
+  formatTape,
+  MAX_TAPE_CELLS,
+  parseTape,
+  readCell,
+  subscript,
+} from './tape';
 export type { TuringTape } from './tape';
 export { configurationState, createState, positionOf, run, step } from './machine';
 export type {

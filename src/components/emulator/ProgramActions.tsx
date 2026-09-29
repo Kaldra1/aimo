@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact';
 import { useRef } from 'preact/hooks';
 import { IconOpen, IconSave, IconShare } from './icons';
 
@@ -8,8 +9,11 @@ export interface Notice {
 
 interface Props {
   idPrefix: string;
+  /** Вбудовані приклади; якщо їх немає (сторінка задачі), список не показується. */
   examples: readonly { id: string; title: string }[];
   onExample: (id: string) => void;
+  /** Додаткові кнопки перед «Зберегти», наприклад «Перевірити» на сторінці задачі. */
+  extra?: ComponentChildren;
   onSave: () => void;
   onOpenFile: (text: string) => void;
   onShare: () => void;
@@ -25,6 +29,7 @@ export function ProgramActions({
   onOpenFile,
   onShare,
   notice,
+  extra,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -36,28 +41,31 @@ export function ProgramActions({
 
   return (
     <div class="program-actions">
-      <label class="field field--inline" for={`${idPrefix}-example`}>
-        <span class="field__label">Приклади</span>
-        <select
-          id={`${idPrefix}-example`}
-          class="input"
-          value=""
-          onChange={(event) => {
-            const id = event.currentTarget.value;
-            event.currentTarget.value = '';
-            if (id) onExample(id);
-          }}
-        >
-          <option value="">Оберіть приклад…</option>
-          {examples.map((example) => (
-            <option key={example.id} value={example.id}>
-              {example.title}
-            </option>
-          ))}
-        </select>
-      </label>
+      {examples.length > 0 && (
+        <label class="field field--inline" for={`${idPrefix}-example`}>
+          <span class="field__label">Приклади</span>
+          <select
+            id={`${idPrefix}-example`}
+            class="input"
+            value=""
+            onChange={(event) => {
+              const id = event.currentTarget.value;
+              event.currentTarget.value = '';
+              if (id) onExample(id);
+            }}
+          >
+            <option value="">Оберіть приклад…</option>
+            {examples.map((example) => (
+              <option key={example.id} value={example.id}>
+                {example.title}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
 
       <div class="program-actions__buttons">
+        {extra}
         <button type="button" class="button button--secondary" onClick={onSave}>
           <IconSave />
           Зберегти
