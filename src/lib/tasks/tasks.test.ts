@@ -10,9 +10,10 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse as parseYaml } from 'yaml';
 import { taskSchema, type TaskData } from '../content/schemas';
+import * as markov from '../machines/markov';
 import * as post from '../machines/post';
 import * as turing from '../machines/turing';
-import { checkPost, checkTuring, type CheckReport } from './check';
+import { checkMarkov, checkPost, checkTuring, type CheckReport } from './check';
 import { validateTask } from './validate';
 
 const ROOT = process.cwd();
@@ -38,7 +39,14 @@ function checkSaved(task: TaskData, saved: string): CheckReport {
     if (!built.ok) throw new Error(built.errors.map((e) => e.message).join('; '));
     return checkTuring(built.value, task.tests, task.maxSteps);
   }
-  throw new Error(`Перевірка для машини ${task.machine} ще не реалізована`);
+  const scheme = markov.parse(markov.deserialize(saved).program);
+  if (!scheme.ok) throw new Error(scheme.errors.map((e) => e.message).join('; '));
+  if (task.shortest !== undefined) {
+    expect(scheme.value.rules.length, 'еталон не довший за «гольф»-рекорд').toBeLessThanOrEqual(
+      task.shortest,
+    );
+  }
+  return checkMarkov(scheme.value, task.tests, task.maxSteps);
 }
 
 const files = readdirSync(TASKS_DIR).filter((f) => /\.mdx?$/.test(f) && !f.startsWith('_'));

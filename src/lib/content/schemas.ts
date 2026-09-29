@@ -64,10 +64,12 @@ export const taskSchema = z.strictObject({
   related: z.array(z.string().trim().min(1)).default([]),
   /** Заготовка програми: текст програми Поста або правила Тюрінга `q0, 1 -> 1, R, q0`. */
   starter: z.string().default(''),
-  /** Алфавіт задачі (для Тюрінга). Студент може додати до нього допоміжні символи. */
+  /** Алфавіт задачі (Тюрінг, Марков). Студент може додати до нього допоміжні символи. */
   alphabet: z.string().default(''),
   /** Ліміт кроків на один тест. */
   maxSteps: positiveInt.max(1_000_000).optional(),
+  /** Для нормальних алгоритмів: кількість підстановок у найкоротшому відомому розв'язку. */
+  shortest: positiveInt.optional(),
   tests: z.array(taskTestSchema).min(1),
   hints: z.array(z.string().trim().min(1)).default([]),
   draft: z.boolean().default(false),

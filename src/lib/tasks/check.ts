@@ -6,6 +6,7 @@
  * нескінченній стрічці воно записане. Положення каретки перевіряється, лише якщо в тесті
  * `checkHead: true`; тоді воно рахується від початку слова.
  */
+import * as markov from '../machines/markov';
 import { parseCells } from '../machines/notation';
 import * as post from '../machines/post';
 import * as turing from '../machines/turing';
@@ -69,7 +70,24 @@ interface Outcome {
 type Failure = { ok: false; error: string };
 type ParsedTape = { ok: true; cells: Map<number, string>; head: number } | Failure;
 
+/** Як називати виконавця в поясненнях: машина зі стрічкою чи нормальний алгоритм. */
+interface Wording {
+  wrong: string;
+  notStopped: string;
+}
+
+const TAPE_WORDING: Wording = {
+  wrong: 'Машина зупинилася, але слово на стрічці не таке, як очікувалося.',
+  notStopped: 'Машина не зупинилася',
+};
+
+const MARKOV_WORDING: Wording = {
+  wrong: 'Алгоритм зупинився, але слово не таке, як очікувалося.',
+  notStopped: 'Алгоритм не зупинився',
+};
+
 interface Checker {
+  wording: Wording;
   execute: (input: string) => { ok: true; outcome: Outcome } | Failure;
   parseExpected: (text: string) => ParsedTape;
   /** Запис стрічки для показу: лише слово або, якщо важлива каретка, слово з кареткою. */
@@ -105,19 +123,25 @@ export function compareTapes(
   return 'passed';
 }
 
-function reasonOf(verdict: Verdict, outcome: Outcome | null, maxSteps: number, error?: string) {
+function reasonOf(
+  verdict: Verdict,
+  outcome: Outcome | null,
+  maxSteps: number,
+  wording: Wording,
+  error?: string,
+) {
   switch (verdict) {
     case 'passed':
       return undefined;
     case 'wrong-tape':
-      return 'Машина зупинилася, але слово на стрічці не таке, як очікувалося.';
+      return wording.wrong;
     case 'wrong-head':
       return 'Слово правильне, але каретка зупинилася не там, де потрібно.';
     case 'crashed':
       return `Аварійна зупинка: ${outcome?.error ?? 'невідома причина'}.`;
     case 'step-limit': {
       const word = plural(maxSteps, ['крок', 'кроки', 'кроків']).slice(String(maxSteps).length);
-      return `Машина не зупинилася за ${numberFormat.format(maxSteps)}${word} — можливе зациклення.`;
+      return `${wording.notStopped} за ${numberFormat.format(maxSteps)}${word} — можливе зациклення.`;
     }
     case 'bad-input':
       return `Вхідне слово тесту не підходить до алфавіту програми. ${error ?? ''}`.trim();
@@ -134,7 +158,7 @@ function runTests(checker: Checker, tests: readonly TaskTest[], maxSteps: number
         verdict: 'bad-input',
         passed: false,
         actual: null,
-        reason: reasonOf('bad-input', null, maxSteps, executed.error),
+        reason: reasonOf('bad-input', null, maxSteps, checker.wording, executed.error),
         steps: 0,
       };
     }
@@ -151,7 +175,7 @@ function runTests(checker: Checker, tests: readonly TaskTest[], maxSteps: number
     } else {
       verdict = outcome.status === 'crashed' ? 'crashed' : 'step-limit';
     }
-    const reason = reasonOf(verdict, outcome, maxSteps);
+    const reason = reasonOf(verdict, outcome, maxSteps, checker.wording);
     return {
       ...base,
       verdict,
@@ -193,6 +217,7 @@ const EMPTY_TAPE = 'порожня стрічка';
 
 function postChecker(program: post.PostProgram, maxSteps: number): Checker {
   return {
+    wording: TAPE_WORDING,
     execute: (input) => {
       const tape = post.parseTape(input);
       if (!tape.ok) return { ok: false, error: tape.error };
@@ -254,6 +279,7 @@ export function parseTuringWord(text: string): ParsedTape {
 
 function turingChecker(program: turing.TuringProgram, maxSteps: number): Checker {
   return {
+    wording: TAPE_WORDING,
     execute: (input) => {
       const tape = turing.parseTape(input, program.alphabet);
       if (!tape.ok) return { ok: false, error: tape.error };
@@ -284,4 +310,46 @@ export function checkTuring(
   maxSteps = DEFAULT_MAX_STEPS,
 ): CheckReport {
   return runTests(turingChecker(program, maxSteps), tests, maxSteps);
+}
+
+// ---------- Нормальні алгоритми Маркова ----------
+
+/** Слово як «стрічка» без порожніх комірок: так його можна порівнювати тим самим кодом. */
+function wordCells(word: string): Map<number, string> {
+  return new Map(Array.from(word, (symbol, index) => [index, symbol] as const));
+}
+
+function markovChecker(program: markov.MarkovProgram, maxSteps: number): Checker {
+  return {
+    wording: MARKOV_WORDING,
+    execute: (input) => {
+      const word = markov.parseWord(input);
+      if (!word.ok) return { ok: false, error: word.error };
+      const result = markov.run(markov.createState(program, word.word), { maxSteps });
+      return {
+        ok: true,
+        outcome: {
+          status: result.status,
+          steps: result.steps,
+          ...(result.error ? { error: result.error } : {}),
+          cells: wordCells(result.state.word),
+          head: 0,
+        },
+      };
+    },
+    parseExpected: (text) => {
+      const word = markov.parseWord(text);
+      return word.ok ? { ok: true, cells: wordCells(word.word), head: 0 } : word;
+    },
+    format: (cells) => markov.formatWord([...cells.values()].join('')),
+  };
+}
+
+/** Слова порівнюються точно; положення «каретки» в нормальних алгоритмах немає. */
+export function checkMarkov(
+  program: markov.MarkovProgram,
+  tests: readonly TaskTest[],
+  maxSteps = DEFAULT_MAX_STEPS,
+): CheckReport {
+  return runTests(markovChecker(program, maxSteps), tests, maxSteps);
 }

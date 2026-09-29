@@ -2,6 +2,7 @@
  * Перевірка файлів задач під час збирання сайту й у тестах: тести мають розбиратися в нотації
  * машини, алфавіт — бути коректним, заготовка — без помилок. Повідомлення — для автора задачі.
  */
+import * as markov from '../machines/markov';
 import { MACHINE_META } from '../machines/meta';
 import * as post from '../machines/post';
 import * as turing from '../machines/turing';
@@ -73,6 +74,30 @@ export function validateTask(fileId: string, task: TaskData): string[] {
     });
     if (task.starter.trim() !== '') {
       const parsed = turing.parse(task.starter, { alphabet: task.alphabet });
+      if (!parsed.ok) report(`заготовка містить помилки: ${parsed.errors[0]?.message ?? ''}`);
+    }
+  }
+
+  if (task.machine === 'markov') {
+    const alphabet = markov.parseAlphabet(task.alphabet);
+    if (!alphabet.ok) {
+      report(`алфавіт: ${alphabet.error}`);
+      return problems;
+    }
+    // Алфавіт задачі — букви вхідних і вихідних слів; допоміжні букви студент додає сам.
+    const symbols = alphabet.symbols.length > 0 ? alphabet.symbols : null;
+    task.tests.forEach((test, index) => {
+      for (const [field, text] of [
+        ['input', test.input],
+        ['expected', test.expected],
+      ] as const) {
+        const word = markov.parseWord(text, symbols);
+        if (!word.ok) report(`тест ${index + 1}, поле ${field}: ${word.error}`);
+      }
+      if (test.checkHead) report(`тест ${index + 1}: у нормальних алгоритмах немає каретки`);
+    });
+    if (task.starter.trim() !== '') {
+      const parsed = markov.parse(task.starter);
       if (!parsed.ok) report(`заготовка містить помилки: ${parsed.errors[0]?.message ?? ''}`);
     }
   }

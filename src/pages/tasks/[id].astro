@@ -1,10 +1,12 @@
 ---
 import 'katex/dist/katex.min.css';
 import '../../styles/emulator.css';
+import '../../styles/markov.css';
 import '../../styles/prose.css';
 import '../../styles/tasks.css';
 import { render } from 'astro:content';
 import PrevNext from '../../components/PrevNext.astro';
+import MarkovHelp from '../../components/markov/MarkovHelp.astro';
 import PostHelp from '../../components/post/PostHelp.astro';
 import RelatedLinks from '../../components/RelatedLinks.astro';
 import TaskWorkbench, { type TaskView } from '../../components/tasks/TaskWorkbench';
@@ -29,10 +31,6 @@ const { task } = Astro.props;
 const { data } = task;
 const { Content } = await render(task);
 
-if (data.machine === 'markov') {
-  throw new Error(`Задача «${task.id}»: перевірка для алгоритмів Маркова ще не реалізована.`);
-}
-
 const tasks = await loadTasks();
 const { prev, next } = neighbors(
   tasks,
@@ -53,6 +51,7 @@ const view: TaskView = {
   tests: data.tests,
   hints: data.hints,
   maxSteps: data.maxSteps ?? DEFAULT_MAX_STEPS,
+  shortest: data.shortest,
 };
 ---
 
@@ -74,9 +73,10 @@ const view: TaskView = {
           <span class="visually-hidden">{difficultyText(data.difficulty)}</span>
         </li>
         <li>{topicLabel(data.topic)}</li>
-        {data.machine === 'turing' && (
+        {data.machine !== 'post' && data.alphabet !== '' && (
           <li>
-            Алфавіт задачі: <code>{data.alphabet}</code> (можна додати допоміжні символи)
+            Алфавіт задачі: <code>{data.alphabet}</code> (можна додати допоміжні{' '}
+            {data.machine === 'markov' ? 'букви-маркери' : 'символи'})
           </li>
         )}
       </ul>
@@ -88,7 +88,13 @@ const view: TaskView = {
 
     <TaskWorkbench client:load task={view} />
 
-    {data.machine === 'post' ? <PostHelp /> : <TuringHelp />}
+    {data.machine === 'post' ? (
+      <PostHelp />
+    ) : data.machine === 'turing' ? (
+      <TuringHelp />
+    ) : (
+      <MarkovHelp />
+    )}
 
     <RelatedLinks items={related} />
     <PrevNext

@@ -1,5 +1,6 @@
 /** Острів сторінки задачі: підказки, емулятор, перевірка на всіх тестах і позначка «розв’язано». */
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks';
+import type { MarkovProgram, MarkovSaved } from '../../lib/machines/markov';
 import type { PostProgram, PostSaved } from '../../lib/machines/post';
 import {
   parse as parseTuring,
@@ -9,6 +10,7 @@ import {
 } from '../../lib/machines/turing';
 import { plural } from '../../lib/plural';
 import {
+  checkMarkov,
   checkPost,
   checkTuring,
   type CheckReport,
@@ -17,6 +19,7 @@ import {
 } from '../../lib/tasks/check';
 import { formatSolvedDate, taskStorageKey } from '../../lib/tasks/meta';
 import { formatNumber, removeStorage, type EmulatorApi } from '../emulator/support';
+import MarkovEmulator from '../markov/MarkovEmulator';
 import PostEmulator from '../post/PostEmulator';
 import TuringEmulator from '../turing/TuringEmulator';
 import { notifyProgress, useProgress } from './progress';
@@ -24,18 +27,19 @@ import { notifyProgress, useProgress } from './progress';
 /** Те, що острів отримує від сторінки: лише потрібні для роботи поля задачі. */
 export interface TaskView {
   id: string;
-  machine: 'post' | 'turing';
+  machine: 'post' | 'turing' | 'markov';
   alphabet: string;
   starter: string;
   tests: TaskTest[];
   hints: string[];
   maxSteps: number;
+  /** Для нормальних алгоритмів: підстановок у найкоротшому відомому розв’язку. */
+  shortest?: number | undefined;
 }
 
-type Program = PostProgram | TuringProgram;
+type Program = PostProgram | TuringProgram | MarkovProgram;
 
 const NO_EXAMPLES: readonly never[] = [];
-const EMPTY = 'порожня стрічка';
 
 function initialPost(task: TaskView): PostSaved {
   return { program: task.starter, input: task.tests[0]?.input ?? '', comment: '' };
@@ -48,6 +52,31 @@ function initialTuring(task: TaskView): TuringSaved {
     ? tableFromProgram(parsed.value, task.alphabet)
     : { alphabet: task.alphabet, states: 1, cells: {} };
   return { table, input: task.tests[0]?.input ?? '', comment: '' };
+}
+
+function initialMarkov(task: TaskView): MarkovSaved {
+  // Алфавіт задачі — для довідки; перевірку символів студент вмикає сам, коли додасть маркери.
+  return {
+    program: task.starter,
+    input: task.tests[0]?.input ?? '',
+    alphabet: task.alphabet,
+    checkAlphabet: false,
+    comment: '',
+  };
+}
+
+function initialOf(task: TaskView): PostSaved | TuringSaved | MarkovSaved {
+  if (task.machine === 'post') return initialPost(task);
+  if (task.machine === 'turing') return initialTuring(task);
+  return initialMarkov(task);
+}
+
+function checkTask(task: TaskView, program: Program): CheckReport {
+  if (task.machine === 'post') return checkPost(program as PostProgram, task.tests, task.maxSteps);
+  if (task.machine === 'turing') {
+    return checkTuring(program as TuringProgram, task.tests, task.maxSteps);
+  }
+  return checkMarkov(program as MarkovProgram, task.tests, task.maxSteps);
 }
 
 const scrollBehavior = (): ScrollBehavior =>
@@ -65,10 +94,9 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
   const checkPanelRef = useRef<HTMLElement>(null);
   const emulatorRef = useRef<HTMLDivElement>(null);
 
-  const initialState = useMemo(
-    () => (task.machine === 'post' ? initialPost(task) : initialTuring(task)),
-    [task],
-  );
+  const initialState = useMemo(() => initialOf(task), [task]);
+  const empty = task.machine === 'markov' ? 'λ (порожнє слово)' : 'порожня стрічка';
+  const [rules, setRules] = useState<number | null>(null);
   const solvedAt = progress?.solved[task.id];
 
   const onChange = useCallback((next: Program | null) => {
@@ -87,11 +115,9 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
     if (current === null) {
       setReport(null);
     } else {
-      const next =
-        task.machine === 'post'
-          ? checkPost(current as PostProgram, task.tests, task.maxSteps)
-          : checkTuring(current as TuringProgram, task.tests, task.maxSteps);
+      const next = checkTask(task, current);
       setReport(next);
+      setRules(task.machine === 'markov' ? (current as MarkovProgram).rules.length : null);
       setStale(false);
       if (next.solved) {
         store.markSolved(task.id);
@@ -167,7 +193,18 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
 
       <div class="task-emulator" ref={emulatorRef}>
         <h2 class="task-section-title">Розв’язання</h2>
-        {task.machine === 'post' ? (
+        {task.machine === 'markov' ? (
+          <MarkovEmulator
+            key={generation}
+            storageKey={taskStorageKey(task.id)}
+            initial={initialState as MarkovSaved}
+            examples={NO_EXAMPLES}
+            fileName={`${task.id}.json`}
+            onChange={onChange}
+            onReady={onReady}
+            actions={actions}
+          />
+        ) : task.machine === 'post' ? (
           <PostEmulator
             key={generation}
             storageKey={taskStorageKey(task.id)}
@@ -208,10 +245,21 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
         </div>
         <p class="panel__hint">
           Програму буде запущено на {plural(task.tests.length, ['тесті', 'тестах', 'тестах'])} з
-          лімітом {formatNumber(task.maxSteps)} кроків на кожен. Порожні комірки по краях стрічки не
-          враховуються. Задачу зараховано, коли пройдено всі тести; прогрес зберігається лише в
-          цьому браузері.
+          лімітом {formatNumber(task.maxSteps)} кроків на кожен.{' '}
+          {task.machine === 'markov'
+            ? 'Слово після зупинки має точно збігтися з очікуваним.'
+            : 'Порожні комірки по краях стрічки не враховуються.'}{' '}
+          Задачу зараховано, коли пройдено всі тести; прогрес зберігається лише в цьому браузері.
         </p>
+        {task.shortest !== undefined && (
+          <p class="panel__hint">
+            Гольф: найкоротший відомий розв’язок —{' '}
+            {plural(task.shortest, ['підстановка', 'підстановки', 'підстановок'])}.
+            {report?.solved &&
+              rules !== null &&
+              ` У вашій схемі — ${plural(rules, ['підстановка', 'підстановки', 'підстановок'])}.`}
+          </p>
+        )}
         <p
           class={`task-check__summary${report?.solved ? ' is-solved' : ''}${broken ? ' is-error' : ''}`}
           role="status"
@@ -245,13 +293,13 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
                   <div>
                     <dt>Вхід</dt>
                     <dd>
-                      <code>{result.input || EMPTY}</code>
+                      <code>{result.input || empty}</code>
                     </dd>
                   </div>
                   <div>
                     <dt>Очікувано</dt>
                     <dd>
-                      <code>{result.expected || EMPTY}</code>
+                      <code>{result.expected || empty}</code>
                     </dd>
                   </div>
                   <div>
