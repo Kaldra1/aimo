@@ -5,3 +5,6 @@ package-lock.json
 public/files/
 # Навчальний контент форматує автор: Prettier може зіпсувати формули в Markdown.
 src/content/
+
+# Варіанти занять: одне завдання — один рядок, так зручніше читати й правити
+src/data/variants/
