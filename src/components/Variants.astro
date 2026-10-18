@@ -1,0 +1,100 @@
+---
+/** Таблиця індивідуальних варіантів заняття з src/data/variants/<id>.yaml. */
+import { parseVariants, tasksOf, VARIANTS } from '../lib/variants/variants';
+
+interface Props {
+  /** Ім'я файлу без розширення, наприклад practical-01. */
+  id: string;
+}
+
+const files = import.meta.glob<string>('../data/variants/*.yaml', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+});
+const { id } = Astro.props;
+const source = files[`../data/variants/${id}.yaml`];
+if (source === undefined)
+  throw new Error(`Варіанти «${id}»: файл src/data/variants/${id}.yaml не знайдено`);
+const data = parseVariants(source);
+
+const escape = (text: string) =>
+  text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+/** `код` в умові — моноширинним шрифтом. */
+const inline = (text: string) => escape(text).replace(/`([^`]+)`/g, '<code>$1</code>');
+
+const rows = Array.from({ length: VARIANTS }, (_, i) => ({
+  n: i + 1,
+  tasks: tasksOf(data, i + 1),
+}));
+const HEADERS = ['★ — обов’язкове', '★★ — на занятті', '★★★ — за бажанням, удома'];
+---
+
+<div class="variants">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Варіант</th>
+        {HEADERS.map((h) => (
+          <th scope="col">{h}</th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map(({ n, tasks }) => (
+        <tr>
+          <th scope="row">{n}</th>
+          {tasks.map((task) => (
+            <td>
+              <p set:html={inline(task.task)} />
+              <p class="variants__meta">
+                Алфавіт: {task.alphabet}. Приклади:{' '}
+                {task.examples.map((example, k) => (
+                  <>
+                    {k > 0 && '; '}
+                    <code>{example}</code>
+                  </>
+                ))}
+              </p>
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .variants {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .variants table {
+    display: table;
+    width: 100%;
+  }
+
+  .variants table td p {
+    margin: 0;
+  }
+
+  .variants table td p + p {
+    margin-top: var(--space-1);
+  }
+
+  .variants__meta {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .variants tbody th {
+    text-align: center;
+    vertical-align: top;
+  }
+
+  .variants td {
+    vertical-align: top;
+    min-width: 12rem;
+  }
+</style>
