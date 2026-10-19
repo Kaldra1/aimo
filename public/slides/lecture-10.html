@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./resources.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/styles.css">
+<script src="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/_ds_bundle.js"></script>
+<link rel="stylesheet" href="fonts/fonts.css">
+<title>АІМО — Лекція 10 · Основні алгоритмічні структури</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  --h: "Manrope", system-ui, sans-serif;
+  --b: "IBM Plex Sans", system-ui, sans-serif;
+  --m: "IBM Plex Mono", ui-monospace, monospace;
+  --bg: #f5f7f5; --bg2: #e7efeb; --ink: #16262b; --mut: #56696d; --ln: rgba(22,38,43,.16);
+  --acc: #0d6e63; --fill: #f0b45a; --acc-ink: #1b2620;
+  --hair: 1px solid var(--ln);
+  --ns: 2px solid var(--ink);
+  --mk-c: rgba(22,38,43,.45);
+  --mk-img: linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c));
+  --mk-pos: 0 -7px, -7px 0, right 0 top -7px, right -7px top 0, 0 bottom -7px, -7px bottom 0, right 0 bottom -7px, right -7px bottom 0;
+  --mk-size: 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px;
+  --grid: linear-gradient(rgba(238,243,239,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(238,243,239,.045) 1px, transparent 1px);
+}
+a { color: var(--acc); text-decoration: none; }
+a:hover { color: var(--ink); }
+</style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" data-uneditable="">
+
+<section data-label="Титул" data-screen-label="01" data-speaker-notes="Будь-яку програму можна зібрати з трьох цеглинок: слідування, розгалуження, циклу. Сьогодні — кожна в трьох записах: схемою, псевдокодом і C++." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);--ns:2px solid #eef3ef;height:100%;display:flex;gap:60px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
+    <div style="align-self:flex-start;border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Лекція 10 · Алгоритми і методи обчислень</div>
+    <div>
+      <h1 style="margin:0;font-family:var(--h);font-weight:800;font-size:108px;line-height:1.02;letter-spacing:-.02em">Основні<br><span style="color:var(--acc)">алгоритмічні</span><br>структури</h1>
+      <p style="margin:30px 0 0;font-size:36px;line-height:1.3;color:var(--mut);max-width:900px">Слідування, розгалуження, цикл — і як їх поєднувати</p>
+    </div>
+    <div style="display:flex;gap:18px;font-size:24px;color:var(--mut)"><span>Змістовий модуль 1</span><span>·</span><span>Тема 3. Представлення та основні структури алгоритмів</span></div>
+  </div>
+  <div style="width:680px;flex:none;display:flex;flex-direction:column;justify-content:center;gap:28px">
+    <div style="padding:36px 40px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="display:flex;flex-direction:column;gap:18px;align-items:center">
+        <svg viewBox="0 0 160 300" style="display:block;width:100%;height:340px;color:var(--ink)" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
+          <path d="M80 0V30"></path><rect x="20" y="30" width="120" height="56"></rect><path d="M80 86V122"></path><rect x="20" y="122" width="120" height="56"></rect><path d="M80 178V214"></path><rect x="20" y="214" width="120" height="56"></rect><path d="M80 270V300"></path>
+        </svg>
+        <span style="font-family:var(--h);font-weight:700;font-size:26px">Слідування</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px;align-items:center">
+        <svg viewBox="0 0 160 300" style="display:block;width:100%;height:340px;color:var(--ink)" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
+          <path d="M80 0V40"></path><path d="M80 40L130 90L80 140L30 90Z" stroke="var(--acc)"></path>
+          <path d="M30 90H14V170"></path><rect x="0" y="170" width="28" height="50"></rect>
+          <path d="M130 90H146V170"></path><rect x="132" y="170" width="28" height="50"></rect>
+          <path d="M14 220V250H146V220"></path><path d="M80 250V300"></path>
+        </svg>
+        <span style="font-family:var(--h);font-weight:700;font-size:26px">Розгалуження</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px;align-items:center">
+        <svg viewBox="0 0 160 300" style="display:block;width:100%;height:340px;color:var(--ink)" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
+          <path d="M80 0V50"></path><path d="M80 50L130 100L80 150L30 100Z" stroke="var(--acc)"></path>
+          <path d="M80 150V180"></path><rect x="30" y="180" width="100" height="50"></rect>
+          <path d="M80 230V256H10V24H76"></path>
+          <path d="M130 100H150V300"></path>
+        </svg>
+        <span style="font-family:var(--h);font-weight:700;font-size:26px">Цикл</span>
+      </div>
+    </div>
+    <p style="margin:0;text-align:center;font-size:24px;color:var(--mut)">Один вхід, один вихід — у кожної</p>
+  </div>
+</section>
+
+<section data-label="Еволюція парадигм" data-screen-label="02" data-speaker-notes="Карта еволюції. Машина Поста — команди з номерами й переходами; асемблер і ранній BASIC — те саме, лише ближче до заліза. Структурне й процедурне програмування сховало переходи в цикли й функції. ООП об'єднало дані з поведінкою. Зараз ШІ дозволяє описувати намір природною мовою — але перевіряти згенерований код усе одно доводиться через ті самі три структури. Кожен рівень не скасовує попередній: while компілюється в ті самі jmp." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Історія</span><span style="display:var(--hdr,inline);color:var(--mut)">01</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Від переходів до наміру</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Кожна парадигма піднімає рівень абстракції: те, що програміст пише руками, наступна ховає всередину мови.</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:auto 1fr;min-height:0">
+    <div style="grid-column:1 / -1;position:relative;height:56px;display:grid;grid-template-columns:repeat(5,1fr)">
+      <div style="position:absolute;left:0;right:0;top:27px;height:2px;background:var(--ink)"></div>
+      <div style="position:absolute;left:80%;right:0;top:26px;height:0;border-top:4px dashed var(--bg)"></div>
+      <div style="position:relative;display:flex;align-items:center;padding-left:32px"><span style="width:22px;height:22px;background:var(--bg);border:2px solid var(--ink)"></span></div>
+      <div style="position:relative;display:flex;align-items:center;padding-left:32px"><span style="width:22px;height:22px;background:var(--bg);border:2px solid var(--ink)"></span></div>
+      <div style="position:relative;display:flex;align-items:center;padding-left:32px"><span style="width:22px;height:22px;background:var(--acc);border:2px solid var(--acc)"></span></div>
+      <div style="position:relative;display:flex;align-items:center;padding-left:32px"><span style="width:22px;height:22px;background:var(--bg);border:2px solid var(--ink)"></span></div>
+      <div style="position:relative;display:flex;align-items:center;padding-left:32px"><span style="width:22px;height:22px;background:var(--fill);border:2px dashed var(--ink)"></span></div>
+    </div>
+    <div style="padding:20px 32px 28px;display:flex;flex-direction:column;gap:14px;border:var(--hair);border-right:0;background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--m);font-size:30px;color:var(--acc)">1936</div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px;line-height:1.15">Машина Поста</h3>
+      <p style="margin:0;font-size:23px;line-height:1.4;color:var(--mut)">Пронумеровані команди й переходи «до команди j» (лекція 3)</p>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Одиниця · команда</div><div style="font-family:var(--m);font-size:24px;background:var(--bg2);padding:12px 16px">i. ? j₁; j₂</div></div>
+    </div>
+    <div style="padding:20px 32px 28px;display:flex;flex-direction:column;gap:14px;border:var(--hair);border-right:0">
+      <div style="font-family:var(--m);font-size:30px;color:var(--acc)">1950–60-ті</div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px;line-height:1.15">Неструктуровані мови</h3>
+      <p style="margin:0;font-size:23px;line-height:1.4;color:var(--mut)">Асемблер, ранні Fortran і BASIC. Логіка та сама — <b style="font-weight:600;color:var(--ink)">goto</b> і номери рядків</p>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Одиниця · перехід</div><div style="font-family:var(--m);font-size:24px;background:var(--bg2);padding:12px 16px">10 IF X&gt;0 GOTO 40</div></div>
+    </div>
+    <div style="padding:20px 32px 28px;display:flex;flex-direction:column;gap:14px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--m);font-size:30px;color:var(--acc)">1970-ті</div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px;line-height:1.15">Структурне й процедурне</h3>
+      <p style="margin:0;font-size:23px;line-height:1.4;color:var(--mut)">C, Pascal. Переходи сховані в цикли, розгалуження й функції — <b style="font-weight:600;color:var(--acc)">тема сьогодні</b></p>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Одиниця · процедура</div><div style="font-family:var(--m);font-size:24px;background:var(--bg2);padding:12px 16px">while (b != 0) {…}</div></div>
+    </div>
+    <div style="padding:20px 32px 28px;display:flex;flex-direction:column;gap:14px;border:var(--hair);border-left:0;border-right:0">
+      <div style="font-family:var(--m);font-size:30px;color:var(--acc)">1980–2000-ні</div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px;line-height:1.15">Об'єктне</h3>
+      <p style="margin:0;font-size:23px;line-height:1.4;color:var(--mut)">C++ (C + класи), Java, C#. Дані й дії над ними — в одному об'єкті</p>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Одиниця · об'єкт</div><div style="font-family:var(--m);font-size:24px;background:var(--bg2);padding:12px 16px">acc.withdraw(sum)</div></div>
+    </div>
+    <div style="padding:20px 32px 28px;display:flex;flex-direction:column;gap:14px;border:2px dashed var(--ln)">
+      <div style="font-family:var(--m);font-size:30px;color:var(--acc)">2020-ті</div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px;line-height:1.15">З ШІ — <span style="color:var(--mut)">формується</span></h3>
+      <p style="margin:0;font-size:23px;line-height:1.4;color:var(--mut)">Задачу описують природною мовою, код генерує модель. Перевіряє — людина</p>
+      <div style="margin-top:auto;display:flex;flex-direction:column;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Одиниця · намір</div><div style="font-family:var(--m);font-size:24px;background:var(--fill);color:var(--acc-ink);padding:12px 16px">«знайди НСД a і b»</div></div>
+    </div>
+  </div>
+  <div style="padding:22px 32px;font-size:27px;line-height:1.35;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">Нові рівні не скасовують старі: <span style="font-family:var(--m);color:var(--acc);font-weight:600">while</span> компілюється в ті самі переходи <span style="font-family:var(--m);color:var(--acc);font-weight:600">jmp</span>, а згенерований код перевіряємо через ті самі три структури.</div>
+</section>
+
+<section data-label="Структурне програмування" data-screen-label="03" data-speaker-notes="Історичний контекст. Спагеті-код: щоб зрозуміти, як програма потрапила в певне місце, треба відстежити всі стрибки. Два результати змінили підхід." style="height:100%;display:flex;flex-direction:column;gap:32px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Структурне програмування</span><span style="display:var(--hdr,inline);color:var(--mut)">02</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Від «спагеті-коду» до трьох структур</h2>
+  <p style="margin:0;font-size:30px;line-height:1.35;max-width:1560px">У 1960-х програми писали з безліччю переходів <span style="font-family:var(--m);color:var(--acc);font-weight:600">goto</span>. Такий код важко читати й перевіряти: доводилося відстежувати всі стрибки.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:36px 40px;display:flex;flex-direction:column;gap:18px">
+      <div style="font-family:var(--m);font-size:44px;color:var(--acc)">1966</div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:38px">Теорема Бьома–Якопіні</h3>
+      <p style="margin:0;font-size:27px;line-height:1.42;color:var(--mut)">К. Бьом і Дж. Якопіні: будь-який алгоритм, заданий схемою з переходами, можна перебудувати так, щоб він використовував лише <b style="font-weight:600;color:var(--ink)">слідування, розгалуження й цикл</b>.</p>
+    </div>
+    <div style="background:var(--bg);padding:36px 40px;display:flex;flex-direction:column;gap:18px">
+      <div style="font-family:var(--m);font-size:44px;color:var(--acc)">1968</div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:38px">«Go To Statement Considered Harmful»</h3>
+      <p style="margin:0;font-size:27px;line-height:1.42;color:var(--mut)">Стаття Е. Дейкстри переконала програмістів: без <span style="font-family:var(--m);color:var(--ink)">goto</span> програми зрозуміліші, а довести їхню правильність простіше.</p>
+    </div>
+  </div>
+  <div style="padding:24px 34px;font-size:27px;line-height:1.35;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">Ці ідеї — основа <b style="font-weight:600;color:var(--acc)">структурного програмування</b>, яке визначило вигляд сучасних мов, зокрема C++.</div>
+</section>
+
+<section data-label="Один вхід, один вихід" data-screen-label="04" data-speaker-notes="Рис. 1 з конспекту. Головна властивість: один вхід і один вихід. Тому будь-який прямокутник «дія» можна замінити цілою структурою — вкладеність будь-якої глибини. Так будуються й структурограми з лекції 8." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Базові структури</span><span style="display:var(--hdr,inline);color:var(--mut)">03</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Один вхід — один вихід</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Тому будь-яку дію всередині структури можна <b style="font-weight:600;color:var(--ink)">замінити іншою структурою</b> — вкладеність будь-якої глибини без втрати зрозумілості.</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:24px 28px;display:flex;flex-direction:column;gap:14px;min-height:0">
+      <div style="display:flex;gap:16px;align-items:baseline"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">1</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Слідування</h3></div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 320 340" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M160 0V30"></path>
+          <rect x="90" y="30" width="140" height="60"></rect><text x="160" y="68" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">дія 1</text>
+          <path d="M160 90V140"></path>
+          <rect x="90" y="140" width="140" height="60"></rect><text x="160" y="178" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">дія 2</text>
+          <path d="M160 200V250"></path>
+          <rect x="90" y="250" width="140" height="60"></rect><text x="160" y="288" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">дія 3</text>
+          <path d="M160 310V340"></path>
+        </svg>
+      </div>
+      <p style="margin:0;font-size:24px;line-height:1.38;color:var(--mut)">Дії одна за одною</p>
+    </div>
+    <div style="background:var(--bg);padding:24px 28px;display:flex;flex-direction:column;gap:14px;min-height:0">
+      <div style="display:flex;gap:16px;align-items:baseline"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">2</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Розгалуження</h3></div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 320 340" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M160 0V30"></path>
+          <path d="M160 30L240 80L160 130L80 80Z"></path><text x="160" y="89" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">умова</text>
+          <path d="M80 80H50V170"></path><text x="56" y="66" text-anchor="middle" font-size="20" fill="var(--acc)" stroke="none">так</text>
+          <rect x="5" y="170" width="90" height="56"></rect><text x="50" y="206" text-anchor="middle" font-size="22" fill="currentColor" stroke="none">дія 1</text>
+          <path d="M240 80H270V170"></path><text x="264" y="66" text-anchor="middle" font-size="20" fill="var(--mut)" stroke="none">ні</text>
+          <rect x="225" y="170" width="90" height="56"></rect><text x="270" y="206" text-anchor="middle" font-size="22" fill="currentColor" stroke="none">дія 2</text>
+          <path d="M50 226V280H270V226"></path><path d="M160 280V340"></path>
+        </svg>
+      </div>
+      <p style="margin:0;font-size:24px;line-height:1.38;color:var(--mut)">Одна з гілок за умовою</p>
+    </div>
+    <div style="background:var(--bg);padding:24px 28px;display:flex;flex-direction:column;gap:14px;min-height:0">
+      <div style="display:flex;gap:16px;align-items:baseline"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">3</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Цикл з передумовою</h3></div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 320 340" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M160 0V40"></path>
+          <path d="M160 40L240 90L160 140L80 90Z" stroke="var(--acc)"></path><text x="160" y="99" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">умова</text>
+          <path d="M160 140V190"></path><text x="176" y="172" font-size="20" fill="var(--acc)" stroke="none">так</text>
+          <rect x="100" y="190" width="120" height="56"></rect><text x="160" y="226" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">тіло</text>
+          <path d="M160 246V276H40V20H156"></path><path d="M146 13L160 20L146 27Z" fill="currentColor"></path>
+          <path d="M240 90H290V340"></path><text x="262" y="78" text-anchor="middle" font-size="20" fill="var(--mut)" stroke="none">ні</text>
+        </svg>
+      </div>
+      <p style="margin:0;font-size:24px;line-height:1.38;color:var(--mut)">Перевірка <b style="font-weight:600;color:var(--ink)">до</b> тіла</p>
+    </div>
+    <div style="background:var(--bg);padding:24px 28px;display:flex;flex-direction:column;gap:14px;min-height:0">
+      <div style="display:flex;gap:16px;align-items:baseline"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">4</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Цикл з післяумовою</h3></div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 320 340" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M160 0V50"></path>
+          <rect x="100" y="50" width="120" height="56"></rect><text x="160" y="86" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">тіло</text>
+          <path d="M160 106V150"></path>
+          <path d="M160 150L240 200L160 250L80 200Z" stroke="var(--acc)"></path><text x="160" y="209" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">умова</text>
+          <path d="M80 200H40V24H156"></path><path d="M146 17L160 24L146 31Z" fill="currentColor"></path><text x="58" y="188" text-anchor="middle" font-size="20" fill="var(--acc)" stroke="none">так</text>
+          <path d="M160 250V340"></path><text x="176" y="282" font-size="20" fill="var(--mut)" stroke="none">ні</text>
+        </svg>
+      </div>
+      <p style="margin:0;font-size:24px;line-height:1.38;color:var(--mut)">Перевірка <b style="font-weight:600;color:var(--ink)">після</b> тіла</p>
+    </div>
+  </div>
+</section>
+
+<section data-label="Слідування" data-screen-label="05" data-speaker-notes="Найпростіша структура, але саме вона визначає, що результат однієї дії може використати наступна. Спитати: що буде, якщо рядок 3 поставити перед рядком 1?" style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Слідування</span><span style="display:var(--hdr,inline);color:var(--mut)">04</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Слідування: порядок має значення</h2>
+  <p style="margin:0;font-size:28px;line-height:1.4;max-width:1560px">Дії виконуються одна за одною в порядку запису. Результат однієї дії <b style="font-weight:600;color:var(--acc)">може використовувати наступна</b>.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1.5fr 1fr;gap:44px;min-height:0">
+    <div style="padding:28px 34px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++ · середнє двох чисел</div>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:30px;line-height:1.7;background:var(--bg2);padding:20px 30px;white-space:pre"><span style="color:var(--acc);font-weight:600">double</span> a, b;
+cin &gt;&gt; a &gt;&gt; b;               <span style="color:var(--mut)">// 1. введення
+</span><span style="color:var(--acc);font-weight:600">double</span> sum = a + b;          <span style="color:var(--mut)">// 2. обчислення
+</span><span style="color:var(--acc);font-weight:600">double</span> average = sum / 2;    <span style="color:var(--mut)">// 3. використовує 2</span>
+cout &lt;&lt; average &lt;&lt; '\n';     <span style="color:var(--mut)">// 4. виведення</span></pre>
+    </div>
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px;color:var(--acc)">Ланцюжок залежностей</h3><p style="margin:0;font-size:25px;line-height:1.4"><span style="font-family:var(--m)">average</span> залежить від <span style="font-family:var(--m)">sum</span>, а <span style="font-family:var(--m)">sum</span> — від введених <span style="font-family:var(--m)">a</span> і <span style="font-family:var(--m)">b</span></p></div>
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Часта помилка</h3><p style="margin:0;font-size:25px;line-height:1.4">Обчислити середнє <span style="background:var(--fill);color:var(--acc-ink);padding:0 8px">до того, як введено дані</span></p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Розгалуження · розділ" data-screen-label="06" data-speaker-notes="Розділ-заставка. Чотири різновиди розгалуження, від найпростішого до багатоальтернативного." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:40px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Частина 1</div><span style="display:var(--hdr,inline);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;color:var(--mut)">05</span></div>
+  <div>
+    <div style="font-family:var(--m);font-size:40px;color:var(--acc)">if · else · switch</div>
+    <h2 style="margin:18px 0 0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Розгалуження</h2>
+    <p style="margin:26px 0 0;font-size:34px;line-height:1.35;color:var(--mut);max-width:1300px">Обирає одну з кількох гілок залежно від умови</p>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;gap:8px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">1</span><span style="font-family:var(--h);font-weight:700;font-size:34px">Повне</span></div>
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;gap:8px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">2</span><span style="font-family:var(--h);font-weight:700;font-size:34px">Неповне</span></div>
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;gap:8px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">3</span><span style="font-family:var(--h);font-weight:700;font-size:34px">Ланцюжок умов</span></div>
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;gap:8px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">4</span><span style="font-family:var(--h);font-weight:700;font-size:34px">Вибір</span></div>
+  </div>
+</section>
+
+<section data-label="Повне й неповне" data-screen-label="07" data-speaker-notes="Повне — дві гілки, неповне — лише «так». У неповному на схемі гілка «ні» йде прямо до точки злиття." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Розгалуження</span><span style="display:var(--hdr,inline);color:var(--mut)">06</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Повне й неповне розгалуження</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.25fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:16px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Повне — дві гілки</h3><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Корінь числа</span></div>
+      <div style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Псевдокод</div>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:27px;line-height:1.55;background:var(--bg2);padding:18px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">якщо</span> x ≥ 0 <span style="color:var(--acc);font-weight:600">то</span>
+    y ← √x
+<span style="color:var(--acc);font-weight:600">інакше</span>
+    <span style="color:var(--acc);font-weight:600">вивести</span> «корінь не визначено»
+<span style="color:var(--acc);font-weight:600">кінець якщо</span></pre>
+      <div style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++</div>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:27px;line-height:1.55;background:var(--bg2);padding:18px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">if</span> (x &gt;= 0) {
+    y = sqrt(x);
+} <span style="color:var(--acc);font-weight:600">else</span> {
+    cout &lt;&lt; "корінь не визначено\n";
+}</pre>
+    </div>
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:16px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Неповне — лише «так»</h3><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Модуль</span></div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 380 320" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M130 0V30"></path>
+          <path d="M130 30L215 82L130 134L45 82Z"></path><text x="130" y="91" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">x &lt; 0</text>
+          <path d="M215 82H300V140"></path><text x="250" y="68" text-anchor="middle" font-size="22" fill="var(--acc)" stroke="none">так</text>
+          <rect x="225" y="140" width="150" height="60"></rect><text x="300" y="179" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">x ← −x</text>
+          <path d="M300 200V250H136"></path><path d="M146 243L132 250L146 257Z" fill="currentColor"></path>
+          <path d="M130 134V320"></path><text x="148" y="172" font-size="22" fill="var(--mut)" stroke="none">ні</text>
+        </svg>
+      </div>
+      <pre style="margin:0;font-family:var(--m);font-size:27px;line-height:1.55;background:var(--bg2);padding:18px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">if</span> (x &lt; 0) {
+    x = -x;    <span style="color:var(--mut)">// модуль числа</span>
+}</pre>
+      <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Умова хибна — нічого не відбувається</p>
+    </div>
+  </div>
+</section>
+
+<section data-label="Ланцюжок умов" data-screen-label="08" data-speaker-notes="Гілка може містити інше розгалуження. Ланцюжок else if — найзручніший запис для кількох варіантів. Таблиця праворуч: ті самі умови в іншому порядку дають хибний результат." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Розгалуження</span><span style="display:var(--hdr,inline);color:var(--mut)">07</span></div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Вкладені розгалуження й ланцюжки</h2>
+    <p style="margin:0;font-size:27px;line-height:1.4;color:var(--mut)">Переведення бала зі 100-бальної шкали в оцінку: <span style="font-family:var(--m);color:var(--ink)">if … else if … else</span></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="padding:28px 34px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++</div>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:30px;line-height:1.7;background:var(--bg2);padding:20px 30px;white-space:pre"><span style="color:var(--acc);font-weight:600">int</span> grade;
+<span style="color:var(--acc);font-weight:600">if</span> (score &gt;= 90)      grade = 5;
+<span style="color:var(--acc);font-weight:600">else if</span> (score &gt;= 75) grade = 4;
+<span style="color:var(--acc);font-weight:600">else if</span> (score &gt;= 60) grade = 3;
+<span style="color:var(--acc);font-weight:600">else</span>                  grade = 2;</pre>
+      <p style="margin:0;font-size:25px;line-height:1.4">Умови перевіряються згори донизу — <b style="font-weight:600;color:var(--acc)">спрацьовує перша істинна</b>.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:20px;min-height:0">
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;grid-auto-rows:1fr;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-size:27px">
+        <div style="padding:12px 24px;display:flex;align-items:center;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Бал</div>
+        <div style="padding:12px 24px;display:flex;align-items:center;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">90 → 75 → 60</div>
+        <div style="padding:12px 24px;display:flex;align-items:center;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">60 першою</div>
+        <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">95</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);color:var(--acc);font-weight:600">5</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)"><span style="background:var(--fill);color:var(--acc-ink);padding:0 10px">3</span></div>
+        <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">80</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);color:var(--acc);font-weight:600">4</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)"><span style="background:var(--fill);color:var(--acc-ink);padding:0 10px">3</span></div>
+        <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">65</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);color:var(--acc);font-weight:600">3</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">3</div>
+        <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">40</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);color:var(--acc);font-weight:600">2</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">2</div>
+      </div>
+      <div style="padding:22px 30px;font-size:26px;line-height:1.38;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">Поставте <span style="font-family:var(--m)">score &gt;= 60</span> першою — і всі з балом від 60 отримають трійку. <b style="font-weight:600;color:var(--acc)">Порядок умов важливий.</b></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Вибір" data-screen-label="09" data-speaker-notes="switch — коли гілка визначається значенням цілого виразу. Наголосити на break: провалювання іноді навмисне (дні 6 і 7), але частіше — помилка." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Розгалуження</span><span style="display:var(--hdr,inline);color:var(--mut)">08</span></div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Вибір: оператор switch</h2>
+    <p style="margin:0;font-size:27px;line-height:1.4;color:var(--mut)">Гілка визначається <b style="font-weight:600;color:var(--ink)">значенням цілого виразу</b>, а не логічною умовою</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:44px;min-height:0">
+    <div style="padding:28px 34px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++ · день тижня</div>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:30px;line-height:1.6;background:var(--bg2);padding:20px 30px;white-space:pre"><span style="color:var(--acc);font-weight:600">switch</span> (day) {
+    <span style="color:var(--acc);font-weight:600">case</span> 6:
+    <span style="color:var(--acc);font-weight:600">case</span> 7:
+        cout &lt;&lt; "вихідний\n";
+        <span style="background:var(--fill);color:var(--acc-ink);padding:0 8px;font-weight:600">break;</span>
+    <span style="color:var(--acc);font-weight:600">default</span>:
+        cout &lt;&lt; "робочий день\n";
+}</pre>
+    </div>
+    <div style="display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px;color:var(--acc)">break завершує гілку</h3><p style="margin:0;font-size:25px;line-height:1.4">Без нього виконання <b style="font-weight:600">«провалиться»</b> в наступну гілку</p></div>
+      <div style="background:var(--bg);padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Навмисне провалювання</h3><p style="margin:0;font-size:25px;line-height:1.4"><span style="font-family:var(--m)">case 6</span> порожній і падає в <span style="font-family:var(--m)">case 7</span>: обидва дні — вихідні</p></div>
+      <div style="background:var(--bg2);padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Але частіше — помилка</h3><p style="margin:0;font-size:25px;line-height:1.4">Забутий <span style="font-family:var(--m)">break</span> — у списку типових помилок</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Цикли · розділ" data-screen-label="10" data-speaker-notes="Розділ-заставка. Тіло циклу, ітерація. Головна вимога: дії в тілі мають наближати виконання умови завершення." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:40px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Частина 2</div><span style="display:var(--hdr,inline);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;color:var(--mut)">09</span></div>
+  <div>
+    <div style="font-family:var(--m);font-size:40px;color:var(--acc)">while · do … while · for</div>
+    <h2 style="margin:18px 0 0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Цикли</h2>
+    <p style="margin:26px 0 0;font-size:34px;line-height:1.35;color:var(--mut);max-width:1400px">Цикл повторює <b style="font-weight:600;color:var(--ink)">тіло</b>; кожне повторення — <b style="font-weight:600;color:var(--ink)">ітерація</b>. Щоб цикл не був нескінченним, тіло має наближати умову завершення.</p>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;gap:8px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">≥ 0 разів</span><span style="font-family:var(--h);font-weight:700;font-size:34px">З передумовою</span></div>
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;gap:8px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">≥ 1 раз</span><span style="font-family:var(--h);font-weight:700;font-size:34px">З післяумовою</span></div>
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;gap:8px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">n разів</span><span style="font-family:var(--h);font-weight:700;font-size:34px">З параметром</span></div>
+  </div>
+</section>
+
+<section data-label="Передумова і післяумова" data-screen-label="11" data-speaker-notes="Ключова різниця — коли перевіряють умову. Ліворуч: якщо n ≤ 1, тіло не виконається, p = 1 — і це правильно. Праворуч: перевірка введення — тіло завжди виконується хоча б раз. Попередити про repeat…until у Pascal." style="height:100%;display:flex;flex-direction:column;gap:26px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Цикли</span><span style="display:var(--hdr,inline);color:var(--mut)">10</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Передумова чи післяумова</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:16px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">while — умова <span style="color:var(--acc)">до</span> тіла</h3><span style="font-family:var(--m);font-size:24px;color:var(--mut)">≥ 0 разів</span></div>
+      <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Найменший степінь двійки, не менший за <span style="font-family:var(--m);color:var(--ink)">n</span></p>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:30px;line-height:1.6;background:var(--bg2);padding:20px 28px;white-space:pre"><span style="color:var(--acc);font-weight:600">long long</span> p = 1;
+<span style="color:var(--acc);font-weight:600">while</span> (p &lt; n) {
+    p *= 2;
+}</pre>
+      <p style="margin:0;font-size:25px;line-height:1.4">Якщо <span style="font-family:var(--m)">n ≤ 1</span>, тіло не виконається жодного разу, і <span style="font-family:var(--m)">p = 1</span> — саме так і має бути.</p>
+    </div>
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:16px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">do … while — умова <span style="color:var(--acc)">після</span></h3><span style="font-family:var(--m);font-size:24px;color:var(--mut)">≥ 1 раз</span></div>
+      <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Класичне застосування — перевірка введення</p>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:26px;line-height:1.6;background:var(--bg2);padding:20px 28px;white-space:pre"><span style="color:var(--acc);font-weight:600">int</span> month;
+<span style="color:var(--acc);font-weight:600">do</span> {
+    cout &lt;&lt; "Номер місяця (1-12): ";
+    cin &gt;&gt; month;
+} <span style="color:var(--acc);font-weight:600">while</span> (month &lt; 1 || month &gt; 12);</pre>
+      <p style="margin:0;font-size:25px;line-height:1.4">Запитати треба хоча б раз — тому умову перевіряємо після введення.</p>
+    </div>
+  </div>
+  <div style="padding:22px 32px;display:flex;gap:40px;align-items:center;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);flex:none">Увага</span>
+    <span style="font-size:26px;line-height:1.38">C++ <span style="font-family:var(--m)">do … while</span> триває, <b style="font-weight:600">поки</b> умова істинна. Pascal <span style="font-family:var(--m)">repeat … until</span> — навпаки: умова <b style="font-weight:600">завершення</b>.</span>
+  </div>
+</section>
+
+<section data-label="Цикл з параметром" data-screen-label="12" data-speaker-notes="for — коли кількість повторень відома наперед. Показати, що це той самий while: три частини заголовка розкладаються на три місця в коді. Контрольне запитання 7." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Цикли</span><span style="display:var(--hdr,inline);color:var(--mut)">11</span></div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Цикл з параметром</h2>
+    <p style="margin:0;font-size:27px;line-height:1.4;color:var(--mut)">Кількість повторень відома наперед. Гармонічна сума <span style="font-family:var(--m);color:var(--ink)">1 + 1/2 + … + 1/n</span></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 90px 1fr;align-items:stretch;min-height:0">
+    <div style="padding:28px 34px;display:flex;flex-direction:column;gap:18px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">for</div>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:28px;line-height:1.7;background:var(--bg2);padding:20px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">double</span> sum = 0;
+<span style="color:var(--acc);font-weight:600">for</span> (<span style="border-bottom:3px solid var(--acc)">int i = 1</span>; <span style="background:var(--fill);color:var(--acc-ink);padding:0 4px">i &lt;= n</span>; <span style="border-bottom:3px dashed var(--ink)">i++</span>) {
+    sum += 1.0 / i;
+}</pre>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;font-family:var(--m);font-size:44px;color:var(--acc)">=</div>
+    <div style="padding:28px 34px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">while</div>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:28px;line-height:1.7;background:var(--bg2);padding:20px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">double</span> sum = 0;
+<span style="border-bottom:3px solid var(--acc)">int i = 1</span>;
+<span style="color:var(--acc);font-weight:600">while</span> (<span style="background:var(--fill);color:var(--acc-ink);padding:0 4px">i &lt;= n</span>) {
+    sum += 1.0 / i;
+    <span style="border-bottom:3px dashed var(--ink)">i++</span>;
+}</pre>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:20px 30px;display:flex;gap:18px;align-items:center;font-size:25px"><span style="width:44px;height:0;border-bottom:3px solid var(--acc);flex:none"></span>ініціалізація — один раз</div>
+    <div style="background:var(--bg);padding:20px 30px;display:flex;gap:18px;align-items:center;font-size:25px"><span style="width:44px;height:22px;background:var(--fill);flex:none"></span>умова — перед кожною ітерацією</div>
+    <div style="background:var(--bg);padding:20px 30px;display:flex;gap:18px;align-items:center;font-size:25px"><span style="width:44px;height:0;border-bottom:3px dashed var(--ink);flex:none"></span>зміна лічильника — після тіла</div>
+  </div>
+</section>
+
+<section data-label="До досягнення точності" data-screen-label="13" data-speaker-notes="Прообраз чисельних методів (лекції 16–20). Кількість ітерацій заздалегідь невідома. Трасування праворуч — для ε = 0,001: на k = 7 член 1/7! ≈ 0,0002 < ε, цикл зупиняється." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Цикли</span><span style="display:var(--hdr,inline);color:var(--mut)">12</span></div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Цикл «до досягнення точності»</h2>
+    <p style="margin:0;font-size:27px;line-height:1.4;color:var(--mut)">Сума ряду <span style="font-family:var(--m);color:var(--ink)">e = Σ 1/k!</span>, <span style="font-family:var(--m);color:var(--ink)">k = 0 … ∞</span>, з точністю <span style="font-family:var(--m);color:var(--ink)">ε</span></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:44px;min-height:0">
+    <div style="padding:28px 34px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++</div>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:28px;line-height:1.65;background:var(--bg2);padding:20px 28px;white-space:pre"><span style="color:var(--acc);font-weight:600">double</span> term = 1.0, e = 0.0;
+<span style="color:var(--acc);font-weight:600">int</span> k = 0;
+<span style="color:var(--acc);font-weight:600">while</span> (term &gt;= eps) {
+    e += term;
+    k++;
+    term /= k;   <span style="color:var(--mut)">// 1/k! = 1/(k−1)! / k</span>
+}</pre>
+      <p style="margin:0;font-size:25px;line-height:1.4">Кількість ітерацій <b style="font-weight:600;color:var(--acc)">заздалегідь невідома</b> — вона залежить від <span style="font-family:var(--m)">ε</span>. Новий член рахуємо з попереднього, без факторіала.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:.6fr 1fr 1fr;grid-auto-rows:1fr;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-family:var(--m);font-size:26px">
+      <div style="padding:10px 22px;display:flex;align-items:center;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">k</div>
+      <div style="padding:10px 22px;display:flex;align-items:center;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">term</div>
+      <div style="padding:10px 22px;display:flex;align-items:center;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">e після</div>
+      <div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">0</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">1</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">1</div>
+      <div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">1</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">1</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">2</div>
+      <div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">2</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">0.5</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">2.5</div>
+      <div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">3</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">0.16667</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">2.66667</div>
+      <div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">4</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">0.04167</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">2.70833</div>
+      <div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">5</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">0.00833</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">2.71667</div>
+      <div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">6</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair)">0.00139</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair);color:var(--acc);font-weight:600">2.71806</div>
+      <div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair);background:var(--fill);color:var(--acc-ink)">7</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair);background:var(--fill);color:var(--acc-ink)">0.00020</div><div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair);background:var(--fill);color:var(--acc-ink);font-family:var(--b);font-size:24px">&lt; ε — стоп</div>
+      <div style="grid-column:1 / -1;padding:8px 22px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--b);font-size:24px;color:var(--mut)">ε = 0.001</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Вкладені цикли" data-screen-label="14" data-speaker-notes="Внутрішній цикл виконується повністю на кожній ітерації зовнішнього. Підсвічений рядок — одна ітерація зовнішнього циклу (i = 3). Кількості перемножуються — знадобиться в лекції 13 про складність." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Цикли</span><span style="display:var(--hdr,inline);color:var(--mut)">13</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Вкладені цикли: таблиця множення</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:28px 34px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++</div>
+        <pre style="margin:0;font-family:var(--m);font-size:27px;line-height:1.6;background:var(--bg2);padding:20px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> i = 1; i &lt;= 9; i++) {
+    <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> j = 1; j &lt;= 9; j++) {
+        cout &lt;&lt; i * j &lt;&lt; '\t';
+    }
+    cout &lt;&lt; '\n';
+}</pre>
+      </div>
+      <div style="flex:1;padding:26px 34px;display:grid;grid-template-columns:auto 1fr;gap:36px;align-items:center;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--m);font-size:56px;white-space:nowrap">9 · 9 = <span style="color:var(--acc)">81</span></div>
+        <p style="margin:0;font-size:26px;line-height:1.4">Кількість повторень вкладених циклів <b style="font-weight:600;color:var(--acc)">перемножується</b> — основа оцінки швидкості алгоритмів (лекція 13)</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m);font-size:26px;min-height:0">
+      <sc-for list="{{ table }}" as="c" hint-placeholder-count="81">
+        <div style="display:flex;align-items:center;justify-content:center;border-right:var(--hair);border-bottom:var(--hair);background:{{ c.bg }};color:{{ c.fg }}">{{ c.v }}</div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<section data-label="break і continue" data-screen-label="15" data-speaker-notes="break і continue не порушують структурності, якщо використовувати обережно: вихід із циклу все одно один. Перевірка на простоту: шукаємо дільник до √n, знайшли — далі сенсу немає." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Цикли</span><span style="display:var(--hdr,inline);color:var(--mut)">14</span></div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Дострокове завершення</h2>
+    <p style="margin:0;font-size:27px;line-height:1.4;color:var(--mut)">Перевірка числа <span style="font-family:var(--m);color:var(--ink)">n</span> на простоту</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.3fr 1fr;gap:44px;min-height:0">
+    <div style="padding:28px 34px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++</div>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:28px;line-height:1.65;background:var(--bg2);padding:20px 28px;white-space:pre"><span style="color:var(--acc);font-weight:600">bool</span> isPrime = n &gt;= 2;
+<span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> d = 2; d * d &lt;= n; d++) {
+    <span style="color:var(--acc);font-weight:600">if</span> (n % d == 0) {
+        isPrime = <span style="color:var(--acc);font-weight:600">false</span>;
+        <span style="background:var(--fill);color:var(--acc-ink);padding:0 8px;font-weight:600">break;</span>  <span style="color:var(--mut)">// дільник знайдено</span>
+    }
+}</pre>
+    </div>
+    <div style="display:grid;grid-template-rows:1fr 1fr auto;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--m);font-weight:600;font-size:34px;color:var(--acc)">break</h3><p style="margin:0;font-size:25px;line-height:1.4">Вийти з циклу — до першої дії після нього</p></div>
+      <div style="background:var(--bg);padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--m);font-weight:600;font-size:34px;color:var(--acc)">continue</h3><p style="margin:0;font-size:25px;line-height:1.4">Пропустити решту тіла й перейти до наступної ітерації</p></div>
+      <div style="background:var(--bg2);padding:22px 32px;font-size:25px;line-height:1.4">Структурність не порушено: <b style="font-weight:600">вихід із циклу все одно один</b></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Комбінування структур" data-screen-label="16" data-speaker-notes="Складні алгоритми — вкладені базові структури. Ліворуч псевдокод з позначками, праворуч та сама задача структурограмою з лекції 8: цикл містить слідування, у ньому — розгалуження." style="height:100%;display:flex;flex-direction:column;gap:28px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Комбінування</span><span style="display:var(--hdr,inline);color:var(--mut)">15</span></div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Комбінування структур</h2>
+    <p style="margin:0;font-size:27px;line-height:1.4;color:var(--mut)">У масиві з <span style="font-family:var(--m);color:var(--ink)">n</span> оцінок порахувати відмінників (оцінка 5) і знайти середній бал</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.25fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-columns:1fr auto;grid-auto-rows:1fr;font-family:var(--m);font-size:26px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="padding:6px 28px;display:flex;align-items:center">кількість ← 0</div><div style="padding:6px 24px;display:flex;align-items:center;font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">слідування</div>
+      <div style="padding:6px 28px;display:flex;align-items:center;border-top:var(--hair)">сума ← 0</div><div style="border-top:var(--hair)"></div>
+      <div style="padding:6px 28px;display:flex;align-items:center;border-top:var(--hair);background:var(--bg2)"><span><span style="color:var(--acc);font-weight:600">для</span> i <span style="color:var(--acc);font-weight:600">від</span> 0 <span style="color:var(--acc);font-weight:600">до</span> n − 1 <span style="color:var(--acc);font-weight:600">виконувати</span></span></div><div style="padding:6px 24px;display:flex;align-items:center;border-top:var(--hair);background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">цикл</div>
+      <div style="padding:6px 28px 6px 76px;display:flex;align-items:center;border-top:var(--hair)">сума ← сума + оцінка[i]</div><div style="padding:6px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">у тілі</div>
+      <div style="padding:6px 28px 6px 76px;display:flex;align-items:center;border-top:var(--hair)"><span><span style="color:var(--acc);font-weight:600">якщо</span> оцінка[i] = 5 <span style="color:var(--acc);font-weight:600">то</span></span></div><div style="padding:6px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc-ink);background:var(--fill)">розгалуження</div>
+      <div style="padding:6px 28px 6px 124px;display:flex;align-items:center;border-top:var(--hair)">кількість ← кількість + 1</div><div style="border-top:var(--hair)"></div>
+      <div style="padding:6px 28px 6px 76px;display:flex;align-items:center;border-top:var(--hair)"><span style="color:var(--acc);font-weight:600">кінець якщо</span></div><div style="border-top:var(--hair)"></div>
+      <div style="padding:6px 28px;display:flex;align-items:center;border-top:var(--hair);background:var(--bg2)"><span style="color:var(--acc);font-weight:600">кінець для</span></div><div style="border-top:var(--hair);background:var(--bg2)"></div>
+      <div style="padding:6px 28px;display:flex;align-items:center;border-top:var(--hair)">середній ← сума / n</div><div style="padding:6px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">слідування</div>
+    </div>
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Структурограма</span><span style="font-family:var(--m);font-size:22px;color:var(--mut)">лекція 8</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div style="border:var(--ns);font-family:var(--m);font-size:24px">
+          <div style="padding:12px 18px;border-bottom:var(--ns)">кількість ← 0; сума ← 0</div>
+          <div style="padding:12px 18px;color:var(--acc)">для i від 0 до n − 1</div>
+          <div style="display:flex;border-bottom:var(--ns)">
+            <div style="width:48px;flex:none"></div>
+            <div style="flex:1;border-top:var(--ns);border-left:var(--ns)">
+              <div style="padding:12px 18px;border-bottom:var(--ns)">сума ← сума + оцінка[i]</div>
+              <div style="position:relative;padding:12px 18px 34px;text-align:center;border-bottom:var(--ns)">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;color:var(--ink)" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke" aria-hidden="true"><path d="M0 0L50 100L100 0" vector-effect="non-scaling-stroke"></path></svg>
+                <span style="position:relative">оцінка[i] = 5</span>
+                <span style="position:absolute;left:14px;bottom:6px;font-size:20px;color:var(--acc)">так</span>
+                <span style="position:absolute;right:14px;bottom:6px;font-size:20px;color:var(--mut)">ні</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr">
+                <div style="padding:12px 18px;border-right:var(--ns);background:var(--fill);color:var(--acc-ink)">кількість ← кількість + 1</div>
+                <div style="padding:12px 18px;color:var(--mut);text-align:center">—</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:12px 18px">середній ← сума / n</div>
+        </div>
+      </div>
+      <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Один вхід, один вихід у кожної структури — читаємо згори донизу, перевіряємо частинами.</p>
+    </div>
+  </div>
+</section>
+
+<section data-label="Типові помилки" data-screen-label="17" data-speaker-notes="Пройтися по кожній з прикладом на дошці. Дійсний лічильник — детальніше в лекції 15 про похибки." style="height:100%;display:flex;flex-direction:column;gap:32px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Помилки</span><span style="display:var(--hdr,inline);color:var(--mut)">16</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Типові помилки</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:flex-start"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">01</span><div style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Нескінченний цикл</h3><p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Умова ніколи не стає хибною: забули змінити лічильник або змінюють «не ту» змінну</p></div></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:flex-start"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">02</span><div style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Помилка на одиницю</h3><p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)"><span style="font-family:var(--m);color:var(--ink)">i &lt;= n</span> замість <span style="font-family:var(--m);color:var(--ink)">i &lt; n</span> — вихід за межі масиву; навпаки — пропущений останній елемент</p></div></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:flex-start"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">03</span><div style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Дійсний лічильник</h3><p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)"><span style="font-family:var(--m);color:var(--ink)">for (double x = 0; x != 1; x += 0.1)</span> може не зупинитися. Цілий лічильник або <span style="font-family:var(--m);color:var(--ink)">&lt;</span></p></div></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:flex-start"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">04</span><div style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Пропущені фігурні дужки</h3><p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Без них тіло <span style="font-family:var(--m);color:var(--ink)">if</span> чи <span style="font-family:var(--m);color:var(--ink)">for</span> — лише один наступний оператор</p></div></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:flex-start"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">05</span><div style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px"><span style="font-family:var(--m)">=</span> замість <span style="font-family:var(--m)">==</span></h3><p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)"><span style="font-family:var(--m);color:var(--ink)">if (x = 0)</span> — це присвоювання, а не порівняння</p></div></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:flex-start"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">06</span><div style="display:flex;flex-direction:column;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Забутий <span style="font-family:var(--m)">break</span> у <span style="font-family:var(--m)">switch</span></h3><p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Виконання «провалюється» в наступну гілку</p></div></div>
+  </div>
+</section>
+
+<section data-label="Підсумки" data-screen-label="18" data-speaker-notes="Пройтися по шести пунктах і перейти до запитань." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Підсумки</span><span style="display:var(--hdr,inline);color:var(--mut)">17</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Що забрати з лекції</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">01</span><span style="font-size:26px;line-height:1.35">За теоремою Бьома–Якопіні будь-який алгоритм будується зі слідування, розгалуження й циклу</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">02</span><span style="font-size:26px;line-height:1.35">Один вхід і один вихід — тому структури можна вкладати одну в одну</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">03</span><span style="font-size:26px;line-height:1.35">Розгалуження: повне, неповне, вкладене, багатоальтернативне (<span style="font-family:var(--m)">else if</span>, <span style="font-family:var(--m)">switch</span>)</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">04</span><span style="font-size:26px;line-height:1.35">Передумова — може не виконатися жодного разу; післяумова — принаймні раз; параметр — задану кількість</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">05</span><span style="font-size:26px;line-height:1.35">Кількість повторень вкладених циклів перемножується</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">06</span><span style="font-size:26px;line-height:1.35">Найчастіші помилки: нескінченні цикли, помилки на одиницю, дійсні лічильники, <span style="font-family:var(--m)">=</span> замість <span style="font-family:var(--m)">==</span></span></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:25px;color:var(--mut);padding-top:16px;border-top:var(--hair)">
+    <span>Попередня · Лекція 9. Графічне представлення алгоритмів (ЄСПД)</span>
+    <span style="font-family:var(--h);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Далі · Лекція 11. Прості алгоритми сортування</span>
+  </div>
+</section>
+
+<section data-label="Контрольні запитання" data-screen-label="19" data-speaker-notes="Запитання 11 — розв'язати на дошці трьома способами. Решту — на самостійне опрацювання." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Перевірка</span><span style="display:var(--hdr,inline);color:var(--mut)">18</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Контрольні запитання</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.4fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Теорія</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;font-size:24px;line-height:1.3">
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">1</span><span>Сформулюйте теорему Бьома–Якопіні. Яке її значення?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">2</span><span>Чому базові структури мають один вхід і один вихід? Що це дає?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">3</span><span>Чим повне розгалуження відрізняється від неповного?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">4</span><span>Чому в ланцюжку <span style="font-family:var(--m)">if … else if</span> важливий порядок умов?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">5</span><span>Коли зручний <span style="font-family:var(--m)">switch</span>? Що буде без <span style="font-family:var(--m)">break</span>?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">6</span><span>Передумова чи післяумова: коли доречний кожен цикл?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">7</span><span>Як цикл <span style="font-family:var(--m)">for</span> виражається через <span style="font-family:var(--m)">while</span>?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">8</span><span>Скільки разів виконається тіло вкладених <span style="font-family:var(--m)">for</span> по 10 і 20 повторень?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">9</span><span>Чому небезпечний дійсний лічильник циклу?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">10</span><span>Для чого <span style="font-family:var(--m)">break</span> і <span style="font-family:var(--m)">continue</span>? Чи порушують вони структурність?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">12</span><span>Назвіть типові помилки в циклах і способи їх уникнути</span></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:1.3fr 1fr;gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg2);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">11 · На дошці</div><p style="margin:0;font-size:30px;line-height:1.35">Запишіть схемою, псевдокодом і мовою C++ алгоритм обчислення <span style="font-family:var(--m)">n!</span></p></div>
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Конспект</div><p style="margin:0;font-size:26px;line-height:1.38"><a href="https://kaldra1.github.io/aimo/lectures/10-basic-algorithmic-structures/">Лекція 10 на сайті курсу</a></p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Практика 1/2" data-screen-label="20" data-speaker-notes="Задачі 1–5 на побудову блок-схем за ЄСПД. Зірочки — складність. Під кожною задачею — які структури знадобляться." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Практика</span><span style="display:var(--hdr,inline);color:var(--mut)">19</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Практика: блок-схеми <span style="color:var(--mut);font-weight:700">1/2</span></h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Для кожної задачі побудувати блок-схему за ЄСПД</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="grid-column:span 2;background:var(--bg);padding:24px 30px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">1</span><span style="font-size:26px;letter-spacing:.1em;color:var(--acc)">★<span style="color:var(--ln)">☆☆</span></span></div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Таймер матчу</h3>
+      <p style="margin:0;font-size:24px;line-height:1.4">Ввести кількість секунд від початку матчу. Вивести час у форматі <span style="font-family:var(--m)">хвилини:секунди</span>, наприклад <span style="font-family:var(--m)">135 → 2:15</span>.</p>
+      <div style="margin-top:auto;font-size:24px;color:var(--mut)"><span style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase">Структури · </span>слідування</div>
+    </div>
+    <div style="grid-column:span 2;background:var(--bg);padding:24px 30px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">2</span><span style="font-size:26px;letter-spacing:.1em;color:var(--acc)">★<span style="color:var(--ln)">☆☆</span></span></div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Знижка в магазині</h3>
+      <p style="margin:0;font-size:24px;line-height:1.4">Ввести суму замовлення. Якщо сума більша за 1000 грн, застосувати знижку 10%. Вивести суму до сплати.</p>
+      <div style="margin-top:auto;font-size:24px;color:var(--mut)"><span style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase">Структури · </span>слідування, розгалуження</div>
+    </div>
+    <div style="grid-column:span 2;background:var(--bg);padding:24px 30px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">3</span><span style="font-size:26px;letter-spacing:.1em;color:var(--acc)">★★<span style="color:var(--ln)">☆</span></span></div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Розрахунок шкоди</h3>
+      <p style="margin:0;font-size:24px;line-height:1.4">Ввести атаку гравця, броню ворога й ознаку критичного удару. Шкода дорівнює атаці мінус броня, але не менша за 1. Якщо удар критичний — шкода подвоюється.</p>
+      <div style="margin-top:auto;font-size:24px;color:var(--mut)"><span style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase">Структури · </span>вкладене розгалуження</div>
+    </div>
+    <div style="grid-column:span 3;background:var(--bg);padding:24px 30px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">4</span><span style="font-size:26px;letter-spacing:.1em;color:var(--acc)">★★<span style="color:var(--ln)">☆</span></span></div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Кошик покупця</h3>
+      <p style="margin:0;font-size:24px;line-height:1.4">Ввести кількість товарів <span style="font-family:var(--m)">n</span> і ціну кожного. Обчислити загальну суму. Якщо товарів більше трьох — застосувати знижку 5%.</p>
+      <div style="margin-top:auto;font-size:24px;color:var(--mut)"><span style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase">Структури · </span>цикл з параметром, розгалуження</div>
+    </div>
+    <div style="grid-column:span 3;background:var(--bg);padding:24px 30px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">5</span><span style="font-size:26px;letter-spacing:.1em;color:var(--acc)">★★<span style="color:var(--ln)">☆</span></span></div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Регенерація здоров'я</h3>
+      <p style="margin:0;font-size:24px;line-height:1.4">Задано поточне й максимальне HP. Щосекунди HP зростає на 5, доки не досягне максимуму; перевищувати максимум не можна. Визначити, скільки секунд триватиме регенерація для <span style="font-family:var(--m)">HP = 37, max = 60</span>.</p>
+      <div style="margin-top:auto;font-size:24px;color:var(--mut)"><span style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase">Структури · </span>цикл з передумовою</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Практика 2/2" data-screen-label="21" data-speaker-notes="Задачі підвищеної складності. У задачі 6 — дві окремі блок-схеми й трасування для a = 48, b = 18. У задачі 7 цикл має дві умови виходу: вгадав або вичерпано 7 спроб." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 10 · Практика</span><span style="display:var(--hdr,inline);color:var(--mut)">20</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Практика: блок-схеми <span style="color:var(--mut);font-weight:700">2/2</span></h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Для кожної задачі побудувати блок-схему за ЄСПД</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="padding:34px 40px;display:flex;flex-direction:column;gap:20px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--m);font-size:40px;color:var(--acc)">6</span><span style="font-size:32px;letter-spacing:.1em;color:var(--acc)">★★★</span></div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:40px">НСД і НСК</h3>
+      <p style="margin:0;font-size:27px;line-height:1.45">Оформити алгоритм Евкліда окремою процедурою <span style="font-family:var(--m)">НСД(a, b)</span> зі своєю блок-схемою. Основний алгоритм обчислює <span style="font-family:var(--m)">НСК = a · b / НСД(a, b)</span>, виклик процедури позначити блоком <b style="font-weight:600">«визначений процес»</b>.</p>
+      <p style="margin:0;font-size:27px;line-height:1.45">Побудувати дві блок-схеми й виконати трасування для <span style="font-family:var(--m);background:var(--fill);color:var(--acc-ink);padding:0 8px">a = 48, b = 18</span>.</p>
+      <div style="margin-top:auto;padding-top:18px;border-top:var(--hair);font-size:25px;color:var(--mut)"><span style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase">Структури · </span>процедура, цикл з передумовою</div>
+    </div>
+    <div style="padding:34px 40px;display:flex;flex-direction:column;gap:20px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--m);font-size:40px;color:var(--acc)">7</span><span style="font-size:32px;letter-spacing:.1em;color:var(--acc)">★★★</span></div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:40px">«Вгадай число»</h3>
+      <p style="margin:0;font-size:27px;line-height:1.45">Комп'ютер загадує число від 1 до 100. Гравець вводить варіант, програма відповідає <span style="font-family:var(--m)">«більше»</span>, <span style="font-family:var(--m)">«менше»</span> або <span style="font-family:var(--m)">«вгадав»</span>.</p>
+      <p style="margin:0;font-size:27px;line-height:1.45">Дається <span style="font-family:var(--m);background:var(--fill);color:var(--acc-ink);padding:0 8px">7 спроб</span>.</p>
+      <div style="margin-top:auto;padding-top:18px;border-top:var(--hair);font-size:25px;color:var(--mut)"><span style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase">Структури · </span>цикл із двома умовами виходу, розгалуження на три гілки</div>
+    </div>
+  </div>
+</section>
+
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Бурштин&quot;,&quot;М'ята&quot;],&quot;default&quot;:&quot;Бурштин&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Оформлення&quot;},&quot;showHeaderLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Оформлення&quot;}}">
+class Component extends DCLogic {
+  applyTweaks() {
+    const b = document.body.style;
+    const mint = this.props.accent === "М'ята";
+    b.setProperty("--fill", mint ? "#5fd3bd" : "#f0b45a");
+    b.setProperty("--acc", "#0d6e63");
+    b.setProperty("--hdr", this.props.showHeaderLabels === false ? "none" : "inline");
+  }
+  componentDidMount() { this.applyTweaks(); }
+  componentDidUpdate() { this.applyTweaks(); }
+  renderVals() {
+    const table = [];
+    for (let i = 1; i <= 9; i++) for (let j = 1; j <= 9; j++) {
+      const hl = i === 3;
+      table.push({ v: i * j, bg: hl ? "var(--fill)" : "transparent", fg: hl ? "var(--acc-ink)" : "var(--ink)" });
+    }
+    return { table };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./resources.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/styles.css">
+<script src="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/_ds_bundle.js"></script>
+<link rel="stylesheet" href="fonts/fonts.css">
+<title>АІМО — Лекція 11 · Прості алгоритми сортування</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  --h: "Manrope", system-ui, sans-serif;
+  --b: "IBM Plex Sans", system-ui, sans-serif;
+  --m: "IBM Plex Mono", ui-monospace, monospace;
+  --bg: #f5f7f5; --bg2: #e7efeb; --ink: #16262b; --mut: #56696d; --ln: rgba(22,38,43,.16);
+  --acc: #0d6e63; --fill: #f0b45a; --acc-ink: #1b2620;
+  --hair: 1px solid var(--ln);
+  --mk-c: rgba(22,38,43,.45);
+  --mk-img: linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c));
+  --mk-pos: 0 -7px, -7px 0, right 0 top -7px, right -7px top 0, 0 bottom -7px, -7px bottom 0, right 0 bottom -7px, right -7px bottom 0;
+  --mk-size: 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px;
+  --grid: linear-gradient(rgba(238,243,239,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(238,243,239,.045) 1px, transparent 1px);
+}
+a { color: var(--acc); text-decoration: none; }
+a:hover { color: var(--ink); }
+</style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" data-uneditable="">
+
+<section data-label="Титул" data-screen-label="01" data-speaker-notes="Сортування — одна з найчастіших задач. Сьогодні три прості методи: бульбашкою, вибором і вставками — ідея, трасування, C++ і кількість операцій. Наступна лекція — ефективні методи." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;gap:60px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
+    <div style="align-self:flex-start;border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Лекція 11 · Алгоритми і методи обчислень</div>
+    <div>
+      <h1 style="margin:0;font-family:var(--h);font-weight:800;font-size:108px;line-height:1.02;letter-spacing:-.02em">Прості<br>алгоритми<br><span style="color:var(--acc)">сортування</span></h1>
+      <p style="margin:30px 0 0;font-size:36px;line-height:1.3;color:var(--mut);max-width:900px">Бульбашкою, вибором і вставками</p>
+    </div>
+    <div style="display:flex;gap:18px;font-size:24px;color:var(--mut)"><span>Змістовий модуль 1</span><span>·</span><span>Тема 3. Представлення та основні структури алгоритмів</span></div>
+  </div>
+  <div style="width:640px;flex:none;display:flex;flex-direction:column;justify-content:center;gap:24px">
+    <div style="padding:36px 40px;display:flex;flex-direction:column;gap:28px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="display:flex;justify-content:space-between;font-family:var(--m);font-size:24px;color:var(--mut)"><span>a = [5, 2, 4, 1, 3]</span><span>до</span></div>
+      <div style="height:220px;display:grid;grid-template-columns:repeat(5,1fr);gap:16px;align-items:end">
+        <div style="height:100%;border:2px solid var(--ink)"></div><div style="height:40%;border:2px solid var(--ink)"></div><div style="height:80%;border:2px solid var(--ink)"></div><div style="height:20%;border:2px solid var(--ink)"></div><div style="height:60%;border:2px solid var(--ink)"></div>
+      </div>
+      <div style="height:1px;background:var(--ln)"></div>
+      <div style="height:220px;display:grid;grid-template-columns:repeat(5,1fr);gap:16px;align-items:end">
+        <div style="height:20%;background:var(--acc)"></div><div style="height:40%;background:var(--acc)"></div><div style="height:60%;background:var(--acc)"></div><div style="height:80%;background:var(--acc)"></div><div style="height:100%;background:var(--acc)"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-family:var(--m);font-size:24px;color:var(--mut)"><span>a₀ ≤ a₁ ≤ … ≤ aₙ₋₁</span><span>після</span></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Постановка задачі" data-screen-label="02" data-speaker-notes="Сортування за неспаданням. Сортування за незростанням — лише інший знак порівняння. Ключ: сортуємо записи, наприклад студентів за середнім балом. Масив [5, 2, 4, 1, 3] — для всіх прикладів лекції." style="height:100%;display:flex;flex-direction:column;gap:32px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 11 · Постановка задачі</span><span style="display:var(--hdr,inline);color:var(--mut)">01</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Що означає «відсортувати»</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:44px;min-height:0">
+    <div style="padding:36px 40px;display:flex;flex-direction:column;justify-content:center;gap:28px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <p style="margin:0;font-size:28px;line-height:1.4">Дано масив <span style="font-family:var(--m)">a₀, a₁, …, aₙ₋₁</span>. Переставити елементи так, щоб</p>
+      <div style="font-family:var(--m);font-size:64px;text-align:center;color:var(--acc);padding:24px 0;background:var(--bg2)">a₀ ≤ a₁ ≤ … ≤ aₙ₋₁</div>
+      <p style="margin:0;font-size:27px;line-height:1.4">Це сортування <b style="font-weight:600">за неспаданням</b>. За незростанням — інший знак порівняння.</p>
+    </div>
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:30px 36px;display:flex;flex-direction:column;justify-content:center;gap:12px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px;color:var(--acc)">Ключ</h3><p style="margin:0;font-size:26px;line-height:1.4">Сортують не лише числа, а й записи. Поле, за яким порівнюють, — <b style="font-weight:600">ключ</b>: наприклад, середній бал студента.</p></div>
+      <div style="background:var(--bg);padding:30px 36px;display:flex;flex-direction:column;justify-content:center;gap:20px">
+        <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Приклад на всю лекцію</h3>
+        <div style="display:flex;gap:12px;align-items:center"><span style="font-family:var(--m);font-size:30px;margin-right:10px">a =</span>
+          <span style="width:72px;height:72px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:32px">5</span><span style="width:72px;height:72px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:32px">2</span><span style="width:72px;height:72px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:32px">4</span><span style="width:72px;height:72px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:32px">1</span><span style="width:72px;height:72px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:32px">3</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Характеристики методів" data-screen-label="03" data-speaker-notes="Чотири мірила, за якими порівнюватимемо методи. Приклад зі стійкістю: сортуємо за прізвищем, потім стійко за групою — у межах групи прізвища лишаються за абеткою." style="height:100%;display:flex;flex-direction:column;gap:32px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 11 · Постановка задачі</span><span style="display:var(--hdr,inline);color:var(--mut)">02</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Як порівнювати методи</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:30px 38px;display:flex;gap:28px"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">01</span><div style="display:flex;flex-direction:column;gap:12px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Порівняння й переміщення</h3><p style="margin:0;font-size:26px;line-height:1.4;color:var(--mut)">Кількість порівнянь ключів і переміщень елементів (обмінів або зсувів) — основні міри трудомісткості</p></div></div>
+    <div style="background:var(--bg);padding:30px 38px;display:flex;gap:28px"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">02</span><div style="display:flex;flex-direction:column;gap:12px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Сортування на місці</h3><p style="margin:0;font-size:26px;line-height:1.4;color:var(--mut)">Без додаткового масиву: додаткова пам'ять <span style="font-family:var(--m);color:var(--ink)">O(1)</span></p></div></div>
+    <div style="background:var(--bg);padding:30px 38px;display:flex;gap:28px"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">03</span><div style="display:flex;flex-direction:column;gap:12px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Стійкість</h3><p style="margin:0;font-size:26px;line-height:1.4;color:var(--mut)">Елементи з однаковими ключами зберігають взаємний порядок. Спершу за прізвищем, потім стійко за групою — у групі прізвища лишаться за абеткою</p></div></div>
+    <div style="background:var(--bg);padding:30px 38px;display:flex;gap:28px"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">04</span><div style="display:flex;flex-direction:column;gap:12px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Поведінка на різних даних</h3><p style="margin:0;font-size:26px;line-height:1.4;color:var(--mut)">Найкращий, середній і найгірший випадки: відсортований, випадковий, зворотний масив</p></div></div>
+  </div>
+</section>
+
+<section data-label="Три методи · розділ" data-screen-label="04" data-speaker-notes="Розділ-заставка. Три ідеї в одному реченні кожна. Позначення на наступних слайдах: бурштин — елементи, з якими працюємо зараз, зелений — уже на своєму місці." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:40px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Методи</div><span style="display:var(--hdr,inline);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;color:var(--mut)">03</span></div>
+  <div>
+    <div style="font-family:var(--m);font-size:40px;color:var(--acc)">bubble · selection · insertion</div>
+    <h2 style="margin:18px 0 0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Три прості методи</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:30px 34px;display:flex;flex-direction:column;gap:12px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">1</span><span style="font-family:var(--h);font-weight:700;font-size:38px">Бульбашкою</span><span style="font-size:25px;line-height:1.4;color:var(--mut)">Міняти місцями сусідів, доки найбільший не «спливе» в кінець</span></div>
+    <div style="background:var(--bg);padding:30px 34px;display:flex;flex-direction:column;gap:12px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">2</span><span style="font-family:var(--h);font-weight:700;font-size:38px">Вибором</span><span style="font-size:25px;line-height:1.4;color:var(--mut)">Знайти мінімум решти й поставити його на чергове місце</span></div>
+    <div style="background:var(--bg);padding:30px 34px;display:flex;flex-direction:column;gap:12px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">3</span><span style="font-family:var(--h);font-weight:700;font-size:38px">Вставками</span><span style="font-size:25px;line-height:1.4;color:var(--mut)">Вставити черговий елемент у вже впорядковану частину</span></div>
+  </div>
+</section>
+
+<section data-label="Бульбашка · ідея" data-screen-label="05" data-speaker-notes="Перший прохід на нашому масиві: чотири порівняння, чотири обміни, п'ятірка спливла в кінець. Наступний прохід закінчується на один елемент раніше. Прапорець: якщо за прохід не було обмінів — зупиняємось." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 11 · Бульбашка</span><span style="display:var(--hdr,inline);color:var(--mut)">04</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Сортування бульбашкою: ідея</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:30px 36px;display:flex;flex-direction:column;justify-content:center;gap:14px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px;color:var(--acc)">Прохід</h3><p style="margin:0;font-size:26px;line-height:1.42">Порівнюємо сусідів зліва направо. Лівий більший — міняємо місцями. Найбільший елемент <b style="font-weight:600">«спливає»</b> в кінець, тож наступний прохід коротший на один.</p></div>
+      <div style="background:var(--bg2);padding:30px 36px;display:flex;flex-direction:column;justify-content:center;gap:14px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Прапорець</h3><p style="margin:0;font-size:26px;line-height:1.42">Якщо за прохід не було <b style="font-weight:600">жодного обміну</b>, масив уже відсортовано — роботу можна припинити.</p></div>
+    </div>
+    <div style="padding:28px 36px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Прохід 1</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between">
+        <sc-for list="{{ bubbleSteps }}" as="r" hint-placeholder-count="5">
+          <div style="display:flex;gap:28px;align-items:center">
+            <div style="display:flex;gap:10px">
+              <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="5">
+                <span style="width:72px;height:72px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:32px;background:{{ c.bg }};color:{{ c.fg }}">{{ c.v }}</span>
+              </sc-for>
+            </div>
+            <span style="font-family:var(--m);font-size:26px;color:var(--mut)">{{ r.t }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:32px;font-size:24px;color:var(--mut);padding-top:14px;border-top:var(--hair)"><span style="display:flex;gap:12px;align-items:center"><span style="width:28px;height:28px;background:var(--fill);border:2px solid var(--ink)"></span>порівнюються</span><span style="display:flex;gap:12px;align-items:center"><span style="width:28px;height:28px;background:var(--acc);border:2px solid var(--ink)"></span>на своєму місці</span></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Бульбашка · трасування" data-screen-label="06" data-speaker-notes="Чотири проходи. На четвертому — жодного обміну, прапорець зупиняє алгоритм. Разом 10 порівнянь і 7 обмінів." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 11 · Бульбашка</span><span style="display:var(--hdr,inline);color:var(--mut)">05</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Бульбашка: трасування</h2>
+  <div style="flex:1;display:grid;grid-template-columns:140px 1fr auto;grid-template-rows:auto repeat(4,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="padding:14px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Прохід</div>
+    <div style="padding:14px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Порівняння й обміни</div>
+    <div style="padding:14px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Масив після проходу</div>
+    <sc-for list="{{ bubbleTrace }}" as="r" hint-placeholder-count="4">
+      <div style="padding:10px 28px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:34px;color:var(--acc)">{{ r.n }}</div>
+      <div style="padding:10px 28px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:26px">{{ r.ops }}</div>
+      <div style="padding:10px 28px;display:flex;gap:10px;align-items:center;border-top:var(--hair)">
+        <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="5">
+          <span style="width:68px;height:68px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:30px;background:{{ c.bg }};color:{{ c.fg }}">{{ c.v }}</span>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:20px 32px;display:flex;gap:24px;align-items:baseline"><span style="font-family:var(--m);font-size:48px;color:var(--acc)">10</span><span style="font-size:26px">порівнянь</span></div>
+    <div style="background:var(--bg);padding:20px 32px;display:flex;gap:24px;align-items:baseline"><span style="font-family:var(--m);font-size:48px;color:var(--acc)">7</span><span style="font-size:26px">обмінів</span></div>
+  </div>
+</section>
+
+<section data-label="Бульбашка · код і аналіз" data-screen-label="07" data-speaker-notes="Звернути увагу на межу внутрішнього циклу n − 1 − pass і на break за прапорцем. Інверсії: у нашому масиві 7 — і 7 обмінів. Стійкість — завдяки строгому знаку &gt;." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 11 · Бульбашка</span><span style="display:var(--hdr,inline);color:var(--mut)">06</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Бульбашка: реалізація й аналіз</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.25fr 1fr;gap:44px;min-height:0">
+    <div style="padding:28px 34px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++</div>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:25px;line-height:1.55;background:var(--bg2);padding:22px 28px;white-space:pre"><span style="color:var(--acc);font-weight:600">void</span> bubbleSort(vector&lt;<span style="color:var(--acc);font-weight:600">int</span>&gt;&amp; a) {
+    <span style="color:var(--acc);font-weight:600">int</span> n = a.size();
+    <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> pass = 0; pass &lt; n - 1; pass++) {
+        <span style="color:var(--acc);font-weight:600">bool</span> swapped = <span style="color:var(--acc);font-weight:600">false</span>;
+        <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> j = 0; j &lt; <span style="border-bottom:3px solid var(--acc)">n - 1 - pass</span>; j++) {
+            <span style="color:var(--acc);font-weight:600">if</span> (a[j] &gt; a[j + 1]) {
+                swap(a[j], a[j + 1]);
+                swapped = <span style="color:var(--acc);font-weight:600">true</span>;
+            }
+        }
+        <span style="background:var(--fill);color:var(--acc-ink);padding:0 6px"><span style="font-weight:600">if</span> (!swapped) <span style="font-weight:600">break</span>;</span>
+    }
+}</pre>
+    </div>
+    <div style="display:grid;grid-template-rows:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Найгірший випадок</h3><p style="margin:0;font-size:24px;line-height:1.38">Зворотний порядок: <span style="font-family:var(--m);color:var(--acc)">n(n−1)/2</span> порівнянь і стільки ж обмінів</p></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Найкращий випадок</h3><p style="margin:0;font-size:24px;line-height:1.38">Масив упорядкований: завдяки прапорцю один прохід, <span style="font-family:var(--m);color:var(--acc)">n − 1</span> порівнянь</p></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Інверсії</h3><p style="margin:0;font-size:24px;line-height:1.38">Пари <span style="font-family:var(--m)">i &lt; j</span>, де <span style="font-family:var(--m)">aᵢ &gt; aⱼ</span>. Обмінів рівно стільки, скільки інверсій — у нас 7</p></div>
+      <div style="background:var(--bg2);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Стійкий</h3><p style="margin:0;font-size:24px;line-height:1.38">Рівні сусіди не міняються: умова <span style="font-family:var(--m)">&gt;</span>, а не <span style="font-family:var(--m)">&gt;=</span></p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Вибір · ідея й трасування" data-screen-label="08" data-speaker-notes="На кроці i масив поділено на відсортовану частину a₀…aᵢ₋₁ і невідсортовану, де шукаємо мінімум. На кроці 1 мінімум уже на місці — обмін не потрібен. Разом 4+3+2+1 = 10 порівнянь і лише 3 обміни." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 11 · Вибір</span><span style="display:var(--hdr,inline);color:var(--mut)">07</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Сортування вибором</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Знаходимо найменший елемент невідсортованої частини й ставимо його на перше вільне місце</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:110px 1fr 1fr 1fr auto;grid-template-rows:auto repeat(4,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="padding:14px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Крок i</div>
+    <div style="padding:14px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Невідсортована</div>
+    <div style="padding:14px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Мінімум</div>
+    <div style="padding:14px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Обмін</div>
+    <div style="padding:14px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Масив після кроку</div>
+    <sc-for list="{{ selTrace }}" as="r" hint-placeholder-count="4">
+      <div style="padding:10px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:34px;color:var(--acc)">{{ r.i }}</div>
+      <div style="padding:10px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:26px">{{ r.part }}</div>
+      <div style="padding:10px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:26px">{{ r.min }}</div>
+      <div style="padding:10px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:26px">{{ r.sw }}</div>
+      <div style="padding:10px 26px;display:flex;gap:10px;align-items:center;border-top:var(--hair)">
+        <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="5">
+          <span style="width:68px;height:68px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:30px;background:{{ c.bg }};color:{{ c.fg }}">{{ c.v }}</span>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:20px 32px;display:flex;gap:24px;align-items:baseline"><span style="font-family:var(--m);font-size:48px;color:var(--acc)">10</span><span style="font-size:26px">порівнянь · <span style="font-family:var(--m)">4 + 3 + 2 + 1</span></span></div>
+    <div style="background:var(--bg);padding:20px 32px;display:flex;gap:24px;align-items:baseline"><span style="font-family:var(--m);font-size:48px;color:var(--acc)">3</span><span style="font-size:26px">обміни</span></div>
+  </div>
+</section>
+
+<section data-label="Вибір · код і аналіз" data-screen-label="09" data-speaker-notes="Порівнянь завжди n(n−1)/2 — мінімум шукаємо повністю навіть у відсортованому масиві. Зате обмінів не більше n − 1: вигідно для великих записів. Нестійкість показати на [2a, 2b, 1]." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 11 · Вибір</span><span style="display:var(--hdr,inline);color:var(--mut)">08</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Вибір: реалізація й аналіз</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:28px 34px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++</div>
+        <pre style="margin:0;font-family:var(--m);font-size:25px;line-height:1.55;background:var(--bg2);padding:22px 28px;white-space:pre"><span style="color:var(--acc);font-weight:600">void</span> selectionSort(vector&lt;<span style="color:var(--acc);font-weight:600">int</span>&gt;&amp; a) {
+    <span style="color:var(--acc);font-weight:600">int</span> n = a.size();
+    <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> i = 0; i &lt; n - 1; i++) {
+        <span style="color:var(--acc);font-weight:600">int</span> <span>minIndex</span> &#61; i;
+        <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> j = i + 1; j &lt; n; j++) {
+            <span style="color:var(--acc);font-weight:600">if</span> (a[j] &lt; a[minIndex]) <span>minIndex</span> &#61; j;
+        }
+        <span style="background:var(--fill);color:var(--acc-ink);padding:0 6px"><span style="font-weight:600">if</span> (minIndex != i) swap(a[i], a[minIndex]);</span>
+    }
+}</pre>
+      </div>
+      <div style="flex:1;padding:24px 34px;display:flex;flex-direction:column;justify-content:center;gap:16px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Нестійкий · приклад</div>
+        <div style="display:flex;gap:24px;align-items:center;font-family:var(--m);font-size:30px">
+          <div style="display:flex;gap:10px"><span style="width:76px;height:64px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);background:var(--fill);color:var(--acc-ink)">2ₐ</span><span style="width:76px;height:64px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink)">2ᵦ</span><span style="width:76px;height:64px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);background:var(--fill);color:var(--acc-ink)">1</span></div>
+          <span style="color:var(--mut)">→</span>
+          <div style="display:flex;gap:10px"><span style="width:76px;height:64px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);background:var(--acc);color:var(--bg)">1</span><span style="width:76px;height:64px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink)">2ᵦ</span><span style="width:76px;height:64px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink)">2ₐ</span></div>
+        </div>
+        <p style="margin:0;font-size:24px;line-height:1.38;color:var(--mut)">Перший обмін переставив рівні двійки</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Порівнянь — завжди</h3><p style="margin:0;font-size:25px;line-height:1.4"><span style="font-family:var(--m);color:var(--acc)">n(n−1)/2</span>, незалежно від даних: мінімум шукаємо повністю навіть у відсортованому масиві</p></div>
+      <div style="background:var(--bg);padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Обмінів — мало</h3><p style="margin:0;font-size:25px;line-height:1.4">Не більше <span style="font-family:var(--m);color:var(--acc)">n − 1</span></p></div>
+      <div style="background:var(--bg2);padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px;color:var(--acc)">Коли вигідний</h3><p style="margin:0;font-size:25px;line-height:1.4">Переміщення дороге (великі записи), а порівняння — дешеве</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Вставки · ідея й трасування" data-screen-label="10" data-speaker-notes="Як карти в руці. Бурштином — куди вставлено черговий елемент, зеленим — уже впорядкована частина. Разом 9 порівнянь і 7 зсувів — знову стільки, скільки інверсій." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 11 · Вставки</span><span style="display:var(--hdr,inline);color:var(--mut)">09</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Сортування вставками</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Як карти в руці: запам'ятовуємо <span style="font-family:var(--m);color:var(--ink)">aᵢ</span>, більші елементи зсуваємо праворуч і вставляємо його на звільнене місце</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:110px 160px 1fr auto;grid-template-rows:auto repeat(4,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="padding:14px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Крок i</div>
+    <div style="padding:14px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Елемент</div>
+    <div style="padding:14px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Зсуви</div>
+    <div style="padding:14px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Масив після кроку</div>
+    <sc-for list="{{ insTrace }}" as="r" hint-placeholder-count="4">
+      <div style="padding:10px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:34px;color:var(--acc)">{{ r.i }}</div>
+      <div style="padding:10px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:30px">{{ r.key }}</div>
+      <div style="padding:10px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:26px">{{ r.sh }}</div>
+      <div style="padding:10px 26px;display:flex;gap:10px;align-items:center;border-top:var(--hair)">
+        <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="5">
+          <span style="width:68px;height:68px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:30px;background:{{ c.bg }};color:{{ c.fg }}">{{ c.v }}</span>
+        </sc-for>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:20px 32px;display:flex;gap:24px;align-items:baseline"><span style="font-family:var(--m);font-size:48px;color:var(--acc)">9</span><span style="font-size:26px">порівнянь</span></div>
+    <div style="background:var(--bg);padding:20px 32px;display:flex;gap:24px;align-items:baseline"><span style="font-family:var(--m);font-size:48px;color:var(--acc)">7</span><span style="font-size:26px">зсувів — стільки ж, скільки інверсій</span></div>
+  </div>
+</section>
+
+<section data-label="Вставки · код і аналіз" data-screen-label="11" data-speaker-notes="Наголосити на порядку умов у while: спершу j &gt;= 0, потім a[j]. Скорочене обчислення &amp;&amp; не дасть звернутися до a[-1]. Вставки — частина ефективних методів у лекції 12." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 11 · Вставки</span><span style="display:var(--hdr,inline);color:var(--mut)">10</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Вставки: реалізація й аналіз</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:28px 34px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++</div>
+        <pre style="margin:0;font-family:var(--m);font-size:24px;line-height:1.45;background:var(--bg2);padding:18px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">void</span> insertionSort(vector&lt;<span style="color:var(--acc);font-weight:600">int</span>&gt;&amp; a) {
+    <span style="color:var(--acc);font-weight:600">int</span> n = a.size();
+    <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> i = 1; i &lt; n; i++) {
+        <span style="color:var(--acc);font-weight:600">int</span> key = a[i];
+        <span style="color:var(--acc);font-weight:600">int</span> j = i - 1;
+        <span style="color:var(--acc);font-weight:600">while</span> (<span style="background:var(--fill);color:var(--acc-ink);padding:0 6px">j &gt;= 0</span> &amp;&amp; a[j] &gt; key) {
+            a[j + 1] = a[j];   <span style="color:var(--mut)">// зсув праворуч</span>
+            j--;
+        }
+        a[j + 1] = key;        <span style="color:var(--mut)">// вставка</span>
+    }
+}</pre>
+      </div>
+      <div style="flex:1;padding:22px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Порядок умов</div>
+        <p style="margin:0;font-size:25px;line-height:1.4">Спершу <span style="font-family:var(--m)">j &gt;= 0</span>, потім <span style="font-family:var(--m)">a[j]</span>. Завдяки скороченому <span style="font-family:var(--m)">&amp;&amp;</span> при <span style="font-family:var(--m)">j = −1</span> друга умова не перевіряється — виходу за межі немає.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Найгірший випадок</h3><p style="margin:0;font-size:24px;line-height:1.38">Зворотний порядок: <span style="font-family:var(--m);color:var(--acc)">n(n−1)/2</span> порівнянь і зсувів</p></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Найкращий випадок</h3><p style="margin:0;font-size:24px;line-height:1.38">Відсортований масив: <span style="font-family:var(--m);color:var(--acc)">n − 1</span> порівнянь, жодного зсуву</p></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Майже відсортовані дані</h3><p style="margin:0;font-size:24px;line-height:1.38">Дуже швидко: зсувів стільки, скільки інверсій</p></div>
+      <div style="background:var(--bg2);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Стійкий, на місці</h3><p style="margin:0;font-size:24px;line-height:1.38">Для малих масивів і як частина ефективних методів (лекція 12)</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Порівняння методів" data-screen-label="12" data-speaker-notes="Зведена таблиця. Відмінність вибору — завжди квадратична кількість порівнянь, але лінійна кількість обмінів; і він єдиний нестійкий." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 11 · Порівняння</span><span style="display:var(--hdr,inline);color:var(--mut)">11</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Порівняння методів</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.15fr 1.25fr 1.25fr .7fr .7fr;grid-template-rows:auto repeat(3,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-size:27px">
+    <div style="padding:16px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Метод</div>
+    <div style="padding:16px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Порівнянь, найгірше</div>
+    <div style="padding:16px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Переміщень, найгірше</div>
+    <div style="padding:16px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Найкращий випадок</div>
+    <div style="padding:16px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Стійкий</div>
+    <div style="padding:16px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Пам'ять</div>
+
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:32px">Бульбашкою</div>
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">n(n−1)/2</div>
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair)"><span><span style="font-family:var(--m)">n(n−1)/2</span> обмінів</span></div>
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair)"><span><span style="font-family:var(--m);color:var(--acc);font-weight:600">n − 1</span> порівнянь</span></div>
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair);color:var(--acc);font-weight:600">так</div>
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">O(1)</div>
+
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:32px">Вибором</div>
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">n(n−1)/2</div>
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair)"><span><span style="font-family:var(--m);color:var(--acc);font-weight:600">n − 1</span> обмінів</span></div>
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair)"><span><span style="font-family:var(--m)">n(n−1)/2</span> порівнянь</span></div>
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair)"><span style="background:var(--fill);color:var(--acc-ink);padding:0 10px">ні</span></div>
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">O(1)</div>
+
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:32px;color:var(--acc)">Вставками</div>
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">n(n−1)/2</div>
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair)"><span><span style="font-family:var(--m)">n(n−1)/2</span> зсувів</span></div>
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair)"><span><span style="font-family:var(--m);color:var(--acc);font-weight:600">n − 1</span> порівнянь</span></div>
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair);color:var(--acc);font-weight:600">так</div>
+    <div style="padding:12px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">O(1)</div>
+  </div>
+</section>
+
+<section data-label="Квадратична трудомісткість" data-screen-label="13" data-speaker-notes="Усі три методи квадратичні: n збільшили вдесятеро — час зріс приблизно в сто разів. Формальну O-нотацію розглянемо в лекції 13, ефективні методи — в лекції 12." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 11 · Порівняння</span><span style="display:var(--hdr,inline);color:var(--mut)">12</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Квадратична трудомісткість</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Масив більший удесятеро — час роботи більший приблизно <b style="font-weight:600;color:var(--ink)">у сто разів</b></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:40px 48px;display:flex;flex-direction:column;justify-content:center;gap:20px">
+      <div style="font-family:var(--m);font-size:40px;color:var(--mut)">n = 10³</div>
+      <div style="font-family:var(--m);font-size:104px;line-height:1;color:var(--acc)">≈ 5·10⁵</div>
+      <div style="font-size:28px">порівнянь — <b style="font-weight:600">миттєво</b></div>
+    </div>
+    <div style="background:var(--bg);padding:40px 48px;display:flex;flex-direction:column;justify-content:center;gap:20px">
+      <div style="font-family:var(--m);font-size:40px;color:var(--mut)">n = 10⁶</div>
+      <div style="font-family:var(--m);font-size:104px;line-height:1"><span style="background:var(--fill);color:var(--acc-ink);padding:0 14px">≈ 5·10¹¹</span></div>
+      <div style="font-size:28px">порівнянь — <b style="font-weight:600">хвилини чи години</b></div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px">
+    <div style="padding:24px 32px;font-size:26px;line-height:1.4;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">Для великих масивів — ефективні методи (<b style="font-weight:600">лекція 12</b>); формальні оцінки, <span style="font-family:var(--m)">O</span>-нотація — <b style="font-weight:600">лекція 13</b></div>
+    <div style="padding:24px 32px;font-size:26px;line-height:1.4;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">З простих методів на практиці найкорисніші <b style="font-weight:600;color:var(--acc)">вставки</b>: стійкі, короткі, швидкі на малих і майже впорядкованих масивах</div>
+  </div>
+</section>
+
+<section data-label="Перевірка програми" data-screen-label="14" data-speaker-notes="Сортування легко написати з помилкою на одиницю. Ліворуч — набір граничних тестів, праворуч — перевіряльник: тисяча випадкових масивів, результат порівнюємо зі std::sort." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 11 · Перевірка</span><span style="display:var(--hdr,inline);color:var(--mut)">13</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Перевірка програми сортування</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.5fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-rows:repeat(5,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:14px 28px;display:flex;gap:20px;align-items:center;font-size:25px"><span style="font-family:var(--m);color:var(--acc);flex:none">01</span>Порожній і з одного елемента</div>
+      <div style="background:var(--bg);padding:14px 28px;display:flex;gap:20px;align-items:center;font-size:25px"><span style="font-family:var(--m);color:var(--acc);flex:none">02</span>Відсортований і зворотний</div>
+      <div style="background:var(--bg);padding:14px 28px;display:flex;gap:20px;align-items:center;font-size:25px"><span style="font-family:var(--m);color:var(--acc);flex:none">03</span>Однакові елементи й повтори</div>
+      <div style="background:var(--bg);padding:14px 28px;display:flex;gap:20px;align-items:center;font-size:25px"><span style="font-family:var(--m);color:var(--acc);flex:none">04</span>Від'ємні числа</div>
+      <div style="background:var(--bg2);padding:14px 28px;display:flex;gap:20px;align-items:center;font-size:25px"><span style="font-family:var(--m);color:var(--acc);flex:none">05</span><span>Випадкові масиви проти <span style="font-family:var(--m)">std::sort</span></span></div>
+    </div>
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:16px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Перевіряльник · 1000 випадкових масивів</div>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:24px;line-height:1.5;background:var(--bg2);padding:20px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">bool</span> testSort(<span style="color:var(--acc);font-weight:600">void</span> (*sortFunction)(vector&lt;<span style="color:var(--acc);font-weight:600">int</span>&gt;&amp;)) {
+    mt19937 rng(42);
+    <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> test = 0; test &lt; 1000; test++) {
+        vector&lt;<span style="color:var(--acc);font-weight:600">int</span>&gt; a(rng() % 50);
+        <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span>&amp; x : a) x = <span style="color:var(--acc);font-weight:600">int</span>(rng() % 21) - 10;
+        vector&lt;<span style="color:var(--acc);font-weight:600">int</span>&gt; expected = a;
+        <span style="background:var(--fill);color:var(--acc-ink);padding:0 6px">sort(expected.begin(), expected.end());</span>
+        sortFunction(a);
+        <span style="color:var(--acc);font-weight:600">if</span> (a != expected) <span style="color:var(--acc);font-weight:600">return false</span>;
+    }
+    <span style="color:var(--acc);font-weight:600">return true</span>;
+}</pre>
+      <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">За частку секунди майже напевно знайде помилку, якщо вона є</p>
+    </div>
+  </div>
+</section>
+
+<section data-label="Підсумки" data-screen-label="15" data-speaker-notes="Пройтися по шести пунктах. Нагадати про практичне заняття №3 й емулятор сортування." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 11 · Підсумки</span><span style="display:var(--hdr,inline);color:var(--mut)">14</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Що забрати з лекції</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">01</span><span style="font-size:26px;line-height:1.35">Сортування впорядковує за ключем; важливі порівняння, переміщення, стійкість і пам'ять</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">02</span><span style="font-size:26px;line-height:1.35">Бульбашка міняє сусідів; прапорець зупиняє, щойно масив відсортовано</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">03</span><span style="font-size:26px;line-height:1.35">Вибір: порівнянь завжди <span style="font-family:var(--m)">n(n−1)/2</span>, обмінів не більше <span style="font-family:var(--m)">n − 1</span>; нестійкий</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">04</span><span style="font-size:26px;line-height:1.35">Вставки — найшвидший з простих методів на майже впорядкованих даних</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">05</span><span style="font-size:26px;line-height:1.35">Обміни бульбашки й зсуви вставок дорівнюють кількості інверсій</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">06</span><span style="font-size:26px;line-height:1.35">Усі три методи квадратичні — лише для невеликих масивів</span></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:25px;color:var(--mut);padding-top:16px;border-top:var(--hair)">
+    <span>Попередня · Лекція 10. Основні алгоритмічні структури</span>
+    <span style="font-family:var(--h);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Далі · Лекція 12. Ефективні алгоритми сортування</span>
+  </div>
+</section>
+
+<section data-label="Контрольні запитання" data-screen-label="16" data-speaker-notes="Запитання 10 — протрасувати на дошці. Решту — на самостійне опрацювання; для перевірки — емулятор сортування." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 11 · Перевірка</span><span style="display:var(--hdr,inline);color:var(--mut)">15</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Контрольні запитання</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.4fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Теорія</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;font-size:24px;line-height:1.3">
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">1</span><span>Сформулюйте задачу сортування. Що таке ключ?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">2</span><span>Що означає стійкість? Коли вона важлива?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">3</span><span>Ідея бульбашки. Навіщо прапорець обміну?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">4</span><span>Скільки порівнянь у бульбашки в найкращому й найгіршому випадках?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">5</span><span>Що таке інверсія? Скільки інверсій у <span style="font-family:var(--m)">[3, 1, 2]</span>?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">6</span><span>Чому порівнянь у вибору не залежить від даних?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">7</span><span>Покажіть на прикладі, що вибір нестійкий</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">8</span><span>Чому вставки швидкі на майже впорядкованих масивах?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">9</span><span>Чому у вставках <span style="font-family:var(--m)">j &gt;= 0</span> перевіряють першою?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">11</span><span>Як зміниться час роботи, якщо масив збільшити вдвічі?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">12</span><span>Як перевірити правильність програми сортування?</span></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:1.3fr 1fr;gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg2);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:16px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">10 · На дошці</div><p style="margin:0;font-size:30px;line-height:1.35">Протрасуйте три методи на масиві</p><div style="display:flex;gap:10px"><span style="width:68px;height:68px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:30px">4</span><span style="width:68px;height:68px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:30px">3</span><span style="width:68px;height:68px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:30px">2</span><span style="width:68px;height:68px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:30px">1</span></div></div>
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Матеріали</div><a href="https://kaldra1.github.io/aimo/emulators/sorting/" style="font-size:26px">Емулятор: сортування масивів</a><a href="https://kaldra1.github.io/aimo/practicals/3/" style="font-size:26px">Практичне заняття №3</a></div>
+    </div>
+  </div>
+</section>
+
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Бурштин&quot;,&quot;М'ята&quot;],&quot;default&quot;:&quot;Бурштин&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Оформлення&quot;},&quot;showHeaderLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Оформлення&quot;}}">
+class Component extends DCLogic {
+  applyTweaks() {
+    const b = document.body.style;
+    b.setProperty("--fill", this.props.accent === "М'ята" ? "#5fd3bd" : "#f0b45a");
+    b.setProperty("--hdr", this.props.showHeaderLabels === false ? "none" : "inline");
+  }
+  componentDidMount() { this.applyTweaks(); }
+  componentDidUpdate() { this.applyTweaks(); }
+  renderVals() {
+    const mk = (arr, sorted = [], hl = []) => arr.map((v, i) => {
+      const m = hl.includes(i) ? 2 : sorted.includes(i) ? 1 : 0;
+      return { v, bg: m === 1 ? "var(--acc)" : m === 2 ? "var(--fill)" : "transparent", fg: m === 1 ? "var(--bg)" : m === 2 ? "var(--acc-ink)" : "var(--ink)" };
+    });
+    return {
+      bubbleSteps: [
+        { cells: mk([5,2,4,1,3], [], [0,1]), t: "(5, 2) → обмін" },
+        { cells: mk([2,5,4,1,3], [], [1,2]), t: "(5, 4) → обмін" },
+        { cells: mk([2,4,5,1,3], [], [2,3]), t: "(5, 1) → обмін" },
+        { cells: mk([2,4,1,5,3], [], [3,4]), t: "(5, 3) → обмін" },
+        { cells: mk([2,4,1,3,5], [4]), t: "5 на своєму місці" }
+      ],
+      bubbleTrace: [
+        { n: 1, ops: "(5,2) обмін · (5,4) обмін · (5,1) обмін · (5,3) обмін", cells: mk([2,4,1,3,5], [4]) },
+        { n: 2, ops: "(2,4) — · (4,1) обмін · (4,3) обмін", cells: mk([2,1,3,4,5], [3,4]) },
+        { n: 3, ops: "(2,1) обмін · (2,3) —", cells: mk([1,2,3,4,5], [2,3,4]) },
+        { n: 4, ops: "(1,2) — · обмінів не було → стоп", cells: mk([1,2,3,4,5], [0,1,2,3,4]) }
+      ],
+      selTrace: [
+        { i: 0, part: "[5, 2, 4, 1, 3]", min: "1 (індекс 3)", sw: "a₀ ↔ a₃", cells: mk([1,2,4,5,3], [0]) },
+        { i: 1, part: "[2, 4, 5, 3]", min: "2 (індекс 1)", sw: "не потрібен", cells: mk([1,2,4,5,3], [0,1]) },
+        { i: 2, part: "[4, 5, 3]", min: "3 (індекс 4)", sw: "a₂ ↔ a₄", cells: mk([1,2,3,5,4], [0,1,2]) },
+        { i: 3, part: "[5, 4]", min: "4 (індекс 4)", sw: "a₃ ↔ a₄", cells: mk([1,2,3,4,5], [0,1,2,3,4]) }
+      ],
+      insTrace: [
+        { i: 1, key: "2", sh: "5 →", cells: mk([2,5,4,1,3], [0,1], [0]) },
+        { i: 2, key: "4", sh: "5 →", cells: mk([2,4,5,1,3], [0,1,2], [1]) },
+        { i: 3, key: "1", sh: "5 →, 4 →, 2 →", cells: mk([1,2,4,5,3], [0,1,2,3], [0]) },
+        { i: 4, key: "3", sh: "5 →, 4 →", cells: mk([1,2,3,4,5], [0,1,2,3,4], [2]) }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

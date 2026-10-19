@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./resources.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/styles.css">
+<script src="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/_ds_bundle.js"></script>
+<link rel="stylesheet" href="fonts/fonts.css">
+<title>АІМО — Лекція 8 · Псевдокоди, структурограми</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  --h: "Manrope", system-ui, sans-serif;
+  --b: "IBM Plex Sans", system-ui, sans-serif;
+  --m: "IBM Plex Mono", ui-monospace, monospace;
+  --bg: #f5f7f5; --bg2: #e7efeb; --ink: #16262b; --mut: #56696d; --ln: rgba(22,38,43,.16);
+  --acc: #0d6e63; --fill: #f0b45a; --acc-ink: #1b2620;
+  --hair: 1px solid var(--ln);
+  --ns: 2px solid var(--ink);
+  --mk-c: rgba(22,38,43,.45);
+  --mk-img: linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c));
+  --mk-pos: 0 -7px, -7px 0, right 0 top -7px, right -7px top 0, 0 bottom -7px, -7px bottom 0, right 0 bottom -7px, right -7px bottom 0;
+  --mk-size: 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px;
+  --grid: linear-gradient(rgba(238,243,239,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(238,243,239,.045) 1px, transparent 1px);
+}
+a { color: var(--acc); text-decoration: none; }
+a:hover { color: var(--ink); }
+</style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" data-uneditable="">
+
+<section data-label="Титул" data-screen-label="01" data-speaker-notes="Лекція про те, як зафіксувати алгоритм між ідеєю і кодом. Сьогодні — словесний спосіб, псевдокод і структурограми; блок-схемам за ЄСПД присвячена наступна лекція." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);--ns:2px solid #eef3ef;height:100%;display:flex;gap:60px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
+    <div style="align-self:flex-start;border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Лекція 8 · Алгоритми і методи обчислень</div>
+    <div>
+      <h1 style="margin:0;font-family:var(--h);font-weight:800;font-size:108px;line-height:1.02;letter-spacing:-.02em"><span style="color:var(--acc)">Псевдокоди</span><br>і структурограми</h1>
+      <p style="margin:30px 0 0;font-size:36px;line-height:1.3;color:var(--mut);max-width:900px">Методи представлення алгоритмів</p>
+    </div>
+    <div style="display:flex;gap:18px;font-size:24px;color:var(--mut)"><span>Змістовий модуль 1</span><span>·</span><span>Тема 3. Представлення та основні структури алгоритмів</span></div>
+  </div>
+  <div style="width:640px;flex:none;display:flex;flex-direction:column;justify-content:center;gap:28px">
+    <div style="padding:40px 44px;display:flex;flex-direction:column;gap:26px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--h);font-weight:700;font-size:30px">НСД(a, b)</span><span style="font-family:var(--m);font-size:24px;color:var(--mut)">Нассі–Шнейдерман</span></div>
+      <div style="border:var(--ns);font-family:var(--m);font-size:28px">
+        <div style="padding:14px 20px;border-bottom:var(--ns)">ввести a, b</div>
+        <div style="padding:14px 20px;color:var(--acc)">поки b ≠ 0</div>
+        <div style="display:flex;border-bottom:var(--ns)">
+          <div style="width:56px;flex:none"></div>
+          <div style="flex:1;border-top:var(--ns);border-left:var(--ns)">
+            <div style="padding:14px 20px;border-bottom:var(--ns)">r ← a mod b</div>
+            <div style="padding:14px 20px;border-bottom:var(--ns)">a ← b</div>
+            <div style="padding:14px 20px">b ← r</div>
+          </div>
+        </div>
+        <div style="padding:14px 20px">вивести a</div>
+      </div>
+    </div>
+    <p style="margin:0;text-align:center;font-size:24px;color:var(--mut)">Жодної стрілки — лише вкладені прямокутники</p>
+  </div>
+</section>
+
+<section data-label="Навіщо записувати" data-screen-label="02" data-speaker-notes="Головна думка: розділяємо «що робити» і «як це сказати мовою C++». Чотири вимоги внизу прикладатимемо до кожного способу далі." style="height:100%;display:flex;flex-direction:column;gap:32px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 8 · Вступ</span><span style="display:var(--hdr,inline);color:var(--mut)">01</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Навіщо записувати алгоритм до програми</h2>
+  <p style="margin:0;font-size:30px;line-height:1.35;max-width:1500px">Розділяємо дві різні роботи: <b style="font-weight:600;color:var(--acc)">що</b> робити і <b style="font-weight:600;color:var(--acc)">як</b> це висловити конкретною мовою.</p>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:30px 32px;display:flex;flex-direction:column;gap:16px"><div style="font-family:var(--m);font-size:44px;color:var(--acc)">01</div><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Продумати</h3><p style="margin:0;font-size:25px;line-height:1.4;color:var(--mut)">Розв'язок до того, як відволікатися на синтаксис C++</p></div>
+    <div style="background:var(--bg);padding:30px 32px;display:flex;flex-direction:column;gap:16px"><div style="font-family:var(--m);font-size:44px;color:var(--acc)">02</div><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Обговорити</h3><p style="margin:0;font-size:25px;line-height:1.4;color:var(--mut)">Ідею з людьми, які можуть не знати вашої мови програмування</p></div>
+    <div style="background:var(--bg);padding:30px 32px;display:flex;flex-direction:column;gap:16px"><div style="font-family:var(--m);font-size:44px;color:var(--acc)">03</div><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Задокументувати</h3><p style="margin:0;font-size:25px;line-height:1.4;color:var(--mut)">Із запису видно, чому програма влаштована саме так</p></div>
+    <div style="background:var(--bg);padding:30px 32px;display:flex;flex-direction:column;gap:16px"><div style="font-family:var(--m);font-size:44px;color:var(--acc)">04</div><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Налагодити</h3><p style="margin:0;font-size:25px;line-height:1.4;color:var(--mut)">Помилку в логіці легше помітити в короткому записі, ніж у сотнях рядків коду</p></div>
+  </div>
+  <div style="padding:24px 34px;display:flex;gap:48px;align-items:center;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);flex:none">Вимоги до запису</span>
+    <div style="display:flex;gap:44px;font-family:var(--h);font-weight:700;font-size:30px"><span>Однозначність</span><span>Наочність</span><span>Компактність</span><span>Зручність перевірки</span></div>
+  </div>
+</section>
+
+<section data-label="Способи" data-screen-label="03" data-speaker-notes="Карта лекції: від найменш формального до найбільш формального. Перші три — сьогодні, схеми — лекція 9, програма — результат." style="height:100%;display:flex;flex-direction:column;gap:32px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 8 · Огляд</span><span style="display:var(--hdr,inline);color:var(--mut)">02</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">П'ять способів представлення</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:30px 30px;display:flex;flex-direction:column;gap:16px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Сьогодні</div><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:36px">Словесний</h3><p style="margin:0;font-size:25px;line-height:1.4;color:var(--mut)">Пронумеровані кроки природною мовою</p><div style="margin-top:auto;font-family:var(--m);font-size:24px;color:var(--mut)">1. Ввести a, b…</div></div>
+    <div style="background:var(--bg);padding:30px 30px;display:flex;flex-direction:column;gap:16px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Сьогодні</div><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:36px">Псевдокод</h3><p style="margin:0;font-size:25px;line-height:1.4;color:var(--mut)">Ключові слова структурного програмування + математика</p><div style="margin-top:auto;font-family:var(--m);font-size:24px;color:var(--mut)">поки b ≠ 0 …</div></div>
+    <div style="background:var(--bg);padding:30px 30px;display:flex;flex-direction:column;gap:16px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Сьогодні</div><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:36px">Структурограма</h3><p style="margin:0;font-size:25px;line-height:1.4;color:var(--mut)">Вкладені прямокутники без стрілок</p><div style="margin-top:auto;display:flex;flex-direction:column;border:var(--ns);width:150px"><div style="height:26px;border-bottom:var(--ns)"></div><div style="display:flex;height:52px"><div style="width:26px"></div><div style="flex:1;border-left:var(--ns);border-top:var(--ns)"></div></div></div></div>
+    <div style="background:var(--bg);padding:30px 30px;display:flex;flex-direction:column;gap:16px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Лекція 9</div><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:36px">Схема</h3><p style="margin:0;font-size:25px;line-height:1.4;color:var(--mut)">Блок-схема за стандартами ЄСПД</p><div style="margin-top:auto;font-family:var(--m);font-size:24px;color:var(--mut)">ГОСТ 19.701-90</div></div>
+    <div style="background:var(--bg);padding:30px 30px;display:flex;flex-direction:column;gap:16px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Результат</div><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:36px">Програма</h3><p style="margin:0;font-size:25px;line-height:1.4;color:var(--mut)">Точний запис, який виконується</p><div style="margin-top:auto;font-family:var(--m);font-size:24px;color:var(--mut)">while (b != 0)</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:24px;font-size:26px;color:var(--mut)"><span>менш формально</span><div style="flex:1;height:1px;background:var(--ln)"></div><span style="font-family:var(--m);color:var(--acc)">→</span><span>більш формально</span></div>
+</section>
+
+<section data-label="Словесний спосіб" data-screen-label="04" data-speaker-notes="Спитати аудиторію: де тут «повторювати»? Його немає — є «перейти до кроку 2». Це і є goto, і саме від нього нас позбавить псевдокод." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 8 · Словесний спосіб</span><span style="display:var(--hdr,inline);color:var(--mut)">03</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Алгоритм Евкліда словами</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.25fr 1fr;gap:44px;min-height:0">
+    <div style="padding:30px 36px;display:flex;flex-direction:column;justify-content:space-between;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="display:flex;gap:22px;align-items:baseline;font-size:28px;padding-bottom:16px;border-bottom:var(--hair)"><span style="font-family:var(--m);color:var(--acc);width:30px;flex:none">1</span><span>Ввести натуральні числа <span style="font-family:var(--m)">a</span> і <span style="font-family:var(--m)">b</span></span></div>
+      <div style="display:flex;gap:22px;align-items:baseline;font-size:28px;padding-bottom:16px;border-bottom:var(--hair)"><span style="font-family:var(--m);color:var(--acc);width:30px;flex:none">2</span><span>Якщо <span style="font-family:var(--m)">b = 0</span>, <span style="background:var(--fill);color:var(--acc-ink);padding:0 8px">перейти до кроку 5</span></span></div>
+      <div style="display:flex;gap:22px;align-items:baseline;font-size:28px;padding-bottom:16px;border-bottom:var(--hair)"><span style="font-family:var(--m);color:var(--acc);width:30px;flex:none">3</span><span>Обчислити <span style="font-family:var(--m)">r</span> — остачу від ділення <span style="font-family:var(--m)">a</span> на <span style="font-family:var(--m)">b</span></span></div>
+      <div style="display:flex;gap:22px;align-items:baseline;font-size:28px;padding-bottom:16px;border-bottom:var(--hair)"><span style="font-family:var(--m);color:var(--acc);width:30px;flex:none">4</span><span>Покласти <span style="font-family:var(--m)">a = b</span>, <span style="font-family:var(--m)">b = r</span> і <span style="background:var(--fill);color:var(--acc-ink);padding:0 8px">повернутися до кроку 2</span></span></div>
+      <div style="display:flex;gap:22px;align-items:baseline;font-size:28px"><span style="font-family:var(--m);color:var(--acc);width:30px;flex:none">5</span><span>Вивести <span style="font-family:var(--m)">a</span> — це і є НСД</span></div>
+    </div>
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;gap:12px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px;color:var(--acc)">Переваги</h3><p style="margin:0;font-size:25px;line-height:1.4">Зрозумілий будь-кому, не потребує спеціальних знань. З формулами в кроках — <b style="font-weight:600">формульно-словесний</b> спосіб.</p></div>
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;gap:12px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Недоліки</h3><p style="margin:0;font-size:25px;line-height:1.4">Мова багатозначна: «повторювати, доки…» — перевіряти умову до чи після дії? Опис швидко розростається.</p></div>
+    </div>
+  </div>
+  <div style="padding:22px 32px;font-size:27px;line-height:1.35;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">«Перейти до кроку N» — прямий аналог оператора <span style="font-family:var(--m);color:var(--acc);font-weight:600">goto</span>: структура алгоритму стає заплутаною.</div>
+</section>
+
+<section data-label="Псевдокод" data-screen-label="05" data-speaker-notes="Наголосити: стандарту немає, тому важлива послідовність. Таблиця — домовленості саме нашого курсу; ними користуємось на всіх лабораторних." style="height:100%;display:flex;flex-direction:column;gap:26px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 8 · Псевдокод</span><span style="display:var(--hdr,inline);color:var(--mut)">04</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Домовленості курсу</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)"><b style="font-weight:600;color:var(--ink)">Псевдокод</b> — напівформальна мова для людей: не має єдиного стандарту й не компілюється. Однакові конструкції записують однаково.</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.7fr 1.35fr;grid-auto-rows:1fr;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-size:25px">
+    <div style="padding:12px 24px;display:flex;align-items:center;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Конструкція</div>
+    <div style="padding:12px 24px;display:flex;align-items:center;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Псевдокод</div>
+    <div style="padding:12px 24px;display:flex;align-items:center;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">C++</div>
+    <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair)">присвоювання</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">x <span style="color:var(--acc);font-weight:600;margin:0 10px">←</span> вираз</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);color:var(--mut)">x = вираз;</div>
+    <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair)">введення, виведення</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)"><span style="color:var(--acc);font-weight:600;margin-right:10px">ввести</span> x, <span style="color:var(--acc);font-weight:600;margin:0 10px">вивести</span> x</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);color:var(--mut)">cin &gt;&gt; x; cout &lt;&lt; x;</div>
+    <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair)">розгалуження</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)"><span style="color:var(--acc);font-weight:600;margin-right:10px">якщо</span> умова <span style="color:var(--acc);font-weight:600;margin:0 10px">то</span> … <span style="color:var(--acc);font-weight:600;margin:0 10px">інакше</span> …</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);color:var(--mut)">if (умова) … else …</div>
+    <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair)">вибір</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)"><span style="color:var(--acc);font-weight:600;margin-right:10px">вибір</span> x: <span style="color:var(--acc);font-weight:600;margin:0 10px">випадок</span> 1: …</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);color:var(--mut)">switch (x) …</div>
+    <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair)">цикл з передумовою</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)"><span style="color:var(--acc);font-weight:600;margin-right:10px">поки</span> умова <span style="color:var(--acc);font-weight:600;margin:0 10px">виконувати</span> …</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);color:var(--mut)">while (умова) …</div>
+    <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair)">цикл з післяумовою</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)"><span style="color:var(--acc);font-weight:600;margin-right:10px">повторювати</span> … <span style="color:var(--acc);font-weight:600;margin:0 10px">поки</span> умова</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);color:var(--mut)">do … while (умова);</div>
+    <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair)">цикл з параметром</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)"><span style="color:var(--acc);font-weight:600;margin-right:10px">для</span> i <span style="color:var(--acc);font-weight:600;margin:0 10px">від</span> 1 <span style="color:var(--acc);font-weight:600;margin:0 10px">до</span> n …</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);color:var(--mut)">for (int i = 1; i &lt;= n; i++)</div>
+    <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair)">підпрограма</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)"><span style="color:var(--acc);font-weight:600;margin-right:10px">функція</span> Ім'я(…) … <span style="color:var(--acc);font-weight:600;margin:0 10px">повернути</span> v</div><div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);color:var(--mut)">функція C++</div>
+  </div>
+</section>
+
+<section data-label="Правила оформлення" data-screen-label="06" data-speaker-notes="Запис a ← a + 1 спершу дивує студентів: як рівняння він хибний. Тому й стрілка, а не «=»." style="height:100%;display:flex;flex-direction:column;gap:32px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 8 · Псевдокод</span><span style="display:var(--hdr,inline);color:var(--mut)">05</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Правила оформлення</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:28px 34px;display:flex;flex-direction:column;gap:12px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px;color:var(--acc)">Відступи — це вкладеність</h3><p style="margin:0;font-size:25px;line-height:1.4;color:var(--mut)">Усе, що всередині циклу чи гілки, пишуть з відступом</p></div>
+    <div style="background:var(--bg);padding:28px 34px;display:flex;flex-direction:column;gap:12px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px;color:var(--acc)">Одна дія — один рядок</h3><p style="margin:0;font-size:25px;line-height:1.4;color:var(--mut)">Складну дію краще розбити або винести в окрему підпрограму</p></div>
+    <div style="background:var(--bg);padding:28px 34px;display:flex;flex-direction:column;gap:12px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px;color:var(--acc)">Змістовні імена</h3><p style="margin:0;font-size:25px;line-height:1.4;color:var(--mut)"><span style="font-family:var(--m);color:var(--ink)">сума</span>, <span style="font-family:var(--m);color:var(--ink)">максимум</span>, <span style="font-family:var(--m);color:var(--ink)">кількістьВідмінників</span> читаються краще за <span style="font-family:var(--m)">s</span>, <span style="font-family:var(--m)">m</span>, <span style="font-family:var(--m)">k</span></p></div>
+    <div style="background:var(--bg);padding:28px 34px;display:flex;flex-direction:column;gap:12px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px;color:var(--acc)">Без деталей мови</h3><p style="margin:0;font-size:25px;line-height:1.4;color:var(--mut)">Типи даних, крапки з комою, дужки й підключення бібліотек не потрібні</p></div>
+  </div>
+  <div style="padding:26px 34px;display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:center;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="font-family:var(--m);font-size:48px;white-space:nowrap">a <span style="color:var(--acc)">←</span> a + 1</div>
+    <p style="margin:0;font-size:27px;line-height:1.4">Читаємо «<b style="font-weight:600;color:var(--acc)">присвоїти</b>»: збільшити <span style="font-family:var(--m)">a</span> на 1. Це дія, а не рівняння.</p>
+  </div>
+</section>
+
+<section data-label="Приклади 1–2" data-screen-label="07" data-speaker-notes="Прийом «поточного кандидата» — ключовий. Замість шести варіантів упорядкування — два порівняння, і він масштабується на масив. У прикладі 2 порівняти зі словесним записом: переходів немає, є цикл." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 8 · Приклади</span><span style="display:var(--hdr,inline);color:var(--mut)">06</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Перші алгоритми псевдокодом</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="padding:28px 34px;display:flex;flex-direction:column;gap:20px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Найбільше з трьох</h3><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Приклад 1</span></div>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:28px;line-height:1.55;background:var(--bg2);padding:20px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">ввести</span> a, b, c
+max ← a
+<span style="color:var(--acc);font-weight:600">якщо</span> b &gt; max <span style="color:var(--acc);font-weight:600">то</span>
+    max ← b
+<span style="color:var(--acc);font-weight:600">кінець якщо
+</span><span style="color:var(--acc);font-weight:600">якщо</span> c &gt; max <span style="color:var(--acc);font-weight:600">то</span>
+    max ← c
+<span style="color:var(--acc);font-weight:600">кінець якщо
+</span><span style="color:var(--acc);font-weight:600">вивести</span> max</pre>
+      <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Прийом «поточного кандидата»: не перебираємо 6 варіантів, а порівнюємо по черзі. Працює для масиву будь-якої довжини.</p>
+    </div>
+    <div style="padding:28px 34px;display:flex;flex-direction:column;gap:20px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Алгоритм Евкліда</h3><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Приклад 2</span></div>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:28px;line-height:1.55;background:var(--bg2);padding:20px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">функція</span> НСД(a, b)
+    <span style="color:var(--acc);font-weight:600">поки</span> b ≠ 0 <span style="color:var(--acc);font-weight:600">виконувати</span>
+        r ← a <span style="color:var(--acc);font-weight:600">mod</span> b
+        a ← b
+        b ← r
+    <span style="color:var(--acc);font-weight:600">кінець поки
+    </span><span style="color:var(--acc);font-weight:600">повернути</span> a</pre>
+      <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)"><span style="font-family:var(--m);color:var(--ink)">mod</span> — остача від ділення (у C++ <span style="font-family:var(--m);color:var(--ink)">%</span>). Переходи «до кроку 2» зникли — їх замінив цикл.</p>
+    </div>
+  </div>
+</section>
+
+<section data-label="Лінійний пошук" data-screen-label="08" data-speaker-notes="Пройти рядок за рядком і показати відповідність. Переклад майже механічний — у цьому сила псевдокоду як проміжного етапу." style="height:100%;display:flex;flex-direction:column;gap:28px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 8 · Приклад 3</span><span style="display:var(--hdr,inline);color:var(--mut)">07</span></div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Лінійний пошук: рядок у рядок</h2>
+    <p style="margin:0;font-size:27px;line-height:1.4;color:var(--mut)">Знайти в масиві <span style="font-family:var(--m);color:var(--ink)">a[0] … a[n−1]</span> позицію першого елемента, рівного <span style="font-family:var(--m);color:var(--ink)">x</span>, або повідомити, що його немає</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto repeat(10,auto) 1fr;font-family:var(--m);font-size:24px;line-height:1.35;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="padding:10px 30px;background:var(--bg2);border-right:var(--hair);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Псевдокод</div>
+    <div style="padding:10px 30px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++</div>
+
+    <div style="padding:5px 30px;border-top:var(--hair);border-right:var(--hair)"><span style="color:var(--acc);font-weight:600">ввести</span> n, масив a, x</div>
+    <div style="padding:5px 30px;border-top:var(--hair)"><div><span style="color:var(--acc);font-weight:600">int</span> n, x; cin &gt;&gt; n;</div><div>vector&lt;<span style="color:var(--acc);font-weight:600">int</span>&gt; a(n);</div><div><span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> i = 0; i &lt; n; i++) cin &gt;&gt; a[i];</div><div>cin &gt;&gt; x;</div></div>
+
+    <div style="padding:5px 30px;border-top:var(--hair);border-right:var(--hair)">позиція ← −1</div>
+    <div style="padding:5px 30px;border-top:var(--hair)"><span style="color:var(--acc);font-weight:600">int</span> position = -1;</div>
+
+    <div style="padding:5px 30px;border-top:var(--hair);border-right:var(--hair)">i ← 0</div>
+    <div style="padding:5px 30px;border-top:var(--hair)"><span style="color:var(--acc);font-weight:600">int</span> i = 0;</div>
+
+    <div style="padding:5px 30px;border-top:var(--hair);border-right:var(--hair)"><span style="color:var(--acc);font-weight:600">поки</span> i &lt; n <span style="color:var(--acc);font-weight:600">і</span> позиція = −1 <span style="color:var(--acc);font-weight:600">виконувати</span></div>
+    <div style="padding:5px 30px;border-top:var(--hair)"><span style="color:var(--acc);font-weight:600">while</span> (i &lt; n &amp;&amp; position == -1) {</div>
+
+    <div style="padding:5px 30px 5px 78px;border-top:var(--hair);border-right:var(--hair)"><div><span style="color:var(--acc);font-weight:600">якщо</span> a[i] = x <span style="color:var(--acc);font-weight:600">то</span></div><div style="padding-left:48px">позиція ← i</div><div><span style="color:var(--acc);font-weight:600">кінець якщо</span></div></div>
+    <div style="padding:5px 30px 5px 78px;border-top:var(--hair);display:flex;align-items:center"><div><span style="color:var(--acc);font-weight:600">if</span> (a[i] == x) position = i;</div></div>
+
+    <div style="padding:5px 30px 5px 78px;border-top:var(--hair);border-right:var(--hair)">i ← i + 1</div>
+    <div style="padding:5px 30px 5px 78px;border-top:var(--hair)">i++;</div>
+
+    <div style="padding:5px 30px;border-top:var(--hair);border-right:var(--hair)"><span style="color:var(--acc);font-weight:600">кінець поки</span></div>
+    <div style="padding:5px 30px;border-top:var(--hair)">}</div>
+
+    <div style="padding:5px 30px;border-top:var(--hair);border-right:var(--hair)"><div><span style="color:var(--acc);font-weight:600">якщо</span> позиція = −1 <span style="color:var(--acc);font-weight:600">то</span></div><div style="padding-left:48px"><span style="color:var(--acc);font-weight:600">вивести</span> «не знайдено»</div></div>
+    <div style="padding:5px 30px;border-top:var(--hair);display:flex;align-items:center"><div><span style="color:var(--acc);font-weight:600">if</span> (position == -1) cout &lt;&lt; "не знайдено";</div></div>
+
+    <div style="padding:5px 30px;border-top:var(--hair);border-right:var(--hair)"><div><span style="color:var(--acc);font-weight:600">інакше</span></div><div style="padding-left:48px"><span style="color:var(--acc);font-weight:600">вивести</span> позиція</div></div>
+    <div style="padding:5px 30px;border-top:var(--hair);display:flex;align-items:center"><div><span style="color:var(--acc);font-weight:600">else</span> cout &lt;&lt; position;</div></div>
+
+    <div style="padding:5px 30px;border-top:var(--hair);border-right:var(--hair)"><span style="color:var(--acc);font-weight:600">кінець якщо</span></div>
+    <div style="padding:5px 30px;border-top:var(--hair);color:var(--mut)">—</div>
+
+    <div style="border-right:var(--hair)"></div>
+    <div></div>
+  </div>
+</section>
+
+<section data-label="Покрокова деталізація" data-screen-label="09" data-speaker-notes="Проєктування згори донизу. Пункти верхнього рівня часто стають окремими функціями — це міст до модульного програмування." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 8 · Проєктування</span><span style="display:var(--hdr,inline);color:var(--mut)">08</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Покрокова деталізація</h2>
+  <p style="margin:0;font-size:28px;line-height:1.4;max-width:1560px">Спершу план верхнього рівня, потім уточнюємо кожен пункт — <b style="font-weight:600;color:var(--acc)">згори донизу</b>. Задача: обробити оцінки групи.</p>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 90px 1fr;align-items:stretch;min-height:0">
+    <div style="padding:28px 34px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Рівень 1 · план</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;font-family:var(--m);font-size:28px">
+        <div style="padding:18px 22px;border:var(--hair);margin-bottom:-1px">ввести оцінки групи</div>
+        <div style="padding:18px 22px;background:var(--fill);color:var(--acc-ink);margin-bottom:-1px">обчислити середній бал</div>
+        <div style="padding:18px 22px;border:var(--hair);margin-bottom:-1px">знайти кількість із балом ≥ 4.5</div>
+        <div style="padding:18px 22px;border:var(--hair)">вивести результати</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;font-family:var(--m);font-size:44px;color:var(--acc)">→</div>
+    <div style="padding:28px 34px;display:flex;flex-direction:column;gap:18px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Рівень 2 · «обчислити середній бал»</div>
+      <pre style="margin:0;flex:1;display:flex;align-items:center;font-family:var(--m);font-size:30px;line-height:1.6;background:var(--bg2);padding:20px 26px;white-space:pre">сума ← 0
+<span style="color:var(--acc);font-weight:600">для</span> i <span style="color:var(--acc);font-weight:600">від</span> 1 <span style="color:var(--acc);font-weight:600">до</span> n <span style="color:var(--acc);font-weight:600">виконувати</span>
+    сума ← сума + бал[i]
+<span style="color:var(--acc);font-weight:600">кінець для</span>
+середній ← сума / n</pre>
+    </div>
+  </div>
+  <div style="padding:22px 32px;font-size:27px;line-height:1.35;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">Деталізуємо, доки кожен рядок не стане очевидним для перекладу. Пункти верхнього рівня часто стають <b style="font-weight:600;color:var(--acc)">окремими функціями</b>.</div>
+</section>
+
+<section data-label="Структурограми" data-screen-label="10" data-speaker-notes="Розділ-заставка. Головне: немає стрілок, отже немає goto. Три базові структури — слідування, розгалуження, цикл — достатньо для будь-якого алгоритму." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:40px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Частина 2</div><span style="display:var(--hdr,inline);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;color:var(--mut)">09</span></div>
+  <div>
+    <div style="font-family:var(--m);font-size:40px;color:var(--acc)">1973</div>
+    <h2 style="margin:18px 0 0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Структурограми</h2>
+    <p style="margin:26px 0 0;font-size:34px;line-height:1.35;color:var(--mut);max-width:1300px">Діаграми Нассі–Шнейдермана: запис, розрахований саме на структурне програмування. У Німеччині нормує стандарт DIN 66261.</p>
+  </div>
+  <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:26px 32px;font-family:var(--h);font-weight:700;font-size:32px;line-height:1.25">Один прямокутник, поділений на вкладені блоки. <span style="color:var(--acc)">Стрілок немає.</span></div>
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;gap:8px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">1</span><span style="font-family:var(--h);font-weight:700;font-size:34px">Слідування</span></div>
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;gap:8px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">2</span><span style="font-family:var(--h);font-weight:700;font-size:34px">Розгалуження</span></div>
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;gap:8px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">3</span><span style="font-family:var(--h);font-weight:700;font-size:34px">Цикл</span></div>
+  </div>
+</section>
+
+<section data-label="Елементи" data-screen-label="11" data-speaker-notes="Намалювати на дошці паралельно. Звернути увагу на ліву смугу циклу — вона показує межі тіла. Цикл з параметром малюють так само, як з передумовою." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 8 · Структурограми</span><span style="display:var(--hdr,inline);color:var(--mut)">10</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Елементи структурограм</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:26px 26px;display:flex;flex-direction:column;gap:20px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px;color:var(--acc)">Слідування</h3>
+      <div style="margin:auto 0;border:var(--ns);font-family:var(--m);font-size:24px;text-align:center">
+        <div style="padding:16px 8px;border-bottom:var(--ns)">дія 1</div><div style="padding:16px 8px;border-bottom:var(--ns)">дія 2</div><div style="padding:16px 8px">дія 3</div>
+      </div>
+      <p style="margin:0;font-size:24px;line-height:1.38;color:var(--mut)">Блоки одне під одним, виконуються згори донизу</p>
+    </div>
+    <div style="background:var(--bg);padding:26px 26px;display:flex;flex-direction:column;gap:20px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px;color:var(--acc)">Розгалуження</h3>
+      <div style="margin:auto 0;border:var(--ns);font-family:var(--m);font-size:24px">
+        <div style="position:relative;height:96px;border-bottom:var(--ns)">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%" fill="none" stroke="var(--ink)" stroke-width="2" aria-hidden="true"><path d="M0 0L50 100L100 0" vector-effect="non-scaling-stroke"></path></svg>
+          <div style="position:absolute;top:8px;left:0;right:0;text-align:center">умова</div>
+          <div style="position:absolute;bottom:6px;left:10px;font-size:22px;color:var(--acc)">так</div><div style="position:absolute;bottom:6px;right:10px;font-size:22px;color:var(--mut)">ні</div>
+        </div>
+        <div style="display:flex;text-align:center"><div style="flex:1;padding:16px 4px;border-right:var(--ns)">дія 1</div><div style="flex:1;padding:16px 4px">дія 2</div></div>
+      </div>
+      <p style="margin:0;font-size:24px;line-height:1.38;color:var(--mut)">Діагоналі ділять умову на гілки. Порожня гілка — риска</p>
+    </div>
+    <div style="background:var(--bg);padding:26px 26px;display:flex;flex-direction:column;gap:20px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px;color:var(--acc)">Вибір</h3>
+      <div style="margin:auto 0;border:var(--ns);font-family:var(--m);font-size:24px">
+        <div style="position:relative;height:96px;border-bottom:var(--ns)">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%" fill="none" stroke="var(--ink)" stroke-width="2" aria-hidden="true"><path d="M0 0L66.6 100L100 0" vector-effect="non-scaling-stroke"></path><path d="M33.3 50V100" vector-effect="non-scaling-stroke"></path></svg>
+          <div style="position:absolute;top:8px;left:0;right:0;text-align:center">x</div>
+          <div style="position:absolute;bottom:6px;left:12px;font-size:22px;color:var(--acc)">1</div><div style="position:absolute;bottom:6px;left:calc(33.3% + 12px);font-size:22px;color:var(--acc)">2</div><div style="position:absolute;bottom:6px;right:6px;font-size:20px;color:var(--mut)">інакше</div>
+        </div>
+        <div style="display:flex;text-align:center"><div style="flex:1;padding:16px 2px;border-right:var(--ns)">д1</div><div style="flex:1;padding:16px 2px;border-right:var(--ns)">д2</div><div style="flex:1;padding:16px 2px">д3</div></div>
+      </div>
+      <p style="margin:0;font-size:24px;line-height:1.38;color:var(--mut)">Як <span style="font-family:var(--m);color:var(--ink)">switch</span>: кожному значенню — свій стовпець</p>
+    </div>
+    <div style="background:var(--bg);padding:26px 26px;display:flex;flex-direction:column;gap:20px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px;color:var(--acc)">Цикл з передумовою</h3>
+      <div style="margin:auto 0;border:var(--ns);font-family:var(--m);font-size:24px">
+        <div style="padding:16px 14px">поки умова</div>
+        <div style="display:flex"><div style="width:36px;flex:none"></div><div style="flex:1;border-top:var(--ns);border-left:var(--ns);text-align:center"><div style="padding:16px 4px;border-bottom:var(--ns)">дія 1</div><div style="padding:16px 4px">дія 2</div></div></div>
+      </div>
+      <p style="margin:0;font-size:24px;line-height:1.38;color:var(--mut)">Умова зверху, тіло зсунуте праворуч. Так само — «для i від 1 до n»</p>
+    </div>
+    <div style="background:var(--bg);padding:26px 26px;display:flex;flex-direction:column;gap:20px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px;color:var(--acc)">Цикл з післяумовою</h3>
+      <div style="margin:auto 0;border:var(--ns);font-family:var(--m);font-size:24px">
+        <div style="display:flex"><div style="width:36px;flex:none"></div><div style="flex:1;border-bottom:var(--ns);border-left:var(--ns);text-align:center"><div style="padding:16px 4px;border-bottom:var(--ns)">дія 1</div><div style="padding:16px 4px">дія 2</div></div></div>
+        <div style="padding:16px 14px">поки умова</div>
+      </div>
+      <p style="margin:0;font-size:24px;line-height:1.38;color:var(--mut)">Тіло вгорі, умова внизу — виконається хоча б раз</p>
+    </div>
+  </div>
+</section>
+
+<section data-label="Правила і Евклід" data-screen-label="12" data-speaker-notes="Порівняти з псевдокодом прикладу 2: кожен рядок став блоком, цикл охопив три дії тіла. Правило 3 — практичний сигнал: занадто вузькі блоки означають, що час винести частину в підпрограму." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 8 · Структурограми</span><span style="display:var(--hdr,inline);color:var(--mut)">11</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Правила побудови</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.15fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-rows:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:20px 30px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">1</span><span style="font-size:26px;line-height:1.35">Читаємо згори донизу; кожен блок має <b style="font-weight:600">один вхід</b> зверху й <b style="font-weight:600">один вихід</b> знизу</span></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">2</span><span style="font-size:26px;line-height:1.35">Будь-який блок можна замінити цілою структурою — так виникає вкладеність</span></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">3</span><span style="font-size:26px;line-height:1.35">Гілки ділять ширину батька. Надто вузькі блоки — сигнал винести частину в підпрограму</span></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">4</span><span style="font-size:26px;line-height:1.35">Текст у блоках — короткий псевдокод: <span style="font-family:var(--m)">r ← a mod b</span></span></div>
+    </div>
+    <div style="padding:28px 34px;display:flex;flex-direction:column;gap:22px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Алгоритм Евкліда</h3><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Рис. 2</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div style="border:var(--ns);font-family:var(--m);font-size:30px">
+          <div style="padding:18px 24px;border-bottom:var(--ns)">ввести a, b</div>
+          <div style="padding:18px 24px;color:var(--acc);font-weight:600">поки b ≠ 0</div>
+          <div style="display:flex;border-bottom:var(--ns)">
+            <div style="width:60px;flex:none"></div>
+            <div style="flex:1;border-top:var(--ns);border-left:var(--ns)">
+              <div style="padding:18px 24px;border-bottom:var(--ns)">r ← a mod b</div>
+              <div style="padding:18px 24px;border-bottom:var(--ns)">a ← b</div>
+              <div style="padding:18px 24px">b ← r</div>
+            </div>
+          </div>
+          <div style="padding:18px 24px">вивести a</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Максимум у масиві" data-screen-label="13" data-speaker-notes="Розгалуження вкладене в цикл — правило 2 у дії. Гілка «ні» порожня, ставимо риску. Показати, як кожен блок стає рядком C++." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 8 · Структурограми</span><span style="display:var(--hdr,inline);color:var(--mut)">12</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Максимум у масиві</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.1fr 1fr;gap:44px;min-height:0">
+    <div style="padding:28px 34px;display:flex;flex-direction:column;gap:22px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Структурограма</h3><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Рис. 3</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div style="border:var(--ns);font-family:var(--m);font-size:28px">
+          <div style="padding:16px 22px;border-bottom:var(--ns)">ввести n, a</div>
+          <div style="padding:16px 22px;border-bottom:var(--ns)">max ← a[0]</div>
+          <div style="padding:16px 22px;color:var(--acc);font-weight:600">для i від 1 до n − 1</div>
+          <div style="display:flex;border-bottom:var(--ns)">
+            <div style="width:60px;flex:none"></div>
+            <div style="flex:1;border-top:var(--ns);border-left:var(--ns)">
+              <div style="position:relative;height:104px;border-bottom:var(--ns)">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%" fill="none" stroke="var(--ink)" stroke-width="2" aria-hidden="true"><path d="M0 0L50 100L100 0" vector-effect="non-scaling-stroke"></path></svg>
+                <div style="position:absolute;top:10px;left:0;right:0;text-align:center">a[i] &gt; max</div>
+                <div style="position:absolute;bottom:8px;left:14px;font-size:24px;color:var(--acc)">так</div><div style="position:absolute;bottom:8px;right:14px;font-size:24px;color:var(--mut)">ні</div>
+              </div>
+              <div style="display:flex;text-align:center"><div style="flex:1;padding:16px 4px;border-right:var(--ns);background:var(--fill);color:var(--acc-ink)">max ← a[i]</div><div style="flex:1;padding:16px 4px;color:var(--mut)">—</div></div>
+            </div>
+          </div>
+          <div style="padding:16px 22px">вивести max</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px">
+      <div style="padding:28px 34px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++</div>
+        <pre style="margin:0;font-family:var(--m);font-size:28px;line-height:1.6;background:var(--bg2);padding:20px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">int</span> max = a[0];
+<span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> i = 1; i &lt; n; i++) {
+    <span style="color:var(--acc);font-weight:600">if</span> (a[i] &gt; max) max = a[i];
+}
+cout &lt;&lt; max &lt;&lt; '\n';</pre>
+      </div>
+      <div style="flex:1;padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px;color:var(--acc)">Вкладеність</h3>
+        <p style="margin:0;font-size:26px;line-height:1.4">Розгалуження стоїть усередині циклу: для кожного <span style="font-family:var(--m)">i</span> перевіряємо, чи <span style="font-family:var(--m)">a[i]</span> більший за поточний максимум. Гілка «ні» порожня.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Порівняння способів" data-screen-label="14" data-speaker-notes="На практиці способи поєднують: ідею — словами, проєкт — псевдокодом, документацію — схемою чи структурограмою, реалізацію — мовою програмування." style="height:100%;display:flex;flex-direction:column;gap:28px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 8 · Порівняння</span><span style="display:var(--hdr,inline);color:var(--mut)">13</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Порівняння способів</h2>
+  <div style="flex:1;display:grid;grid-template-columns:.9fr 1.3fr 1.3fr 1.3fr;grid-template-rows:auto repeat(5,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-size:25px;line-height:1.3">
+    <div style="padding:14px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Спосіб</div>
+    <div style="padding:14px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Переваги</div>
+    <div style="padding:14px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Недоліки</div>
+    <div style="padding:14px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Де доречний</div>
+    <div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:28px">Словесний</div><div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair)">зрозумілий без підготовки</div><div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">багатозначний, громіздкий</div><div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">інструкції для людей, постановка задачі</div>
+    <div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Псевдокод</div><div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair)">компактний, близький до програми, легко редагувати</div><div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">немає єдиного стандарту</div><div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">проєктування, підручники, співбесіди</div>
+    <div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Структурограма</div><div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair)">наочна структура, неможливий goto</div><div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">важко малювати й змінювати великі алгоритми</div><div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">навчання структурному програмуванню</div>
+    <div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:28px">Схема</div><div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair)">стандартизована (ГОСТ 19.701-90), наочна</div><div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">громіздка, дозволяє заплутані переходи</div><div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">документація за стандартами, звіти</div>
+    <div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:28px">Програма</div><div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair)">точна, виконується</div><div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">залежить від мови, перевантажена деталями</div><div style="padding:12px 24px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">реалізація</div>
+  </div>
+</section>
+
+<section data-label="До програми" data-screen-label="15" data-speaker-notes="Переклад «блок за блоком». Якщо структурограма правильна — у програмі не буде ні goto, ні хитрих переходів. Детально про конструкції — у лекції 10." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 8 · Переклад</span><span style="display:var(--hdr,inline);color:var(--mut)">14</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Від структурограми до програми</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:28px 28px;display:flex;flex-direction:column;gap:20px">
+      <div style="border:var(--ns);height:96px;display:flex;flex-direction:column"><div style="flex:1;border-bottom:var(--ns)"></div><div style="flex:1"></div></div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Блок дії</h3>
+      <div style="margin-top:auto;padding-top:18px;border-top:var(--hair);font-family:var(--m);font-size:25px;color:var(--acc)">оператор / виклик функції</div>
+    </div>
+    <div style="background:var(--bg);padding:28px 28px;display:flex;flex-direction:column;gap:20px">
+      <div style="border:var(--ns);height:96px;display:flex;flex-direction:column"><div style="position:relative;height:50px;border-bottom:var(--ns)"><svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%" fill="none" stroke="var(--ink)" stroke-width="2" aria-hidden="true"><path d="M0 0L50 100L100 0" vector-effect="non-scaling-stroke"></path></svg></div><div style="flex:1;display:flex"><div style="flex:1;border-right:var(--ns)"></div><div style="flex:1"></div></div></div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Розгалуження</h3>
+      <div style="margin-top:auto;padding-top:18px;border-top:var(--hair);font-family:var(--m);font-size:25px;color:var(--acc)">if (умова) … else …</div>
+    </div>
+    <div style="background:var(--bg);padding:28px 28px;display:flex;flex-direction:column;gap:20px">
+      <div style="border:var(--ns);height:96px;display:flex;flex-direction:column"><div style="position:relative;height:50px;border-bottom:var(--ns)"><svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%" fill="none" stroke="var(--ink)" stroke-width="2" aria-hidden="true"><path d="M0 0L66.6 100L100 0" vector-effect="non-scaling-stroke"></path></svg></div><div style="flex:1;display:flex"><div style="flex:1;border-right:var(--ns)"></div><div style="flex:1;border-right:var(--ns)"></div><div style="flex:1"></div></div></div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Вибір</h3>
+      <div style="margin-top:auto;padding-top:18px;border-top:var(--hair);font-family:var(--m);font-size:25px;color:var(--acc)">switch (вираз) …</div>
+    </div>
+    <div style="background:var(--bg);padding:28px 28px;display:flex;flex-direction:column;gap:20px">
+      <div style="border:var(--ns);height:96px;display:flex;flex-direction:column"><div style="height:34px"></div><div style="flex:1;display:flex"><div style="width:30px"></div><div style="flex:1;border-top:var(--ns);border-left:var(--ns)"></div></div></div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Цикл з передумовою</h3>
+      <div style="margin-top:auto;padding-top:18px;border-top:var(--hair);font-family:var(--m);font-size:25px;color:var(--acc)">while (…) або for (…)</div>
+    </div>
+    <div style="background:var(--bg);padding:28px 28px;display:flex;flex-direction:column;gap:20px">
+      <div style="border:var(--ns);height:96px;display:flex;flex-direction:column"><div style="flex:1;display:flex"><div style="width:30px"></div><div style="flex:1;border-bottom:var(--ns);border-left:var(--ns)"></div></div><div style="height:34px"></div></div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Цикл з післяумовою</h3>
+      <div style="margin-top:auto;padding-top:18px;border-top:var(--hair);font-family:var(--m);font-size:25px;color:var(--acc)">do … while (умова);</div>
+    </div>
+  </div>
+  <div style="padding:22px 32px;font-size:27px;line-height:1.35;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">Правильна структурограма дає програму <b style="font-weight:600;color:var(--acc)">без goto</b> — лише вкладені структурні конструкції.</div>
+</section>
+
+<section data-label="Підсумки" data-screen-label="16" data-speaker-notes="Пройтися по шести пунктах і перейти до запитань." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 8 · Підсумки</span><span style="display:var(--hdr,inline);color:var(--mut)">15</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Що забрати з лекції</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">01</span><span style="font-size:26px;line-height:1.35">Алгоритм записують до програми, щоб відокремити логіку від синтаксису й мати документацію</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">02</span><span style="font-size:26px;line-height:1.35">Словесний спосіб простий, але багатозначний і схильний до «перейти до кроку…»</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">03</span><span style="font-size:26px;line-height:1.35">Псевдокод: ключові слова + математичні вирази; важливі послідовність і відступи</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">04</span><span style="font-size:26px;line-height:1.35">Покрокова деталізація: уточнюємо план, доки кожен рядок не стане очевидним</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">05</span><span style="font-size:26px;line-height:1.35">Структурограма — вкладені прямокутники без стрілок: слідування, розгалуження, вибір, цикли</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">06</span><span style="font-size:26px;line-height:1.35">Кожна конструкція псевдокоду й структурограми має пряму відповідність у C++</span></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:25px;color:var(--mut);padding-top:16px;border-top:var(--hair)">
+    <span>Попередня · Лекція 7. Правила виконання НАМ</span>
+    <span style="font-family:var(--h);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Далі · Лекція 9. Схеми за ЄСПД</span>
+  </div>
+</section>
+
+<section data-label="Контрольні запитання" data-screen-label="17" data-speaker-notes="Практичні 5, 9, 11 — виконати в аудиторії на дошці. Решту — на самостійне опрацювання." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 8 · Перевірка</span><span style="display:var(--hdr,inline);color:var(--mut)">16</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Контрольні запитання</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.25fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Теорія</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;font-size:24px;line-height:1.3">
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">1</span><span>Навіщо записувати алгоритм до того, як писати програму?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">2</span><span>Які вимоги ставлять до способу представлення алгоритму?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">3</span><span>Недоліки словесного способу. Чому «перейти до кроку N» ускладнює алгоритм?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">4</span><span>Що таке псевдокод? Чи існує його єдиний стандарт?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">6</span><span>Що означає запис <span style="font-family:var(--m)">a ← a + 1</span>?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">7</span><span>У чому суть покрокової деталізації? Наведіть приклад</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">8</span><span>Хто і коли запропонував структурограми? Яка їхня головна ідея?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">10</span><span>Чому в структурограмі неможливий оператор <span style="font-family:var(--m)">goto</span>?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">12</span><span>Псевдокод, структурограми, блок-схеми: де доречний кожен?</span></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg2);padding:22px 30px;display:flex;flex-direction:column;justify-content:center;gap:10px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">5 · На дошці</div><p style="margin:0;font-size:26px;line-height:1.35">Запишіть псевдокодом цикли з передумовою, з післяумовою й з параметром. Чим вони відрізняються?</p></div>
+      <div style="background:var(--bg2);padding:22px 30px;display:flex;flex-direction:column;justify-content:center;gap:10px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">9 · На дошці</div><p style="margin:0;font-size:26px;line-height:1.35">Зобразіть розгалуження, вибір, цикли з передумовою й післяумовою</p></div>
+      <div style="background:var(--bg2);padding:22px 30px;display:flex;flex-direction:column;justify-content:center;gap:10px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">11 · На дошці</div><p style="margin:0;font-size:26px;line-height:1.35">Побудуйте структурограму знаходження суми додатних елементів масиву</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Л9 · Титул" data-screen-label="18" data-speaker-notes="Блок-схема — найвідоміший спосіб зображати алгоритми. Сьогодні: стандарт ГОСТ 19.701-90, символи, правила побудови, два приклади і типові помилки. Знадобиться в лабораторній роботі 3." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;gap:60px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
+    <div style="align-self:flex-start;border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Лекція 9 · Алгоритми і методи обчислень</div>
+    <div>
+      <h1 style="margin:0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em"><span style="color:var(--acc)">Схеми алгоритмів</span><br>за стандартами ЄСПД</h1>
+      <p style="margin:30px 0 0;font-size:36px;line-height:1.3;color:var(--mut);max-width:1000px">Графічне представлення алгоритмів · ГОСТ 19.701-90 (ISO 5807-85)</p>
+    </div>
+    <div style="display:flex;gap:18px;font-size:24px;color:var(--mut)"><span>Змістовий модуль 1</span><span>·</span><span>Тема 3. Представлення та основні структури алгоритмів</span></div>
+  </div>
+  <div style="width:560px;flex:none;display:flex;flex-direction:column;justify-content:center;gap:28px">
+    <div style="padding:36px 40px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <svg viewBox="0 0 480 560" width="100%" style="display:block;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+        <rect x="150" y="10" width="180" height="56" rx="28"></rect><text x="240" y="46" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">Початок</text>
+        <path d="M240 66V100"></path>
+        <path d="M165 100H345L315 160H135Z"></path><text x="240" y="138" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">Ввести x</text>
+        <path d="M240 160V196"></path>
+        <path d="M240 196L340 246L240 296L140 246Z" stroke="var(--fill)"></path><text x="240" y="255" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">x &gt; 0</text>
+        <path d="M140 246H60V340"></path><path d="M340 246H420V340"></path>
+        <text x="100" y="232" text-anchor="middle" font-size="22" fill="var(--fill)" stroke="none">так</text><text x="380" y="232" text-anchor="middle" font-size="22" fill="var(--mut)" stroke="none">ні</text>
+        <rect x="10" y="340" width="100" height="56"></rect><text x="60" y="376" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">y ← x</text>
+        <rect x="370" y="340" width="100" height="56"></rect><text x="420" y="376" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">y ← −x</text>
+        <path d="M60 396V440H240"></path><path d="M420 396V440H246"></path><path d="M252 434L240 440L252 446" fill="currentColor"></path>
+        <path d="M240 440V484"></path>
+        <rect x="150" y="484" width="180" height="56" rx="28"></rect><text x="240" y="520" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">Кінець</text>
+      </svg>
+    </div>
+    <p style="margin:0;text-align:center;font-size:24px;color:var(--mut)">Однаковий вигляд — однакове розуміння</p>
+  </div>
+</section>
+
+<section data-label="Л9 · ЄСПД" data-screen-label="19" data-speaker-notes="ЄСПД — не один стандарт, а серія. Нас цікавить один — 19.701-90. Важливо, що він ідентичний ISO 5807: схеми зрозумілі й за кордоном." style="height:100%;display:flex;flex-direction:column;gap:32px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 9 · Стандарт</span><span style="display:var(--hdr,inline);color:var(--mut)">01</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">ЄСПД і стандарт на схеми</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="padding:34px 40px;display:flex;flex-direction:column;gap:22px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Система</div>
+      <div style="font-family:var(--m);font-size:64px;color:var(--acc);line-height:1">ГОСТ 19.xxx</div>
+      <p style="margin:0;font-size:28px;line-height:1.45"><b style="font-weight:600">Єдина система програмної документації</b> — комплекс міждержавних стандартів, що встановлюють правила розроблення, оформлення й обігу програм і документації.</p>
+      <div style="margin-top:auto;display:flex;flex-wrap:wrap;gap:12px">
+        <span style="padding:8px 18px;border:var(--hair);font-size:23px">технічне завдання</span>
+        <span style="padding:8px 18px;border:var(--hair);font-size:23px">опис програми</span>
+        <span style="padding:8px 18px;border:var(--hair);font-size:23px">програма й методика випробувань</span>
+      </div>
+    </div>
+    <div style="padding:34px 40px;display:flex;flex-direction:column;gap:22px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Наш стандарт</div>
+      <div style="display:flex;align-items:baseline;gap:24px;flex-wrap:wrap"><span style="font-family:var(--m);font-size:64px;line-height:1">ГОСТ 19.701-90</span><span style="font-family:var(--m);font-size:30px;color:var(--mut)">= ISO 5807-85</span></div>
+      <p style="margin:0;font-size:28px;line-height:1.45">«Схеми алгоритмів, програм, даних і систем. Умовні позначення і правила виконання».</p>
+      <p style="margin:auto 0 0;padding:20px 26px;background:var(--bg2);font-size:26px;line-height:1.4">Відповідає міжнародному ISO 5807:1985 — схеми зрозумілі й за межами країн ЄСПД.</p>
+    </div>
+  </div>
+</section>
+
+<section data-label="Л9 · Види схем" data-screen-label="20" data-speaker-notes="П'ять видів схем. Далі в лекції — переважно перший: схема програми, яку в побуті називають блок-схемою." style="height:100%;display:flex;flex-direction:column;gap:32px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 9 · Стандарт</span><span style="display:var(--hdr,inline);color:var(--mut)">02</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Види схем за ГОСТ 19.701-90</h2>
+  <div style="flex:1;display:grid;grid-template-columns:.9fr 1.6fr;grid-template-rows:auto repeat(5,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-size:28px;line-height:1.35">
+    <div style="padding:14px 30px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Вид схеми</div>
+    <div style="padding:14px 30px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Що показує</div>
+    <div style="padding:12px 30px;display:flex;align-items:center;gap:16px;border-top:var(--hair);background:var(--fill);color:var(--acc-ink);font-family:var(--h);font-weight:700;font-size:30px">Схема програми (алгоритму)</div><div style="padding:12px 30px;display:flex;align-items:center;border-top:var(--hair)">послідовність операцій програми — саме її звуть блок-схемою</div>
+    <div style="padding:12px 30px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:30px">Схема даних</div><div style="padding:12px 30px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">шляхи даних: носії, обробку, перетворення</div>
+    <div style="padding:12px 30px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:30px">Схема роботи системи</div><div style="padding:12px 30px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">керування операціями й потоки даних у системі</div>
+    <div style="padding:12px 30px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:30px">Схема взаємодії програм</div><div style="padding:12px 30px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">зв'язки між програмами й даними, до яких вони звертаються</div>
+    <div style="padding:12px 30px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:30px">Схема ресурсів системи</div><div style="padding:12px 30px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">конфігурацію блоків даних і обробки, потрібних для задачі</div>
+  </div>
+</section>
+
+<section data-label="Л9 · Символи" data-screen-label="21" data-speaker-notes="Чотири групи символів: даних, процесу, ліній, спеціальні. Тут — найуживаніші. Для даних є ще уточнені: документ, ручне введення, дисплей; у навчальних задачах досить загального паралелограма." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 9 · Символи</span><span style="display:var(--hdr,inline);color:var(--mut)">03</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Основні символи схем</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:20px 24px;display:flex;flex-direction:column;gap:10px"><svg viewBox="0 0 150 100" height="104" style="display:block;color:var(--ink)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="15" y="30" width="120" height="40" rx="20"></rect></svg><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Термінатор</h3><p style="margin:0;font-size:23px;line-height:1.35;color:var(--mut)">початок і кінець схеми, вхід і вихід підпрограми</p></div>
+    <div style="background:var(--bg);padding:20px 24px;display:flex;flex-direction:column;gap:10px"><svg viewBox="0 0 150 100" height="104" style="display:block;color:var(--ink)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="30" y="20" width="90" height="60"></rect></svg><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Процес</h3><p style="margin:0;font-size:23px;line-height:1.35;color:var(--mut)">обчислення, присвоювання — будь-яка дія, що змінює дані</p></div>
+    <div style="background:var(--bg);padding:20px 24px;display:flex;flex-direction:column;gap:10px"><svg viewBox="0 0 150 100" height="104" style="display:block;color:var(--ink)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M75 15L130 50L75 85L20 50Z"></path></svg><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Рішення</h3><p style="margin:0;font-size:23px;line-height:1.35;color:var(--mut)">перевірка умови; один вхід, два чи більше виходів</p></div>
+    <div style="background:var(--bg);padding:20px 24px;display:flex;flex-direction:column;gap:10px"><svg viewBox="0 0 150 100" height="104" style="display:block;color:var(--ink)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M42 20H130L108 80H20Z"></path></svg><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Дані</h3><p style="margin:0;font-size:23px;line-height:1.35;color:var(--mut)">введення або виведення без уточнення носія</p></div>
+    <div style="background:var(--bg);padding:20px 24px;display:flex;flex-direction:column;gap:10px"><svg viewBox="0 0 150 100" height="104" style="display:block;color:var(--ink)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="30" y="20" width="90" height="60"></rect><path d="M41 20V80M109 20V80"></path></svg><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Визначений процес</h3><p style="margin:0;font-size:23px;line-height:1.35;color:var(--mut)">виклик підпрограми, описаної окремо</p></div>
+    <div style="background:var(--bg);padding:20px 24px;display:flex;flex-direction:column;gap:10px"><svg viewBox="0 0 150 100" height="104" style="display:block;color:var(--ink)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M45 20H105L125 50L105 80H45L25 50Z"></path></svg><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Підготовка</h3><p style="margin:0;font-size:23px;line-height:1.35;color:var(--mut)">заголовок циклу з параметром, налаштування</p></div>
+    <div style="background:var(--bg);padding:20px 24px;display:flex;flex-direction:column;gap:10px"><svg viewBox="0 0 150 100" height="104" style="display:block;color:var(--ink)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M42 8H108L120 20V42H30V20Z"></path><path d="M30 58H120V80L108 92H42L30 80Z"></path></svg><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Межа циклу</h3><p style="margin:0;font-size:23px;line-height:1.35;color:var(--mut)">початок і кінець циклу: назва й умова</p></div>
+    <div style="background:var(--bg);padding:20px 24px;display:flex;flex-direction:column;gap:10px"><svg viewBox="0 0 150 100" height="104" style="display:block;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="75" cy="50" r="24"></circle><text x="75" y="59" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">A</text></svg><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">З'єднувач</h3><p style="margin:0;font-size:23px;line-height:1.35;color:var(--mut)">розрив лінії й продовження в іншому місці</p></div>
+    <div style="background:var(--bg);padding:20px 24px;display:flex;flex-direction:column;gap:10px"><svg viewBox="0 0 150 100" height="104" style="display:block;color:var(--ink)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><rect x="10" y="35" width="44" height="30"></rect><path d="M54 50H82" stroke-dasharray="5 5"></path><path d="M100 20H82V80H100"></path></svg><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Коментар</h3><p style="margin:0;font-size:23px;line-height:1.35;color:var(--mut)">пояснення до символу через пунктир</p></div>
+    <div style="background:var(--bg);padding:20px 24px;display:flex;flex-direction:column;gap:10px"><svg viewBox="0 0 150 100" height="104" style="display:block;color:var(--ink)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 50H124"></path><path d="M116 42L130 50L116 58Z" fill="currentColor"></path></svg><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Лінія потоку</h3><p style="margin:0;font-size:23px;line-height:1.35;color:var(--mut)">порядок виконання дій</p></div>
+  </div>
+</section>
+
+<section data-label="Л9 · Розміри й текст" data-screen-label="22" data-speaker-notes="Пропорція b = 1,5a — з попереднього ГОСТ 19.003-80, у навчальній практиці її досі тримаються. Номер символу ставлять у розриві контуру ліворуч угорі — показати на рисунку." style="height:100%;display:flex;flex-direction:column;gap:32px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 9 · Правила побудови</span><span style="display:var(--hdr,inline);color:var(--mut)">04</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Розміри й текст</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="padding:30px 36px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Пропорції символу</h3><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">ГОСТ 19.003-80</span></div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 520 330" width="100%" style="display:block;max-height:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M160 70H460V290H100V70H120"></path>
+          <text x="140" y="80" text-anchor="middle" font-size="26" fill="var(--acc)" stroke="none">3</text>
+          <text x="280" y="190" text-anchor="middle" font-size="30" fill="currentColor" stroke="none">S ← S + a[i]</text>
+          <path d="M100 30H460M100 20V40M460 20V40" stroke-width="1.5" stroke="var(--acc)"></path>
+          <text x="280" y="20" text-anchor="middle" font-size="26" fill="var(--acc)" stroke="none">b = 1,5a</text>
+          <path d="M50 70V290M40 70H60M40 290H60" stroke-width="1.5" stroke="var(--acc)"></path>
+          <text x="30" y="190" text-anchor="middle" font-size="28" fill="var(--acc)" stroke="none">a</text>
+        </svg>
+      </div>
+      <div style="display:flex;gap:1px;background:var(--ln);border:var(--hair);font-family:var(--m);font-size:26px;text-align:center"><div style="flex:1.4;background:var(--bg2);padding:12px;font-family:var(--b);font-size:24px">a, мм</div><div style="flex:1;background:var(--bg);padding:12px">10</div><div style="flex:1;background:var(--bg);padding:12px">15</div><div style="flex:1;background:var(--bg);padding:12px">20</div></div>
+    </div>
+    <div style="display:grid;grid-template-rows:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:20px 30px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">1</span><span style="font-size:26px;line-height:1.4">Символи однакові за формою й <b style="font-weight:600">пропорційні</b>: розміри кратні базовому</span></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">2</span><span style="font-size:26px;line-height:1.4">Текст — коротка дія чи умова: <span style="font-family:var(--m)">D &lt; 0</span>, <span style="font-family:var(--m)">Ввести a, b, c</span></span></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">3</span><span style="font-size:26px;line-height:1.4">Не вміщується — перенести на кілька рядків або винести в <b style="font-weight:600">коментар</b></span></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">4</span><span style="font-size:26px;line-height:1.4">Номер символу — у розриві контуру <b style="font-weight:600">ліворуч угорі</b></span></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Л9 · Лінії потоку" data-screen-label="23" data-speaker-notes="Головне правило: вниз і праворуч — стрілки можна не ставити, угору й ліворуч — обов'язково. На рисунку повернення «так» іде вгору й зливається з основною лінією — злиття позначене стрілкою." style="height:100%;display:flex;flex-direction:column;gap:32px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 9 · Правила побудови</span><span style="display:var(--hdr,inline);color:var(--mut)">05</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Лінії потоку</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-rows:repeat(5,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:16px 30px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">1</span><span style="font-size:26px;line-height:1.38">Основний напрямок — <b style="font-weight:600">згори донизу</b> й <b style="font-weight:600">зліва направо</b>: стрілки можна не малювати</span></div>
+      <div style="background:var(--bg);padding:16px 30px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">2</span><span style="font-size:26px;line-height:1.38">Угору чи ліворуч — <span style="background:var(--fill);color:var(--acc-ink);padding:0 8px">стрілка обов'язкова</span></span></div>
+      <div style="background:var(--bg);padding:16px 30px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">3</span><span style="font-size:26px;line-height:1.38">Лише горизонтальні й вертикальні лінії, повороти під прямим кутом</span></div>
+      <div style="background:var(--bg);padding:16px 30px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">4</span><span style="font-size:26px;line-height:1.38">Перетинів уникаємо; перетин не означає зв'язку. Злиття ліній позначають стрілкою</span></div>
+      <div style="background:var(--bg);padding:16px 30px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">5</span><span style="font-size:26px;line-height:1.38">Довгу лінію чи перехід на інший аркуш розривають <b style="font-weight:600">з'єднувачами</b> з однаковою позначкою</span></div>
+    </div>
+    <div style="padding:30px 36px;display:flex;flex-direction:column;gap:18px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Як це виглядає</div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 560 420" width="100%" style="display:block;max-height:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <rect x="70" y="20" width="160" height="60"></rect><text x="150" y="59" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">дія 1</text>
+          <path d="M150 80V170"></path>
+          <path d="M150 170L240 225L150 280L60 225Z"></path><text x="150" y="234" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">умова</text>
+          <path d="M60 225H20V125" stroke="var(--fill)" stroke-width="3"></path>
+          <path d="M20 125H140" stroke="var(--fill)" stroke-width="3"></path><path d="M134 118L148 125L134 132Z" fill="var(--fill)" stroke="var(--fill)"></path>
+          <text x="40" y="212" text-anchor="middle" font-size="22" fill="var(--acc)" stroke="none">так</text>
+          <path d="M150 280V340"></path><text x="172" y="312" font-size="22" fill="var(--mut)" stroke="none">ні</text>
+          <circle cx="150" cy="370" r="28"></circle><text x="150" y="379" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">A</text>
+          <circle cx="440" cy="60" r="28"></circle><text x="440" y="69" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">A</text>
+          <path d="M440 88V170"></path>
+          <rect x="360" y="170" width="160" height="60"></rect><text x="440" y="209" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">дія 2</text>
+          <path d="M440 230V290"></path>
+          <text x="440" y="330" text-anchor="middle" font-size="20" fill="var(--mut)" stroke="none">продовження</text>
+        </svg>
+      </div>
+      <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Повернення вгору — зі стрілкою, злиття — стрілкою, розрив — з'єднувачами «A»</p>
+    </div>
+  </div>
+</section>
+
+<section data-label="Л9 · Рішення і цикли" data-screen-label="24" data-speaker-notes="Три способи зобразити цикл. Через рішення — універсальний, для пред- і післяумови (детально в лекції 10). Підготовка — для лічильних циклів. Межі циклу — зручні для вкладених." style="height:100%;display:flex;flex-direction:column;gap:28px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 9 · Правила побудови</span><span style="display:var(--hdr,inline);color:var(--mut)">06</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Рішення і три способи циклу</h2>
+  <div style="padding:20px 32px;display:flex;gap:40px;align-items:center;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);flex:none">Ромб</span>
+    <span style="font-size:27px;line-height:1.35">Один вхід, два чи більше виходів. <b style="font-weight:600">Кожен вихід підписують</b>: «так»/«ні», «+»/«−» або значеннями. Умова — запитання з однозначною відповіддю: <span style="font-family:var(--m)">i ≤ n</span></span>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:24px 30px;display:flex;flex-direction:column;gap:12px;min-height:0">
+      <div style="display:flex;gap:16px;align-items:baseline"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">1</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Через рішення</h3></div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 320 330" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M160 0V40"></path>
+          <path d="M160 40L240 90L160 140L80 90Z"></path><text x="160" y="99" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">умова</text>
+          <path d="M160 140V190"></path><text x="176" y="172" font-size="20" fill="var(--acc)" stroke="none">так</text>
+          <rect x="100" y="190" width="120" height="56"></rect><text x="160" y="226" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">тіло</text>
+          <path d="M160 246V276H40V20H156"></path><path d="M146 13L160 20L146 27Z" fill="currentColor"></path>
+          <path d="M240 90H290V330"></path><text x="262" y="78" text-anchor="middle" font-size="20" fill="var(--mut)" stroke="none">ні</text>
+        </svg>
+      </div>
+      <p style="margin:0;font-size:23px;line-height:1.38;color:var(--mut)">Універсальний: і передумова, і післяумова</p>
+    </div>
+    <div style="background:var(--bg);padding:24px 30px;display:flex;flex-direction:column;gap:12px;min-height:0">
+      <div style="display:flex;gap:16px;align-items:baseline"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">2</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Через підготовку</h3></div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 320 330" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M160 0V50"></path>
+          <path d="M95 50H225L255 90L225 130H95L65 90Z" stroke="var(--acc)"></path><text x="160" y="99" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">i = 1, n</text>
+          <path d="M160 130V180"></path>
+          <rect x="100" y="180" width="120" height="56"></rect><text x="160" y="216" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">тіло</text>
+          <path d="M160 236V266H30V90H61"></path><path d="M51 83L65 90L51 97Z" fill="currentColor"></path>
+          <path d="M255 90H290V330"></path>
+        </svg>
+      </div>
+      <p style="margin:0;font-size:23px;line-height:1.38;color:var(--mut)">Компактно для лічильних циклів</p>
+    </div>
+    <div style="background:var(--bg);padding:24px 30px;display:flex;flex-direction:column;gap:12px;min-height:0">
+      <div style="display:flex;gap:16px;align-items:baseline"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">3</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Через межі циклу</h3></div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 320 330" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M160 0V30"></path>
+          <path d="M100 30H220L240 50V90H80V50Z" stroke="var(--acc)"></path><text x="160" y="72" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">Цикл A</text>
+          <path d="M160 90V137"></path>
+          <rect x="100" y="137" width="120" height="56"></rect><text x="160" y="173" text-anchor="middle" font-size="24" fill="currentColor" stroke="none">тіло</text>
+          <path d="M160 193V240"></path>
+          <path d="M80 240H240V280L220 300H100L80 280Z" stroke="var(--acc)"></path><text x="160" y="276" text-anchor="middle" font-size="22" fill="currentColor" stroke="none">A: до i &gt; n</text>
+          <path d="M160 300V330"></path>
+        </svg>
+      </div>
+      <p style="margin:0;font-size:23px;line-height:1.38;color:var(--mut)">Тіло між назвою й умовою — зручно для вкладених</p>
+    </div>
+  </div>
+</section>
+
+<section data-label="Л9 · Приклади" data-screen-label="25" data-speaker-notes="Розділ-заставка. Два приклади: розгалуження (квадратне рівняння) і цикл з параметром (сума масиву)." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:40px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Лекція 9 · Частина 2</div><span style="display:var(--hdr,inline);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;color:var(--mut)">07</span></div>
+  <div>
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Приклади схем</h2>
+    <p style="margin:26px 0 0;font-size:34px;line-height:1.35;color:var(--mut);max-width:1300px">Від формули до оформленої схеми — з термінаторами, підписаними виходами й правильними стрілками</p>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:26px 32px;display:flex;gap:24px;align-items:baseline"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">1</span><span style="font-family:var(--h);font-weight:700;font-size:34px">Квадратне рівняння</span><span style="margin-left:auto;font-size:24px;color:var(--mut)">розгалуження</span></div>
+    <div style="background:var(--bg);padding:26px 32px;display:flex;gap:24px;align-items:baseline"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">2</span><span style="font-family:var(--h);font-weight:700;font-size:34px">Сума елементів масиву</span><span style="margin-left:auto;font-size:24px;color:var(--mut)">цикл з параметром</span></div>
+  </div>
+</section>
+
+<section data-label="Л9 · Квадратне рівняння" data-screen-label="26" data-speaker-notes="Пройтися по чотирьох пунктах праворуч, показуючи на схемі. Завдання: домалювати випадок D = 0 — другий ромб у гілці «ні»." style="height:100%;display:flex;flex-direction:column;gap:28px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 9 · Приклад 1</span><span style="display:var(--hdr,inline);color:var(--mut)">08</span></div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Розв'язання квадратного рівняння</h2>
+    <p style="margin:0;font-size:27px;line-height:1.4;color:var(--mut)"><span style="font-family:var(--m);color:var(--ink)">ax² + bx + c = 0</span>, <span style="font-family:var(--m);color:var(--ink)">a ≠ 0</span>. Дискримінант <span style="font-family:var(--m);color:var(--ink)">D = b² − 4ac</span>; при <span style="font-family:var(--m);color:var(--ink)">D &lt; 0</span> дійсних коренів немає, інакше <span style="font-family:var(--m);color:var(--ink)">x₁,₂ = (−b ∓ √D) / 2a</span></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.25fr 1fr;gap:44px;min-height:0">
+    <div style="padding:20px 30px;display:flex;flex-direction:column;gap:8px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="display:flex;justify-content:flex-end;font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Рис. 2</div>
+      <div style="flex:1;display:flex;justify-content:center;min-height:0">
+        <svg viewBox="0 0 900 830" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <rect x="350" y="10" width="200" height="56" rx="28"></rect><text x="450" y="47" text-anchor="middle" font-size="28" fill="currentColor" stroke="none">Початок</text>
+          <path d="M450 66V100"></path>
+          <path d="M335 100H595L565 164H305Z"></path><text x="450" y="142" text-anchor="middle" font-size="28" fill="currentColor" stroke="none">Ввести a, b, c</text>
+          <path d="M450 164V200"></path>
+          <rect x="310" y="200" width="280" height="64"></rect><text x="450" y="242" text-anchor="middle" font-size="28" fill="currentColor" stroke="none">D ← b² − 4ac</text>
+          <path d="M450 264V300"></path>
+          <path d="M450 300L590 356L450 412L310 356Z"></path><text x="450" y="366" text-anchor="middle" font-size="28" fill="currentColor" stroke="none">D &lt; 0</text>
+          <path d="M310 356H200V440"></path><text x="255" y="340" text-anchor="middle" font-size="24" fill="var(--acc)" stroke="none">так</text>
+          <path d="M590 356H650V440"></path><text x="620" y="340" text-anchor="middle" font-size="24" fill="var(--mut)" stroke="none">ні</text>
+          <path d="M75 440H360L325 540H40Z"></path><text x="200" y="482" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">Вивести</text><text x="200" y="516" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">«коренів немає»</text>
+          <rect x="470" y="440" width="360" height="64"></rect><text x="650" y="482" text-anchor="middle" font-size="28" fill="currentColor" stroke="none">x₁ ← (−b − √D)/2a</text>
+          <path d="M650 504V530"></path>
+          <rect x="470" y="530" width="360" height="64"></rect><text x="650" y="572" text-anchor="middle" font-size="28" fill="currentColor" stroke="none">x₂ ← (−b + √D)/2a</text>
+          <path d="M650 594V620"></path>
+          <path d="M500 620H830L800 684H470Z"></path><text x="650" y="662" text-anchor="middle" font-size="28" fill="currentColor" stroke="none">Вивести x₁, x₂</text>
+          <path d="M200 540V730H450"></path><path d="M650 684V730H456" stroke="var(--fill)" stroke-width="3"></path><path d="M470 722L454 730L470 738Z" fill="var(--fill)" stroke="var(--fill)"></path>
+          <path d="M450 730V770"></path>
+          <rect x="350" y="770" width="200" height="56" rx="28"></rect><text x="450" y="807" text-anchor="middle" font-size="28" fill="currentColor" stroke="none">Кінець</text>
+        </svg>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="flex:1;display:grid;grid-template-rows:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:14px 28px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:30px;color:var(--acc);flex:none">1</span><span style="font-size:25px;line-height:1.38">Починається й закінчується <b style="font-weight:600">термінатором</b></span></div>
+        <div style="background:var(--bg);padding:14px 28px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:30px;color:var(--acc);flex:none">2</span><span style="font-size:25px;line-height:1.38">Введення й виведення — <b style="font-weight:600">паралелограми</b></span></div>
+        <div style="background:var(--bg);padding:14px 28px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:30px;color:var(--acc);flex:none">3</span><span style="font-size:25px;line-height:1.38">Обидва виходи ромба <b style="font-weight:600">підписано</b></span></div>
+        <div style="background:var(--bg);padding:14px 28px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:30px;color:var(--acc);flex:none">4</span><span style="font-size:25px;line-height:1.38">Гілки зливаються перед «Кінцем»; лінія ліворуч — <span style="background:var(--fill);color:var(--acc-ink);padding:0 8px">зі стрілкою</span></span></div>
+      </div>
+      <div style="padding:22px 28px;display:flex;flex-direction:column;gap:8px;background:var(--bg2);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Спробуйте самі</div>
+        <p style="margin:0;font-size:25px;line-height:1.4">Додайте випадок <span style="font-family:var(--m)">D = 0</span> (один корінь): другий ромб, вкладений у гілку «ні»</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Л9 · Сума масиву" data-screen-label="27" data-speaker-notes="Шестикутник — заголовок циклу з параметром. Поки i в межах, керування йде в тіло й повертається до заголовка; коли вийшло — праворуч і до виведення. Порівняти з for у C++." style="height:100%;display:flex;flex-direction:column;gap:28px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 9 · Приклад 2</span><span style="display:var(--hdr,inline);color:var(--mut)">09</span></div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Сума елементів масиву</h2>
+    <p style="margin:0;font-size:27px;line-height:1.4;color:var(--mut)">Обчислити <span style="font-family:var(--m);color:var(--ink)">S = a₀ + a₁ + … + aₙ₋₁</span>. Цикл з параметром — символом «підготовка»</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.1fr;gap:44px;min-height:0">
+    <div style="padding:20px 30px;display:flex;flex-direction:column;gap:8px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="display:flex;justify-content:flex-end;font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Рис. 3</div>
+      <div style="flex:1;display:flex;justify-content:center;min-height:0">
+        <svg viewBox="0 0 700 710" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <rect x="260" y="10" width="180" height="56" rx="28"></rect><text x="350" y="47" text-anchor="middle" font-size="28" fill="currentColor" stroke="none">Початок</text>
+          <path d="M350 66V96"></path>
+          <path d="M240 96H490L460 156H210Z"></path><text x="350" y="135" text-anchor="middle" font-size="28" fill="currentColor" stroke="none">Ввести n, a</text>
+          <path d="M350 156V186"></path>
+          <rect x="230" y="186" width="240" height="60"></rect><text x="350" y="225" text-anchor="middle" font-size="28" fill="currentColor" stroke="none">S ← 0</text>
+          <path d="M350 246V276"></path>
+          <path d="M250 276H450L480 311L450 346H250L220 311Z" stroke="var(--acc)" stroke-width="3"></path><text x="350" y="321" text-anchor="middle" font-size="28" fill="currentColor" stroke="none">i = 0, n − 1</text>
+          <path d="M350 346V386"></path>
+          <rect x="200" y="386" width="300" height="64"></rect><text x="350" y="427" text-anchor="middle" font-size="28" fill="currentColor" stroke="none">S ← S + a[i]</text>
+          <path d="M350 450V480H120V311H214" stroke="var(--fill)" stroke-width="3"></path><path d="M204 304L218 311L204 318Z" fill="var(--fill)" stroke="var(--fill)"></path>
+          <path d="M480 311H580V520H350V550"></path>
+          <path d="M255 550H475L445 610H225Z"></path><text x="350" y="589" text-anchor="middle" font-size="28" fill="currentColor" stroke="none">Вивести S</text>
+          <path d="M350 610V640"></path>
+          <rect x="260" y="640" width="180" height="56" rx="28"></rect><text x="350" y="677" text-anchor="middle" font-size="28" fill="currentColor" stroke="none">Кінець</text>
+        </svg>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:26px 32px;display:flex;flex-direction:column;gap:16px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++</div>
+        <pre style="margin:0;font-family:var(--m);font-size:28px;line-height:1.6;background:var(--bg2);padding:20px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">double</span> S = 0;
+<span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> i = 0; i &lt;= n - 1; i++) {
+    S = S + a[i];
+}
+cout &lt;&lt; S &lt;&lt; '\n';</pre>
+      </div>
+      <div style="flex:1;display:grid;grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Параметр у межах</h3><p style="margin:0;font-size:25px;line-height:1.4">Керування йде в тіло й <span style="background:var(--fill);color:var(--acc-ink);padding:0 8px">повертається до заголовка</span></p></div>
+        <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Параметр вийшов за межі</h3><p style="margin:0;font-size:25px;line-height:1.4">Вихід праворуч — до виведення результату</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Л9 · Схеми даних та інструменти" data-screen-label="28" data-speaker-notes="UML не замінює правил наочності: один вхід і один вихід, мінімум перетинів, зрозумілі підписи. Головна порада — спершу псевдокод." style="height:100%;display:flex;flex-direction:column;gap:32px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 9 · Практика</span><span style="display:var(--hdr,inline);color:var(--mut)">10</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Інші схеми й інструменти</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.15fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-rows:1fr 1fr auto;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px;color:var(--acc)">Схеми даних</h3><p style="margin:0;font-size:25px;line-height:1.42">Звідки дані надходять (файл, клавіатура, датчик), якими процесами обробляються, куди записуються. Процеси — укрупнено, дані — уточненими символами.</p></div>
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px;color:var(--acc)">Схеми великих програм</h3><p style="margin:0;font-size:25px;line-height:1.42">Укрупнені: частини подано «визначеним процесом», кожна розкрита на окремому аркуші.</p></div>
+      <div style="background:var(--bg2);padding:20px 32px;font-size:24px;line-height:1.4">Для великих систем дедалі частіше — <b style="font-weight:600">UML</b> (діаграми діяльності, послідовності). Правила наочності ті самі.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="flex:1;display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:18px 30px;display:flex;flex-direction:column;justify-content:center;gap:6px"><span style="font-family:var(--h);font-weight:700;font-size:30px">diagrams.net (draw.io)</span><span style="font-size:24px;color:var(--mut)">безкоштовний, у браузері й офлайн</span></div>
+        <div style="background:var(--bg);padding:18px 30px;display:flex;flex-direction:column;justify-content:center;gap:6px"><span style="font-family:var(--h);font-weight:700;font-size:30px">Microsoft Visio</span><span style="font-size:24px;color:var(--mut)">професійний редактор діаграм</span></div>
+        <div style="background:var(--bg);padding:18px 30px;display:flex;flex-direction:column;justify-content:center;gap:6px"><span style="font-family:var(--h);font-weight:700;font-size:30px">LibreOffice Draw</span><span style="font-size:24px;color:var(--mut)">безкоштовний, набір фігур «Блок-схема»</span></div>
+      </div>
+      <div style="padding:22px 28px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Порада</div>
+        <p style="margin:0;font-size:26px;line-height:1.4">Спершу псевдокод, потім схема. Намальована «з голови» схема зазвичай заплутана.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Л9 · Типові помилки" data-screen-label="29" data-speaker-notes="Помилки, які найчастіше трапляються в лабораторній 3. «Спагеті» з переходами — сигнал перебудувати алгоритм структурно, це тема лекції 10." style="height:100%;display:flex;flex-direction:column;gap:32px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 9 · Помилки</span><span style="display:var(--hdr,inline);color:var(--mut)">11</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Типові помилки</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:20px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">01</span><span style="font-size:26px;line-height:1.38">Немає термінаторів «Початок» і «Кінець» або кілька «Кінців» без потреби</span></div>
+    <div style="background:var(--bg);padding:20px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">02</span><span style="font-size:26px;line-height:1.38">Прямокутник із двома виходами — розгалужувати може <b style="font-weight:600">лише ромб</b></span></div>
+    <div style="background:var(--bg);padding:20px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">03</span><span style="font-size:26px;line-height:1.38">Непідписані виходи ромба: де «так», а де «ні»?</span></div>
+    <div style="background:var(--bg);padding:20px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">04</span><span style="font-size:26px;line-height:1.38">Лінії без стрілок, що йдуть угору чи ліворуч</span></div>
+    <div style="background:var(--bg);padding:20px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">05</span><span style="font-size:26px;line-height:1.38">Введення й виведення в прямокутниках замість паралелограмів</span></div>
+    <div style="background:var(--bg);padding:20px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">06</span><span style="font-size:26px;line-height:1.38">Перетини ліній і «спагеті» з переходів — алгоритм варто перебудувати структурно</span></div>
+    <div style="background:var(--bg);padding:20px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">07</span><span style="font-size:26px;line-height:1.38">Код мовою програмування в символах замість короткого опису дії</span></div>
+    <div style="background:var(--bg2);padding:20px 32px;display:flex;gap:24px;align-items:center"><span style="font-size:26px;line-height:1.38">Перевіряйте свою схему за цим списком — а логіку за <b style="font-weight:600;color:var(--acc)">псевдокодом</b></span></div>
+  </div>
+</section>
+
+<section data-label="Л9 · Підсумки" data-screen-label="30" data-speaker-notes="Пройтися по шести пунктах і перейти до запитань." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 9 · Підсумки</span><span style="display:var(--hdr,inline);color:var(--mut)">12</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Що забрати з лекції</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">01</span><span style="font-size:26px;line-height:1.35">ЄСПД — стандарти ГОСТ 19.xxx; схеми описує ГОСТ 19.701-90 (ISO 5807-85)</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">02</span><span style="font-size:26px;line-height:1.35">П'ять видів схем: програм, даних, роботи системи, взаємодії програм, ресурсів</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">03</span><span style="font-size:26px;line-height:1.35">Основні символи: термінатор, процес, рішення, дані, підготовка, межа циклу, з'єднувач…</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">04</span><span style="font-size:26px;line-height:1.35">Потік — згори донизу й зліва направо; інші напрямки — зі стрілками</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">05</span><span style="font-size:26px;line-height:1.35">Виходи ромба підписують; цикли — через рішення, підготовку або межі циклу</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">06</span><span style="font-size:26px;line-height:1.35">Схеми будують у редакторах діаграм, спершу продумавши алгоритм псевдокодом</span></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:25px;color:var(--mut);padding-top:16px;border-top:var(--hair)">
+    <span>Попередня · Лекція 8. Псевдокоди, структурограми</span>
+    <span style="font-family:var(--h);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Далі · Лекція 10. Основні алгоритмічні структури</span>
+  </div>
+</section>
+
+<section data-label="Л9 · Контрольні запитання" data-screen-label="31" data-speaker-notes="Запитання 10 — побудувати на дошці. Решту — на самостійне опрацювання перед лабораторною 3." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 9 · Перевірка</span><span style="display:var(--hdr,inline);color:var(--mut)">13</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Контрольні запитання</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.4fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Теорія</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;font-size:24px;line-height:1.3">
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">1</span><span>Що таке ЄСПД? Який стандарт встановлює правила виконання схем?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">2</span><span>Які види схем визначає ГОСТ 19.701-90?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">3</span><span>Термінатор, процес, рішення, дані: коли застосовують кожен?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">4</span><span>Чим «визначений процес» відрізняється від «процесу»?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">5</span><span>Для чого використовують символ «підготовка»? Наведіть приклад</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">6</span><span>Як зображують цикл символами «межа циклу»?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">7</span><span>Коли на лініях потоку обов'язково ставлять стрілки?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">8</span><span>Навіщо потрібен з'єднувач?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">9</span><span>Які правила оформлення символу «рішення»?</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">11</span><span>Назвіть типові помилки в оформленні схем</span></div>
+        <div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">12</span><span>Які програми можна використати для побудови схем?</span></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:1.3fr 1fr;gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg2);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">10 · На дошці</div><p style="margin:0;font-size:30px;line-height:1.35">Побудуйте схему алгоритму знаходження найбільшого з трьох чисел</p></div>
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Далі на практиці</div><p style="margin:0;font-size:26px;line-height:1.38"><a href="https://kaldra1.github.io/aimo/labs/3/">Лабораторна робота №3</a>. Побудова схем алгоритмів, даних, програм</p></div>
+    </div>
+  </div>
+</section>
+
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Бурштин&quot;,&quot;М'ята&quot;],&quot;default&quot;:&quot;Бурштин&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Оформлення&quot;},&quot;showHeaderLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Оформлення&quot;}}">
+class Component extends DCLogic {
+  applyTweaks() {
+    const b = document.body.style;
+    const mint = this.props.accent === "М'ята";
+    b.setProperty("--fill", mint ? "#5fd3bd" : "#f0b45a");
+    b.setProperty("--acc", "#0d6e63");
+    b.setProperty("--hdr", this.props.showHeaderLabels === false ? "none" : "inline");
+  }
+  componentDidMount() { this.applyTweaks(); }
+  componentDidUpdate() { this.applyTweaks(); }
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
