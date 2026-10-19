@@ -1,6 +1,6 @@
 /** Перелік машин і їхні назви. Модуль без залежностей: його імпортують і сторінки, і острови. */
 
-export const MACHINES = ['post', 'turing', 'markov'] as const;
+export const MACHINES = ['post', 'turing', 'markov', 'cpp'] as const;
 export type MachineId = (typeof MACHINES)[number];
 
 export function isMachineId(value: unknown): value is MachineId {
@@ -32,5 +32,12 @@ export const MACHINE_META: Record<
     path: '/emulators/markov/',
     summary: 'Схема підстановок, підсвітка заміни й трасувальна таблиця.',
     ready: true,
+  },
+  cpp: {
+    title: 'Виконання C++ покроково',
+    genitive: 'візуалізатора C++',
+    path: '/emulators/cpp/',
+    summary: 'Навчальна підмножина C++: поточний рядок, змінні, стек викликів і масив комірками.',
+    ready: false,
   },
 };

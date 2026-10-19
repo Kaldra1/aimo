@@ -42,10 +42,14 @@ const link = (t: Task | undefined) =>
 
 const related = resolveRelated(data.related, await loadLinkIndex(), `Задача «${task.id}»`);
 const machine = MACHINE_META[data.machine];
+// validateTask не пропускає задачі для неготових машин, тож тут лише ті, що мають емулятор.
+if (data.machine === 'cpp')
+  throw new Error(`Задача «${task.id}»: задачі для C++ ще не підтримуються`);
+const taskMachine = data.machine;
 
 const view: TaskView = {
   id: task.id,
-  machine: data.machine,
+  machine: taskMachine,
   alphabet: data.alphabet,
   starter: data.starter,
   tests: data.tests,
