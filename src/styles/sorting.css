@@ -1,0 +1,305 @@
+/* Візуалізатор сортувань: стовпчики масиву, ключ вставок, код з підсвіткою рядка. */
+
+.sorting {
+  --bar-active: var(--color-accent);
+  --bar-swap: var(--color-danger);
+  --bar-sorted: var(--color-primary);
+  --bar-min: #7b4fc2;
+  --bar-base: var(--color-border-strong);
+
+  display: grid;
+  gap: var(--space-5);
+}
+
+.sorting > * {
+  min-width: 0;
+}
+
+.sorting__setup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-3) var(--space-5);
+}
+
+.sorting__setup .segmented {
+  flex-wrap: wrap;
+}
+
+.sorting__input {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-2);
+}
+
+.sorting__input .field {
+  min-width: 12rem;
+}
+
+.sorting__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.sorting__stage {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.sorting__keyrow,
+.sorting__bars {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: clamp(2px, 1vw, var(--space-3));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sorting__keyslot {
+  display: flex;
+  height: 7rem;
+  align-items: end;
+  justify-content: center;
+}
+
+.sorting__key {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  justify-items: center;
+  align-content: end;
+}
+
+.sorting__key .sorting__bar {
+  width: min(100%, 3.5rem);
+}
+
+.sorting__cell {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+}
+
+.sorting__column {
+  display: flex;
+  width: 100%;
+  height: 12rem;
+  align-items: end;
+  justify-content: center;
+}
+
+.sorting__bar {
+  width: min(100%, 3.5rem);
+  border-radius: 6px 6px 2px 2px;
+  background: var(--bar-base);
+  transition:
+    height 0.25s ease,
+    background-color 0.2s ease;
+}
+
+.sorting__bar.is-hole {
+  height: 100%;
+  border: 2px dashed var(--color-border-strong);
+  background: transparent;
+}
+
+.sorting__bar.is-key {
+  background: var(--bar-min);
+}
+
+.is-active .sorting__bar {
+  background: var(--bar-active);
+}
+
+.is-swap .sorting__bar {
+  background: var(--bar-swap);
+}
+
+.is-min .sorting__bar {
+  background: var(--bar-min);
+}
+
+.is-sorted .sorting__bar {
+  background: var(--bar-sorted);
+}
+
+.sorting__value {
+  font-family: var(--font-mono);
+  font-size: clamp(0.85rem, 0.7rem + 0.8vw, 1.25rem);
+  font-weight: 700;
+}
+
+.sorting__index {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.sorting__text {
+  min-height: 3em;
+  margin-top: var(--space-2);
+  font-size: var(--text-lg);
+}
+
+.sorting__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
+}
+
+.sorting__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.sorting__speed {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.sorting__counters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+}
+
+.sorting__counters div {
+  display: grid;
+}
+
+.sorting__counters dt {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.sorting__counters dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: 700;
+}
+
+.sorting__bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+}
+
+.sorting__bottom > * {
+  min-width: 0;
+}
+
+@media (min-width: 64rem) {
+  .sorting__bottom {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.sorting__code {
+  margin: 0;
+  padding: var(--space-3) 0;
+  overflow-x: auto;
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+.sorting__line {
+  display: block;
+  padding-right: var(--space-3);
+  border-left: 4px solid transparent;
+  white-space: pre;
+}
+
+.sorting__line.is-current {
+  border-left-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.sorting__lineno {
+  display: inline-block;
+  width: 2.5rem;
+  padding-right: var(--space-2);
+  color: var(--color-text-muted);
+  text-align: right;
+  user-select: none;
+}
+
+.sorting__legend {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.sorting__legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sorting__swatch {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 4px;
+  background: var(--bar-base);
+}
+
+.sorting__swatch.is-active {
+  background: var(--bar-active);
+}
+
+.sorting__swatch.is-swap {
+  background: var(--bar-swap);
+}
+
+.sorting__swatch.is-min,
+.sorting__swatch.is-key {
+  background: var(--bar-min);
+}
+
+.sorting__swatch.is-sorted {
+  background: var(--bar-sorted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sorting__bar {
+    transition: none;
+  }
+}
+
+/* Усередині лекції стилі тексту (.prose) не мають змінювати віджет. */
+.sorting .panel__title {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.sorting ol,
+.sorting ul {
+  margin: 0;
+  padding: 0;
+}
+
+.sorting li + li {
+  margin-top: 0;
+}
+
+.sorting pre {
+  max-width: 100%;
+}

@@ -27,6 +27,11 @@ export function validateTask(fileId: string, task: TaskData): string[] {
     return problems;
   }
 
+  if (task.machine === 'sorting' || task.machine === 'cpp') {
+    report('задачі з автоперевіркою є лише для машин Поста, Тюрінга й Маркова');
+    return problems;
+  }
+
   task.tests.forEach((test, index) => {
     if (test.checkHead && !test.expected.includes('[')) {
       report(`тест ${index + 1}: checkHead: true, але в expected не позначено каретку дужками`);

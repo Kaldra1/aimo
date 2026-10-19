@@ -1,0 +1,23 @@
+---
+import '../../styles/emulator.css';
+import SortingVisualizer from '../../components/sorting/SortingVisualizer';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { MACHINE_META } from '../../lib/machines/meta';
+
+const machine = MACHINE_META.sorting;
+---
+
+<BaseLayout
+  title={machine.title}
+  description="Покрокова візуалізація сортувань бульбашкою, вибором і вставками: стовпчики масиву, код з лекції 11, лічильники порівнянь і переміщень."
+  section="emulators"
+  breadcrumbs={[{ label: 'Емулятори', href: '/emulators/' }, { label: machine.title }]}
+>
+  <div class="container page page--emulator">
+    <header class="page-header page-header--compact">
+      <p class="eyebrow">Емулятор</p>
+      <h1>{machine.title}</h1>
+    </header>
+    <SortingVisualizer client:load />
+  </div>
+</BaseLayout>
