@@ -17,11 +17,14 @@ describe('лічильники збігаються з трасуванням л
 
 describe('сортує правильно', () => {
   const inputs = [[], [7], [2, 1], [3, 3, 1], [1, 2, 3, 4], [9, -3, 0, 9, -3, 5], [5, 4, 3, 2, 1]];
-  it.each(['bubble', 'selection', 'insertion'] as const)('%s', (algorithm) => {
-    for (const input of inputs) {
-      expect(last(algorithm, input).array).toEqual([...input].sort((a, b) => a - b));
-    }
-  });
+  it.each(['bubble', 'selection', 'insertion', 'shell', 'merge', 'quick', 'heap'] as const)(
+    '%s',
+    (algorithm) => {
+      for (const input of inputs) {
+        expect(last(algorithm, input).array).toEqual([...input].sort((a, b) => a - b));
+      }
+    },
+  );
 });
 
 describe('особливості методів', () => {
@@ -60,11 +63,57 @@ describe('введення', () => {
     expect(parseArray(Array(17).fill(1).join(',')).ok).toBe(false);
   });
 
-  it('набори даних', () => {
-    const rnd = () => 0.5;
-    expect(makePreset('sorted', 4, rnd)).toEqual([11, 11, 11, 11]);
-    let k = 0;
-    const seq = () => [0.1, 0.9, 0.5, 0.3][k++ % 4]!;
-    expect(makePreset('reversed', 4, seq)).toEqual([19, 11, 7, 3]);
+  it('набори даних — без повторів і потрібної довжини', () => {
+    for (let n = 2; n <= 16; n++) {
+      for (const preset of ['random', 'sorted', 'reversed', 'nearly'] as const) {
+        const values = makePreset(preset, n);
+        expect(values).toHaveLength(n);
+        expect(new Set(values).size).toBe(n);
+      }
+    }
+    const sorted = makePreset('sorted', 6);
+    expect(sorted).toEqual([...sorted].sort((x, y) => x - y));
+    const reversed = makePreset('reversed', 6);
+    expect(reversed).toEqual([...reversed].sort((x, y) => y - x));
+  });
+});
+
+describe('лекція 12', () => {
+  const lecture = [5, 2, 7, 1, 9, 3, 8, 4];
+
+  it('Шелл: на [8…1] з кроками 4, 2, 1 — 12 переміщень', () => {
+    expect(last('shell', [8, 7, 6, 5, 4, 3, 2, 1])).toMatchObject({
+      array: [1, 2, 3, 4, 5, 6, 7, 8],
+      moves: 12,
+    });
+  });
+
+  it('швидке: після першого розбиття — [2, 1, 3, 4, 9, 7, 8, 5]', () => {
+    const steps = traceSort('quick', lecture);
+    const first = steps.find((s) => s.kind === 'swap' && s.line === 10)!;
+    expect(first.array).toEqual([2, 1, 3, 4, 9, 7, 8, 5]);
+    expect(first.pivot).toBe(3);
+  });
+
+  it('пірамідальне: купа як у лекції — [9, 5, 8, 4, 2, 3, 7, 1]', () => {
+    const steps = traceSort('heap', lecture);
+    const built = steps.find((s) => s.text.startsWith('Купа побудована'))!;
+    expect(built.array).toEqual([9, 5, 8, 4, 2, 3, 7, 1]);
+  });
+
+  it('злиття: буфер і остаточне злиття', () => {
+    const done = last('merge', lecture);
+    expect(done.array).toEqual([1, 2, 3, 4, 5, 7, 8, 9]);
+    expect(done.aux?.label).toBe('Буфер');
+  });
+
+  it('підрахунок: жодного порівняння', () => {
+    const done = last('counting', [3, 1, 4, 1, 5, 2, 3, 0]);
+    expect(done).toMatchObject({ array: [0, 1, 1, 2, 3, 3, 4, 5], comparisons: 0, moves: 8 });
+    expect(done.aux?.labels).toEqual([0, 1, 2, 3, 4, 5]);
+  });
+
+  it('підрахунок: від’ємні числа — пояснення замість сортування', () => {
+    expect(traceSort('counting', [3, -1])[0]?.kind).toBe('error');
   });
 });

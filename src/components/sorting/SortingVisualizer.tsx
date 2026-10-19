@@ -1,4 +1,4 @@
-/** Острів візуалізатора простих сортувань: траєкторія з src/lib/sorting, UI лише показує крок. */
+/** Острів візуалізатора сортувань: траєкторія з src/lib/sorting, UI лише показує крок. */
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import '../../styles/emulator.css';
 import '../../styles/sorting.css';
@@ -6,6 +6,8 @@ import {
   ALGORITHMS,
   DEFAULT_ARRAY,
   makePreset,
+  MAX_LENGTH,
+  MIN_LENGTH,
   parseArray,
   traceSort,
   type Preset,
@@ -20,15 +22,24 @@ const PRESETS: { id: Preset; label: string }[] = [
   { id: 'sorted', label: 'Відсортований' },
   { id: 'reversed', label: 'Зворотний' },
 ];
+const GROUPS: { lecture: 11 | 12; ids: SortAlgorithm[] }[] = [
+  { lecture: 11, ids: ['bubble', 'selection', 'insertion'] },
+  { lecture: 12, ids: ['shell', 'merge', 'quick', 'heap', 'counting'] },
+];
 
 function barState(step: SortStep, index: number): string {
-  if (step.kind === 'swap' && step.active.includes(index)) return 'is-swap';
-  if (step.kind === 'shift' && step.active.includes(index)) return 'is-swap';
-  if (step.active.includes(index)) return 'is-active';
-  if (step.min === index) return 'is-min';
-  if (step.sorted.includes(index)) return 'is-sorted';
-  return '';
+  const states: string[] = [];
+  if (step.range && (index < step.range[0] || index >= step.range[1])) states.push('is-dim');
+  if ((step.kind === 'swap' || step.kind === 'shift') && step.active.includes(index)) {
+    states.push('is-swap');
+  } else if (step.active.includes(index)) states.push('is-active');
+  else if (step.pivot === index) states.push('is-pivot');
+  else if (step.min === index) states.push('is-min');
+  else if (step.sorted.includes(index)) states.push('is-sorted');
+  return states.join(' ');
 }
+
+const clampCount = (n: number) => Math.min(Math.max(Math.round(n), MIN_LENGTH), MAX_LENGTH);
 
 export interface SortingVisualizerProps {
   /** Стрілки й PageDown/PageUp крокують масивом; у лекції вимкнено, щоб гортати сторінку. */
@@ -39,6 +50,7 @@ export default function SortingVisualizer({ hotkeys = true }: SortingVisualizerP
   const [algorithm, setAlgorithm] = useState<SortAlgorithm>('bubble');
   const [text, setText] = useState(DEFAULT_ARRAY.join(', '));
   const [values, setValues] = useState<number[]>(DEFAULT_ARRAY);
+  const [count, setCount] = useState('8');
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
@@ -48,6 +60,7 @@ export default function SortingVisualizer({ hotkeys = true }: SortingVisualizerP
   const step = steps[Math.min(index, steps.length - 1)]!;
   const atEnd = index >= steps.length - 1;
   const info = ALGORITHMS[algorithm];
+  const failed = step.kind === 'error';
 
   // Нова траєкторія — з початку.
   useEffect(() => {
@@ -90,7 +103,9 @@ export default function SortingVisualizer({ hotkeys = true }: SortingVisualizerP
   };
 
   const applyPreset = (preset: Preset) => {
-    const next = makePreset(preset, 8);
+    const n = clampCount(Number(count) || 8);
+    setCount(String(n));
+    const next = makePreset(preset, n);
     setText(next.join(', '));
     setValues(next);
   };
@@ -100,24 +115,33 @@ export default function SortingVisualizer({ hotkeys = true }: SortingVisualizerP
   const max = Math.max(1, ...numeric.map((x) => Math.abs(x)));
   const height = (x: number) => `${Math.max(4, (Math.abs(x) / max) * 100)}%`;
   const codeLines = info.code.split('\n');
+  const hasKey = algorithm === 'insertion' || algorithm === 'shell';
+  const writes = algorithm === 'merge' || algorithm === 'counting';
+  const ranged = algorithm === 'merge' || algorithm === 'quick' || algorithm === 'heap';
 
   return (
     <div class="sorting">
       <div class="sorting__setup">
-        <fieldset class="segmented">
-          <legend class="visually-hidden">Метод сортування</legend>
-          {(Object.keys(ALGORITHMS) as SortAlgorithm[]).map((id) => (
-            <label key={id}>
-              <input
-                type="radio"
-                name="sort-algorithm"
-                checked={algorithm === id}
-                onChange={() => setAlgorithm(id)}
-              />
-              <span>{ALGORITHMS[id].title}</span>
-            </label>
+        <div class="sorting__algorithms">
+          {GROUPS.map((group) => (
+            <fieldset key={group.lecture} class="sorting__group">
+              <legend class="field__label">Лекція {group.lecture}</legend>
+              <div class="segmented">
+                {group.ids.map((id) => (
+                  <label key={id}>
+                    <input
+                      type="radio"
+                      name="sort-algorithm"
+                      checked={algorithm === id}
+                      onChange={() => setAlgorithm(id)}
+                    />
+                    <span>{ALGORITHMS[id].title}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
           ))}
-        </fieldset>
+        </div>
 
         <form
           class="sorting__input"
@@ -140,34 +164,52 @@ export default function SortingVisualizer({ hotkeys = true }: SortingVisualizerP
             Застосувати
           </button>
         </form>
-        <div class="sorting__presets">
-          {PRESETS.map((preset) => (
-            <button
-              key={preset.id}
-              type="button"
-              class="button button--secondary"
-              onClick={() => applyPreset(preset.id)}
-            >
-              {preset.label}
-            </button>
-          ))}
+
+        <div class="sorting__generate">
+          <label class="field sorting__count" for="sort-count">
+            <span class="field__label">Кількість чисел</span>
+            <input
+              id="sort-count"
+              class="input input--mono"
+              type="number"
+              min={MIN_LENGTH}
+              max={MAX_LENGTH}
+              value={count}
+              onInput={(event) => setCount(event.currentTarget.value)}
+              onBlur={() => setCount(String(clampCount(Number(count) || 8)))}
+            />
+          </label>
+          <div class="sorting__presets">
+            {PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                class="button button--secondary"
+                onClick={() => applyPreset(preset.id)}
+              >
+                {preset.label}
+              </button>
+            ))}
+          </div>
         </div>
         {!parsed.ok && <p class="message message--error">{parsed.error}</p>}
       </div>
 
       <section class="sorting__stage" aria-label="Масив">
-        <div class="sorting__keyrow" aria-hidden="true">
-          {step.array.map((_, i) => (
-            <div key={i} class="sorting__keyslot">
-              {step.key && step.key.at === i && (
-                <div class="sorting__key">
-                  <div class="sorting__bar is-key" style={{ height: height(step.key.value) }} />
-                  <span class="sorting__value">{step.key.value}</span>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+        {hasKey && (
+          <div class="sorting__keyrow" aria-hidden="true">
+            {step.array.map((_, i) => (
+              <div key={i} class="sorting__keyslot">
+                {step.key && step.key.at === i && (
+                  <div class="sorting__key">
+                    <div class="sorting__bar is-key" style={{ height: height(step.key.value) }} />
+                    <span class="sorting__value">{step.key.value}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         <ol class="sorting__bars">
           {step.array.map((value, i) => (
             <li key={i} class={`sorting__cell ${barState(step, i)}`}>
@@ -183,7 +225,23 @@ export default function SortingVisualizer({ hotkeys = true }: SortingVisualizerP
             </li>
           ))}
         </ol>
-        <p class="sorting__text" aria-live="polite">
+        {step.aux && (
+          <div class="sorting__aux">
+            <span class="sorting__aux-label">{step.aux.label}</span>
+            <ol class="sorting__aux-cells">
+              {step.aux.values.map((value, i) => (
+                <li
+                  key={i}
+                  class={`sorting__aux-cell${step.aux!.active.includes(i) ? ' is-active' : ''}`}
+                >
+                  <span class="sorting__aux-value">{value ?? ''}</span>
+                  <span class="sorting__index">{step.aux!.labels?.[i] ?? i}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+        <p class={`sorting__text${failed ? ' is-error' : ''}`} aria-live="polite">
           {step.text}
         </p>
       </section>
@@ -263,7 +321,7 @@ export default function SortingVisualizer({ hotkeys = true }: SortingVisualizerP
       <div class="sorting__bottom">
         <section class="panel" aria-labelledby="sort-code-title">
           <h3 id="sort-code-title" class="panel__title">
-            Код (лекція 11)
+            Код (лекція {info.lecture})
           </h3>
           <pre class="sorting__code">
             {codeLines.map((line, i) => (
@@ -280,21 +338,34 @@ export default function SortingVisualizer({ hotkeys = true }: SortingVisualizerP
             Позначення
           </h3>
           <ul class="sorting__legend">
-            <li>
-              <span class="sorting__swatch is-active" /> порівнюються
-            </li>
+            {algorithm !== 'counting' && (
+              <li>
+                <span class="sorting__swatch is-active" /> порівнюються
+              </li>
+            )}
             <li>
               <span class="sorting__swatch is-swap" />{' '}
-              {algorithm === 'insertion' ? 'зсув' : 'обмін'}
+              {hasKey ? 'зсув' : writes ? 'запис' : 'обмін'}
             </li>
             {algorithm === 'selection' && (
               <li>
                 <span class="sorting__swatch is-min" /> поточний мінімум
               </li>
             )}
-            {algorithm === 'insertion' && (
+            {algorithm === 'quick' && (
+              <li>
+                <span class="sorting__swatch is-pivot" /> опорний елемент
+              </li>
+            )}
+            {hasKey && (
               <li>
                 <span class="sorting__swatch is-key" /> ключ, який вставляємо
+              </li>
+            )}
+            {ranged && (
+              <li>
+                <span class="sorting__swatch is-dim" />{' '}
+                {algorithm === 'heap' ? 'поза купою' : 'поза поточним відрізком'}
               </li>
             )}
             <li>

@@ -303,3 +303,94 @@
 .sorting pre {
   max-width: 100%;
 }
+
+/* Лекція 12: групи методів, кількість чисел, відрізок, опорний, буфер і лічильники. */
+.sorting__algorithms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-5);
+  flex-basis: 100%;
+}
+
+.sorting__group {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sorting__generate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-2) var(--space-3);
+}
+
+.sorting__count {
+  width: 9rem;
+}
+
+.sorting__cell.is-dim {
+  opacity: 0.35;
+}
+
+.is-pivot .sorting__bar {
+  background: var(--bar-min);
+}
+
+.sorting__swatch.is-pivot {
+  background: var(--bar-min);
+}
+
+.sorting__swatch.is-dim {
+  background: var(--bar-base);
+  opacity: 0.35;
+}
+
+.sorting__aux {
+  display: grid;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+}
+
+.sorting__aux-label {
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.sorting__aux-cells {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: clamp(2px, 1vw, var(--space-3));
+}
+
+.sorting__aux-cell {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+
+.sorting__aux-value {
+  display: grid;
+  width: min(100%, 3.5rem);
+  min-height: 2.25rem;
+  place-items: center;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-bg);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.sorting__aux-cell.is-active .sorting__aux-value {
+  border-color: var(--bar-active);
+  background: var(--color-accent-soft);
+}
+
+.sorting__text.is-error {
+  color: var(--color-danger);
+}
