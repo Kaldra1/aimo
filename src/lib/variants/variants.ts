@@ -12,10 +12,11 @@ export const VERSIONS = 3;
 export const VARIANTS = BLOCKS * VERSIONS;
 
 const taskSchema = z.strictObject({
-  alphabet: z.string().trim().min(1),
+  /** Для машин — алфавіт; для інших занять (C++, сортування) поля немає. */
+  alphabet: z.string().trim().min(1).optional(),
   task: z.string().trim().min(1),
   /** Приклади «вхід → результат»; λ — порожнє слово. */
-  examples: z.array(z.string().includes(' → ')).min(1),
+  examples: z.array(z.string().includes(' → ')).default([]),
 });
 
 const levelSchema = z.strictObject({

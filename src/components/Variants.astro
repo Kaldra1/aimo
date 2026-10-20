@@ -47,15 +47,22 @@ const HEADERS = ['★ — обов’язкове', '★★ — на занят�
           {tasks.map((task) => (
             <td>
               <p set:html={inline(task.task)} />
-              <p class="variants__meta">
-                Алфавіт: {task.alphabet}. Приклади:{' '}
-                {task.examples.map((example, k) => (
-                  <>
-                    {k > 0 && '; '}
-                    <code>{example}</code>
-                  </>
-                ))}
-              </p>
+              {(task.alphabet || task.examples.length > 0) && (
+                <p class="variants__meta">
+                  {task.alphabet && <>Алфавіт: {task.alphabet}. </>}
+                  {task.examples.length > 0 && (
+                    <>
+                      Приклади:{' '}
+                      {task.examples.map((example, k) => (
+                        <>
+                          {k > 0 && '; '}
+                          <code>{example}</code>
+                        </>
+                      ))}
+                    </>
+                  )}
+                </p>
+              )}
             </td>
           ))}
         </tr>
