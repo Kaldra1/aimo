@@ -53,3 +53,27 @@ export function splitExample(example: string): { input: string; output: string }
   const word = (text: string) => (text.trim() === 'λ' ? '' : text.trim());
   return { input: word(input), output: word(output) };
 }
+
+/** Тести завдань варіантів для автоперевірки: ключ «<зірки>-<блок>-<версія>» → «вхід → результат». */
+export const variantTestsSchema = z.record(
+  z.string().regex(/^[1-3]-([1-9]|10)-[1-3]$/),
+  z.array(z.string().includes(' → ')).min(1),
+);
+
+export function parseVariantTests(text: string): Record<string, string[]> {
+  return variantTestsSchema.parse(parseYaml(text));
+}
+
+/** Ключ тестів для завдання з `stars` зірками варіанта n. */
+export function testsKey(n: number, stars: number): string {
+  const { block, version } = slotOf(n);
+  return `${stars}-${block + 1}-${version + 1}`;
+}
+
+/** Ідентифікатор завдання варіанта для прогресу й автозбереження: practical-02/v7/2. */
+export const variantTaskId = (session: string, n: number, stars: number) =>
+  `${session}/v${n}/${stars}`;
+
+/** Адреса сторінки завдання варіанта. */
+export const variantTaskPath = (session: string, n: number, stars: number) =>
+  `/variants/${session}/${n}/${stars}/`;

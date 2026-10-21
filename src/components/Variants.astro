@@ -1,22 +1,18 @@
 ---
 /** Таблиця індивідуальних варіантів заняття з src/data/variants/<id>.yaml. */
-import { parseVariants, tasksOf, VARIANTS } from '../lib/variants/variants';
+import { url } from '../lib/url';
+import { loadVariants, loadVariantTests } from '../lib/variants/load';
+import { tasksOf, VARIANTS, variantTaskId, variantTaskPath } from '../lib/variants/variants';
 
 interface Props {
   /** Ім'я файлу без розширення, наприклад practical-01. */
   id: string;
 }
 
-const files = import.meta.glob<string>('../data/variants/*.yaml', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-});
 const { id } = Astro.props;
-const source = files[`../data/variants/${id}.yaml`];
-if (source === undefined)
-  throw new Error(`Варіанти «${id}»: файл src/data/variants/${id}.yaml не знайдено`);
-const data = parseVariants(source);
+const data = loadVariants(id);
+/** Кнопка «Виконати» — лише там, де є тести для автоперевірки. */
+const checkable = loadVariantTests(id) !== null;
 
 const escape = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -44,7 +40,7 @@ const HEADERS = ['★ — обов’язкове', '★★ — на занят�
       {rows.map(({ n, tasks }) => (
         <tr>
           <th scope="row">{n}</th>
-          {tasks.map((task) => (
+          {tasks.map((task, s) => (
             <td>
               <p set:html={inline(task.task)} />
               {(task.alphabet || task.examples.length > 0) && (
@@ -63,6 +59,20 @@ const HEADERS = ['★ — обов’язкове', '★★ — на занят�
                   )}
                 </p>
               )}
+              {checkable && (
+                <p class="variants__run">
+                  <a
+                    class="button button--secondary variants__button"
+                    href={url(variantTaskPath(id, n, s + 1))}
+                    data-task-id={variantTaskId(id, n, s + 1)}
+                  >
+                    Виконати
+                  </a>
+                  <span class="variants__solved" hidden>
+                    ✓ Розв’язано
+                  </span>
+                </p>
+              )}
             </td>
           ))}
         </tr>
@@ -71,7 +81,42 @@ const HEADERS = ['★ — обов’язкове', '★★ — на занят�
   </table>
 </div>
 
+<script>
+  // Позначка «розв’язано» з прогресу в браузері (localStorage, той самий, що в розділі «Задачі»).
+  try {
+    const raw = window.localStorage.getItem('aimo:progress');
+    const solved: Record<string, string> = raw ? (JSON.parse(raw).solved ?? {}) : {};
+    document.querySelectorAll<HTMLAnchorElement>('[data-task-id]').forEach((link) => {
+      if (solved[link.dataset.taskId ?? ''] === undefined) return;
+      link.textContent = 'Відкрити';
+      (link.nextElementSibling as HTMLElement | null)?.removeAttribute('hidden');
+    });
+  } catch {
+    // Сховище недоступне — просто без позначок.
+  }
+</script>
+
 <style>
+  .variants__run {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-2) !important;
+  }
+
+  .variants__button {
+    min-height: 2.25rem;
+    padding-block: var(--space-1);
+    font-size: var(--text-sm);
+  }
+
+  .variants__solved {
+    color: var(--color-primary);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
   .variants {
     max-width: 100%;
     overflow-x: auto;

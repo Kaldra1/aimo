@@ -1,0 +1,139 @@
+---
+import '../../../../styles/emulator.css';
+import '../../../../styles/markov.css';
+import '../../../../styles/prose.css';
+import '../../../../styles/tasks.css';
+import MarkovHelp from '../../../../components/markov/MarkovHelp.astro';
+import PrevNext from '../../../../components/PrevNext.astro';
+import TaskWorkbench, { type TaskView } from '../../../../components/tasks/TaskWorkbench';
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import { loadContent } from '../../../../lib/content/collections';
+import { sessionPath } from '../../../../lib/content/course';
+import { DEFAULT_MAX_STEPS } from '../../../../lib/tasks/check';
+import { url } from '../../../../lib/url';
+import { checkableSessions, loadVariants, loadVariantTests } from '../../../../lib/variants/load';
+import {
+  splitExample,
+  tasksOf,
+  testsKey,
+  VARIANTS,
+  variantTaskId,
+  variantTaskPath,
+} from '../../../../lib/variants/variants';
+
+export async function getStaticPaths() {
+  const { sessions } = await loadContent();
+  return checkableSessions().flatMap((id) => {
+    const session = sessions.find((s) => s.id === id);
+    if (!session) throw new Error(`Варіанти «${id}»: заняття з таким файлом не знайдено`);
+    const data = loadVariants(id);
+    if (data.machine !== 'markov') {
+      throw new Error(`Варіанти «${id}»: автоперевірка поки є лише для алгоритмів Маркова`);
+    }
+    const tests = loadVariantTests(id)!;
+    return Array.from({ length: VARIANTS }, (_, i) => i + 1).flatMap((n) =>
+      tasksOf(data, n).map((task, s) => {
+        const stars = s + 1;
+        const lines = tests[testsKey(n, stars)];
+        if (!lines) throw new Error(`Варіанти «${id}»: немає тестів для ${testsKey(n, stars)}`);
+        return {
+          params: { session: id, n: String(n), stars: String(stars) },
+          props: {
+            id,
+            title: session.data.title,
+            kind: session.data.kind,
+            number: session.data.number,
+            n,
+            stars,
+            task,
+            lines,
+          },
+        };
+      }),
+    );
+  });
+}
+
+const { id, title, kind, number, n, stars, task, lines } = Astro.props;
+const sessionHref = sessionPath(kind, number);
+const label = `${kind === 'lab' ? 'ЛР' : 'ПЗ'}${number}`;
+const starText = '★'.repeat(stars);
+
+const view: TaskView = {
+  id: variantTaskId(id, n, stars),
+  machine: 'markov',
+  alphabet: (task.alphabet ?? '').replace(/[\s,]+/g, ''),
+  starter: '',
+  tests: lines.map((line: string) => {
+    const { input, output } = splitExample(line);
+    return { input, expected: output, checkHead: false };
+  }),
+  hints: [],
+  maxSteps: DEFAULT_MAX_STEPS,
+};
+
+const escape = (text: string) =>
+  text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const inline = (text: string) => escape(text).replace(/`([^`]+)`/g, '<code>$1</code>');
+const neighbour = (s: number) =>
+  s >= 1 && s <= 3
+    ? { href: variantTaskPath(id, n, s), title: `Варіант ${n} · ${'★'.repeat(s)}` }
+    : undefined;
+---
+
+<BaseLayout
+  title={`${label}, варіант ${n} · ${starText}`}
+  description={`Індивідуальне завдання ${label} «${title}», варіант ${n}, ${starText}. Автоматична перевірка в емуляторі.`}
+  section="practicals"
+  breadcrumbs={[
+    { label: 'Практичні', href: '/practicals/' },
+    { label: `${label}. ${title}`, href: sessionHref },
+    { label: `Варіант ${n} · ${starText}` },
+  ]}
+>
+  <article class="container page page--emulator task-page">
+    <header class="page-header page-header--compact">
+      <p class="eyebrow">{label} · індивідуальне завдання</p>
+      <h1>
+        Варіант {n} · {starText}
+      </h1>
+      <ul class="task-meta">
+        <li>{stars === 1 ? 'Обов’язкове' : stars === 2 ? 'На занятті' : 'За бажанням, удома'}</li>
+        {task.alphabet && (
+          <li>
+            Алфавіт: <code>{task.alphabet}</code> (можна додати маркери)
+          </li>
+        )}
+      </ul>
+    </header>
+
+    <div class="prose task-statement">
+      <p set:html={inline(task.task)} />
+      {task.examples.length > 0 && (
+        <p>
+          <strong>Приклади.</strong>{' '}
+          {task.examples.map((example: string, k: number) => (
+            <>
+              {k > 0 && '; '}
+              <code>{example}</code>
+            </>
+          ))}
+        </p>
+      )}
+      <p>
+        <a href={url(`${sessionHref}#варіанти`)}>← До таблиці варіантів</a>
+      </p>
+    </div>
+
+    <TaskWorkbench client:load task={view} />
+
+    <MarkovHelp />
+
+    <PrevNext
+      prev={neighbour(stars - 1)}
+      next={neighbour(stars + 1)}
+      prevLabel="Попереднє завдання"
+      nextLabel="Наступне завдання"
+    />
+  </article>
+</BaseLayout>

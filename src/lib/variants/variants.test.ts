@@ -7,11 +7,21 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse as parseYaml } from 'yaml';
 import * as markov from '../machines/markov';
-import { parseVariants, slotOf, splitExample, tasksOf, VARIANTS } from './variants';
+import {
+  parseVariants,
+  parseVariantTests,
+  slotOf,
+  splitExample,
+  tasksOf,
+  testsKey,
+  VARIANTS,
+} from './variants';
 
 const DATA_DIR = join(process.cwd(), 'src', 'data', 'variants');
 const SOLUTIONS_DIR = join(process.cwd(), 'solutions', 'variants');
-const files = readdirSync(DATA_DIR).filter((f) => f.endsWith('.yaml'));
+const files = readdirSync(DATA_DIR).filter(
+  (f) => f.endsWith('.yaml') && !f.endsWith('.tests.yaml'),
+);
 
 describe('slotOf', () => {
   it('3, 13 і 23 — один блок, різні версії', () => {
@@ -71,4 +81,15 @@ describe.each(files)('%s', (file) => {
       expect(failures).toEqual([]);
     },
   );
+});
+
+describe('тести автоперевірки варіантів', () => {
+  const testFiles = readdirSync(DATA_DIR).filter((f) => f.endsWith('.tests.yaml'));
+  it.each(testFiles)('%s — є для кожного з 90 завдань', (file) => {
+    const tests = parseVariantTests(readFileSync(join(DATA_DIR, file), 'utf8'));
+    const keys = Array.from({ length: VARIANTS }, (_, i) => i + 1).flatMap((n) =>
+      [1, 2, 3].map((stars) => testsKey(n, stars)),
+    );
+    expect(keys.filter((key) => !tests[key])).toEqual([]);
+  });
 });
