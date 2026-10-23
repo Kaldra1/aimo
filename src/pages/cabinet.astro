@@ -1,0 +1,28 @@
+---
+import ComingSoon from '../components/ComingSoon.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Кабінет студента"
+  description="Особистий кабінет студента: розв’язані індивідуальні завдання й дати розв’язання."
+  section="cabinet"
+  breadcrumbs={[{ label: 'Кабінет' }]}
+  noindex
+>
+  <div class="container page">
+    <header class="page-header">
+      <h1>Кабінет студента</h1>
+      <p class="lead">
+        Тут буде видно, які індивідуальні завдання ви розв’язали й коли: заняття, варіант, ★/★★/★★★,
+        дата перевірки.
+      </p>
+    </header>
+    <ComingSoon message="Кабінет готується: вхід за логіном і паролем, які видасть викладач.">
+      <p>
+        Поки що розв’язані завдання зберігаються лише у вашому браузері й позначаються в таблицях
+        варіантів на сторінках практичних занять.
+      </p>
+    </ComingSoon>
+  </div>
+</BaseLayout>
