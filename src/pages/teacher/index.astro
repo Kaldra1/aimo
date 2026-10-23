@@ -7,7 +7,11 @@ import { DEFAULT_RULES, GRADE_LABELS } from '../../lib/grading/grade';
 
 const [early, middle] = DEFAULT_RULES.windows;
 const label = (grade: 3 | 4 | 5) => `«${GRADE_LABELS[grade]}»`;
-const volume = `виконано ★ — ${label(DEFAULT_RULES.byStars[1])}, до ★★ — ${label(DEFAULT_RULES.byStars[2])}, до ★★★ — ${label(DEFAULT_RULES.byStars[3])}`;
+const volume =
+  `виконано ★ — ${label(DEFAULT_RULES.byStars[1])}, ★ і ★★ — ${label(DEFAULT_RULES.byStars[2])}` +
+  (DEFAULT_RULES.byStars[3] > DEFAULT_RULES.byStars[2]
+    ? `, до ★★★ — ${label(DEFAULT_RULES.byStars[3])}`
+    : '; ★★★ — для охочих, оцінку не підвищує');
 const deadline = `до ${early!.days} днів — без обмежень, до ${middle!.days} днів — не вище ${label(middle!.cap)}, пізніше — не вище ${label(DEFAULT_RULES.lateCap)}`;
 
 // Структура оцінювання: теми, у яких є лабораторні чи практичні.

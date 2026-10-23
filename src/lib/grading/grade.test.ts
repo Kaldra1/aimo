@@ -17,9 +17,9 @@ describe('рекомендована оцінка', () => {
     expect(recommendGrade([], session).reason).toMatch(/★ не виконано/);
   });
 
-  it('обсяг: ★ — 3, до ★★ — 4, до ★★★ — 5', () => {
-    expect(recommendGrade([task(1, '2026-10-02')], session).grade).toBe(3);
-    expect(recommendGrade([task(1, '2026-10-02'), task(2, '2026-10-03')], session).grade).toBe(4);
+  it('обсяг: ★ — 4, ★ + ★★ — 5, ★★★ не підвищує', () => {
+    expect(recommendGrade([task(1, '2026-10-02')], session).grade).toBe(4);
+    expect(recommendGrade([task(1, '2026-10-02'), task(2, '2026-10-03')], session).grade).toBe(5);
     expect(
       recommendGrade([task(1, '2026-10-02'), task(2, '2026-10-03'), task(3, '2026-10-05')], session)
         .grade,
@@ -39,19 +39,19 @@ describe('рекомендована оцінка', () => {
       [task(1, '2026-10-02'), task(2, '2026-10-03'), task(3, '2026-11-20')],
       session,
     );
-    // ★★ вчасно дає 4, ★★★ запізно — лише 3: лишається 4.
-    expect(r).toMatchObject({ byVolume: 5, grade: 4, days: 2 });
+    // ★★ вчасно дає 5, ★★★ запізно — лише 3: лишається 5.
+    expect(r).toMatchObject({ byVolume: 5, grade: 5, days: 2 });
   });
 
   it('без дати заняття термін не враховується', () => {
     const r = recommendGrade([task(1, '2026-12-31'), task(2, '2026-12-31')]);
-    expect(r).toMatchObject({ grade: 4, cap: null, days: null });
+    expect(r).toMatchObject({ grade: 5, cap: null, days: null });
     expect(r.reason).toMatch(/Дату заняття не задано/);
   });
 
   it('повторне розв’язання не зсуває дату — враховується перше', () => {
     const r = recommendGrade([task(1, '2026-10-02'), task(1, '2026-11-30')], session);
-    expect(r).toMatchObject({ grade: 3, days: 1 });
+    expect(r).toMatchObject({ grade: 4, days: 1 });
   });
 });
 

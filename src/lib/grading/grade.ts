@@ -27,7 +27,8 @@ export interface GradingRules {
 }
 
 export const DEFAULT_RULES: GradingRules = {
-  byStars: { 1: 3, 2: 4, 3: 5 },
+  // ★ — «добре», ★ + ★★ — уже «відмінно»; ★★★ — для охочих, оцінку не підвищує.
+  byStars: { 1: 4, 2: 5, 3: 5 },
   windows: [
     { days: 14, cap: 5 },
     { days: 28, cap: 4 },
