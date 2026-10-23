@@ -8,6 +8,8 @@ import {
   type TuringProgram,
   type TuringSaved,
 } from '../../lib/machines/turing';
+import { saveSolve } from '../../lib/cloud/client';
+import { parseVariantTaskId, programText } from '../../lib/cloud/solutions';
 import { plural } from '../../lib/plural';
 import {
   checkMarkov,
@@ -97,6 +99,7 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
   const initialState = useMemo(() => initialOf(task), [task]);
   const empty = task.machine === 'markov' ? 'λ (порожнє слово)' : 'порожня стрічка';
   const [rules, setRules] = useState<number | null>(null);
+  const [cloud, setCloud] = useState<string | null>(null);
   const solvedAt = progress?.solved[task.id];
 
   const onChange = useCallback((next: Program | null) => {
@@ -122,6 +125,19 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
       if (next.solved) {
         store.markSolved(task.id);
         notifyProgress();
+        if (task.machine === 'markov' && parseVariantTaskId(task.id)) {
+          saveSolve(task.id, programText(current as MarkovProgram)).then(
+            (result) =>
+              setCloud(
+                result === 'saved'
+                  ? 'Схему збережено в кабінеті — викладач її бачить.'
+                  : result === 'foreign'
+                    ? 'Це не ваш варіант, тож у кабінет розв’язок не записано.'
+                    : null,
+              ),
+            (error: Error) => setCloud(`Не вдалося зберегти в кабінеті: ${error.message}`),
+          );
+        }
       }
     }
     requestAnimationFrame(() =>
@@ -266,6 +282,11 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
         >
           {summary}
         </p>
+        {report?.solved && cloud !== null && (
+          <p class="message" role="status">
+            {cloud}
+          </p>
+        )}
         {report !== null && stale && (
           <p class="message message--warning">
             Програму змінено після перевірки — натисніть «Перевірити» ще раз.

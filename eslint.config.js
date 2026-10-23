@@ -8,7 +8,7 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig(
   {
-    ignores: ['dist/', '.astro/', 'node_modules/', 'public/', 'coverage/'],
+    ignores: ['dist/', '.astro/', 'node_modules/', 'public/', 'coverage/', 'supabase/functions/'],
   },
   js.configs.recommended,
   tseslint.configs.recommended,

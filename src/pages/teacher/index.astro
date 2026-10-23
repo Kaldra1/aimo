@@ -1,12 +1,16 @@
 ---
-import ComingSoon from '../../components/ComingSoon.astro';
+import '../../styles/emulator.css';
+import '../../styles/cloud.css';
+import TeacherDashboard from '../../components/cloud/TeacherDashboard';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { course, loadContent } from '../../lib/content/collections';
 import { groupByTopic, sessionShortLabel, topicLabel } from '../../lib/content/course';
-import { DEFAULT_RULES, GRADE_LABELS } from '../../lib/grading/grade';
+import { loadCloudMeta } from '../../lib/cloud/meta';
+import { DEFAULT_RULES, GRADE_LABELS, type Grade } from '../../lib/grading/grade';
 
+const meta = await loadCloudMeta();
 const [early, middle] = DEFAULT_RULES.windows;
-const label = (grade: 3 | 4 | 5) => `«${GRADE_LABELS[grade]}»`;
+const label = (grade: Grade) => `«${GRADE_LABELS[grade]}»`;
 const volume =
   `виконано ★ — ${label(DEFAULT_RULES.byStars[1])}, ★ і ★★ — ${label(DEFAULT_RULES.byStars[2])}` +
   (DEFAULT_RULES.byStars[3] > DEFAULT_RULES.byStars[2]
@@ -41,9 +45,12 @@ const topics = groupByTopic(course, lectures, sessions)
       </p>
     </header>
 
-    <ComingSoon message="Дашборд готується: потрібен вхід студентів і викладача (Supabase).">
-      <p>Тут буде таблиця «студенти × заняття × ★/★★/★★★» з датами розв’язання й самими схемами.</p>
-    </ComingSoon>
+    <TeacherDashboard
+      client:only="preact"
+      sessions={meta.sessions}
+      topics={meta.topics}
+      tests={meta.tests}
+    />
 
     <section class="teacher-grading" aria-labelledby="grading-title">
       <h2 id="grading-title">Оцінювання</h2>

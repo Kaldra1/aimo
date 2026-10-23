@@ -1,0 +1,113 @@
+/* Кабінет студента й дашборд викладача. */
+
+.cloud-stack {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.cloud-card,
+.cloud-login {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.cloud-login {
+  max-width: 24rem;
+}
+
+.cloud-row,
+.cloud-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.cloud-toolbar {
+  align-items: center;
+}
+
+.cloud-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.cloud-muted {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 400;
+}
+
+.cloud-ok {
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.cloud-table {
+  overflow-x: auto;
+}
+
+.cloud-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.cloud-table th,
+.cloud-table td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.cloud-table tbody th {
+  font-weight: 600;
+}
+
+.cloud-solve {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font: inherit;
+  white-space: nowrap;
+  text-decoration: underline dotted;
+  cursor: pointer;
+}
+
+.cloud-solve.is-failed {
+  color: var(--color-danger);
+}
+
+.cloud-twin {
+  display: block;
+  margin-top: var(--space-1);
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-control);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+  font-size: var(--text-xs, 0.75rem);
+}
+
+.cloud-grade {
+  min-height: 2.25rem;
+  padding-block: var(--space-1);
+}
+
+.cloud-roster {
+  min-height: 10rem;
+  resize: vertical;
+}
+
+.cloud-program pre {
+  overflow-x: auto;
+  padding: var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}

@@ -6,10 +6,18 @@
 import { parse as parseYaml } from 'yaml';
 import { z } from 'astro/zod';
 import { MACHINES } from '../machines/meta';
+import { BLOCKS, slotOf, VERSIONS } from './ids';
 
-export const BLOCKS = 10;
-export const VERSIONS = 3;
-export const VARIANTS = BLOCKS * VERSIONS;
+export {
+  BLOCKS,
+  slotOf,
+  splitExample,
+  testsKey,
+  VARIANTS,
+  variantTaskId,
+  variantTaskPath,
+  VERSIONS,
+} from './ids';
 
 const taskSchema = z.strictObject({
   /** Для машин — алфавіт; для інших занять (C++, сортування) поля немає. */
@@ -36,22 +44,10 @@ export function parseVariants(text: string): VariantsData {
   return variantsSchema.parse(parseYaml(text));
 }
 
-/** Блок і версія для варіанта з номером n (від 1 до 30). */
-export function slotOf(n: number): { block: number; version: number } {
-  return { block: (n - 1) % BLOCKS, version: Math.floor((n - 1) / BLOCKS) };
-}
-
 /** Три завдання варіанта n: ★, ★★, ★★★. */
 export function tasksOf(data: VariantsData, n: number): VariantTask[] {
   const { block, version } = slotOf(n);
   return data.levels.map((level) => level.blocks[block]![version]!);
-}
-
-/** «abab → aa» → { input: 'abab', output: 'aa' }; λ — порожнє слово. */
-export function splitExample(example: string): { input: string; output: string } {
-  const [input = '', output = ''] = example.split(' → ');
-  const word = (text: string) => (text.trim() === 'λ' ? '' : text.trim());
-  return { input: word(input), output: word(output) };
 }
 
 /** Тести завдань варіантів для автоперевірки: ключ «<зірки>-<блок>-<версія>» → «вхід → результат». */
@@ -63,17 +59,3 @@ export const variantTestsSchema = z.record(
 export function parseVariantTests(text: string): Record<string, string[]> {
   return variantTestsSchema.parse(parseYaml(text));
 }
-
-/** Ключ тестів для завдання з `stars` зірками варіанта n. */
-export function testsKey(n: number, stars: number): string {
-  const { block, version } = slotOf(n);
-  return `${stars}-${block + 1}-${version + 1}`;
-}
-
-/** Ідентифікатор завдання варіанта для прогресу й автозбереження: practical-02/v7/2. */
-export const variantTaskId = (session: string, n: number, stars: number) =>
-  `${session}/v${n}/${stars}`;
-
-/** Адреса сторінки завдання варіанта. */
-export const variantTaskPath = (session: string, n: number, stars: number) =>
-  `/variants/${session}/${n}/${stars}/`;

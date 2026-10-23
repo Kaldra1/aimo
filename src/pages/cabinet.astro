@@ -1,6 +1,11 @@
 ---
-import ComingSoon from '../components/ComingSoon.astro';
+import '../styles/emulator.css';
+import '../styles/cloud.css';
+import Cabinet from '../components/cloud/Cabinet';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { loadCloudMeta } from '../lib/cloud/meta';
+
+const { sessions } = await loadCloudMeta();
 ---
 
 <BaseLayout
@@ -14,15 +19,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <header class="page-header">
       <h1>Кабінет студента</h1>
       <p class="lead">
-        Тут буде видно, які індивідуальні завдання ви розв’язали й коли: заняття, варіант, ★/★★/★★★,
-        дата перевірки.
+        Які індивідуальні завдання ви розв’язали й коли. Після входу кожен успішно перевірений
+        розв’язок свого варіанта зберігається тут, і його бачить викладач.
       </p>
     </header>
-    <ComingSoon message="Кабінет готується: вхід за логіном і паролем, які видасть викладач.">
-      <p>
-        Поки що розв’язані завдання зберігаються лише у вашому браузері й позначаються в таблицях
-        варіантів на сторінках практичних занять.
-      </p>
-    </ComingSoon>
+    <Cabinet client:only="preact" sessions={sessions} />
   </div>
 </BaseLayout>

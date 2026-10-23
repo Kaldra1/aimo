@@ -8,13 +8,14 @@
  *  - Рекомендована оцінка — менша з двох. Якщо дати заняття немає, термін не враховується.
  */
 
-export type Grade = 3 | 4 | 5;
+export type Grade = 2 | 3 | 4 | 5;
 export type Stars = 1 | 2 | 3;
 
 export const GRADE_LABELS: Record<Grade, string> = {
   5: 'відмінно',
   4: 'добре',
   3: 'задовільно',
+  2: 'незадовільно',
 };
 
 export interface GradingRules {
