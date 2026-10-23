@@ -36,6 +36,8 @@ export const sessionSchema = z.strictObject({
   hours: z.number().positive(),
   topic: positiveInt,
   emulator: z.enum(MACHINES).optional(),
+  /** Дата проведення (YYYY-MM-DD): від неї рахуються терміни для рекомендованої оцінки. */
+  date: z.coerce.date().optional(),
   draft: z.boolean().default(false),
 });
 
