@@ -111,3 +111,8 @@
   font-family: var(--font-mono);
   font-size: var(--text-sm);
 }
+
+.cloud-card > .button,
+.cloud-login > .button {
+  justify-self: start;
+}
