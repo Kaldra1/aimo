@@ -1,9 +1,25 @@
 ---
 import ComingSoon from '../../components/ComingSoon.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { course, loadContent } from '../../lib/content/collections';
+import { groupByTopic, sessionShortLabel, topicLabel } from '../../lib/content/course';
 import { DEFAULT_RULES, GRADE_LABELS } from '../../lib/grading/grade';
 
 const [early, middle] = DEFAULT_RULES.windows;
+const label = (grade: 3 | 4 | 5) => `«${GRADE_LABELS[grade]}»`;
+const volume = `виконано ★ — ${label(DEFAULT_RULES.byStars[1])}, до ★★ — ${label(DEFAULT_RULES.byStars[2])}, до ★★★ — ${label(DEFAULT_RULES.byStars[3])}`;
+const deadline = `до ${early!.days} днів — без обмежень, до ${middle!.days} днів — не вище ${label(middle!.cap)}, пізніше — не вище ${label(DEFAULT_RULES.lateCap)}`;
+
+// Структура оцінювання: теми, у яких є лабораторні чи практичні.
+const { lectures, sessions } = await loadContent();
+const topics = groupByTopic(course, lectures, sessions)
+  .flatMap((module) => module.topics)
+  .filter((group) => group.sessions.length > 0)
+  .map((group) => ({
+    label: topicLabel(group.topic.number),
+    title: group.topic.title,
+    sessions: group.sessions.map((s) => sessionShortLabel(s.data.kind, s.data.number)),
+  }));
 ---
 
 <BaseLayout
@@ -28,43 +44,123 @@ const [early, middle] = DEFAULT_RULES.windows;
     <section class="teacher-grading" aria-labelledby="grading-title">
       <h2 id="grading-title">Оцінювання</h2>
       <p>
-        Оцінку за заняття ставить викладач. Дашборд підкаже <strong>рекомендовану оцінку</strong> —
-        меншу з двох:
+        На кожному рівні дашборд показує <strong>рекомендовану</strong> оцінку, а
+        <strong>остаточну</strong> завжди ставить викладач.
       </p>
+
+      <h3>Заняття (лабораторна чи практична)</h3>
+      <p>Рекомендована — менша з двох:</p>
       <ul>
         <li>
-          <strong>за обсягом:</strong> виконано ★ — «{GRADE_LABELS[DEFAULT_RULES.byStars[1]]}», до
-          ★★ — «{GRADE_LABELS[DEFAULT_RULES.byStars[2]]}», до ★★★ — «
-          {GRADE_LABELS[DEFAULT_RULES.byStars[3]]}». Без обов’язкового ★ оцінки немає;
+          <strong>за обсягом:</strong> {volume}. Без обов’язкового ★ оцінки немає;
         </li>
         <li>
-          <strong>за терміном</strong> від дати заняття: до {early!.days} днів — без обмежень, до{' '}
-          {middle!.days} днів — не вище «{GRADE_LABELS[middle!.cap]}», пізніше — не вище «
-          {GRADE_LABELS[DEFAULT_RULES.lateCap]}».
+          <strong>за терміном</strong> від дати заняття: {deadline}.
         </li>
       </ul>
       <p>
         Кожне завдання враховується зі своєю датою, тож пізнє доробляння ★★★ не знижує вже
         заробленої оцінки. Поки дати занять не задано, термін не враховується.
       </p>
+
+      <h3>Тематична</h3>
+      <p>
+        Рекомендована — середнє арифметичне остаточних оцінок за заняття теми, округлене за
+        звичайним правилом (3,5 → 4). Поки якесь заняття теми не оцінене, рекомендації немає.
+      </p>
+
+      <h3>Семестрова</h3>
+      <p>
+        Рекомендована — середнє тематичних оцінок. Наприкінці семестру — залік, на якому студент
+        може підвищити оцінку, тож остаточну семестрову викладач ставить вручну.
+      </p>
+    </section>
+
+    <section class="teacher-structure" aria-labelledby="structure-title">
+      <h2 id="structure-title">Структура оцінок курсу</h2>
+      <p class="teacher-note">
+        Так виглядатиме рядок кожного студента в дашборді: рекомендовані й остаточні оцінки.
+      </p>
+      <div class="teacher-table">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Тема</th>
+              <th scope="col">Заняття</th>
+              <th scope="col">Тематична: рекомендована / остаточна</th>
+            </tr>
+          </thead>
+          <tbody>
+            {topics.map((topic) => (
+              <tr>
+                <th scope="row">
+                  {topic.label}. {topic.title}
+                </th>
+                <td>{topic.sessions.join(', ')}</td>
+                <td>— / —</td>
+              </tr>
+            ))}
+            <tr class="teacher-total">
+              <th scope="row">Семестрова</th>
+              <td>середнє тематичних ({topics.map((t) => t.label).join(', ')}), потім залік</td>
+              <td>— / —</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </section>
   </div>
 </BaseLayout>
 
 <style>
-  .teacher-grading {
+  .teacher-grading,
+  .teacher-structure {
     max-width: var(--width-prose);
     margin-top: var(--space-7);
   }
 
-  .teacher-grading h2 {
+  .teacher-grading h2,
+  .teacher-structure h2 {
     margin-bottom: var(--space-3);
+  }
+
+  .teacher-grading h3 {
+    margin: var(--space-5) 0 var(--space-2);
+    font-size: var(--text-lg);
   }
 
   .teacher-grading ul {
     display: grid;
     gap: var(--space-2);
-    margin: var(--space-3) 0;
+    margin: var(--space-2) 0;
     padding-left: 1.5em;
+  }
+
+  .teacher-note {
+    margin-bottom: var(--space-3);
+    color: var(--color-text-muted);
+  }
+
+  .teacher-table {
+    overflow-x: auto;
+  }
+
+  .teacher-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .teacher-table th,
+  .teacher-table td {
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .teacher-total th,
+  .teacher-total td {
+    font-weight: 600;
+    background: var(--color-surface);
   }
 </style>
