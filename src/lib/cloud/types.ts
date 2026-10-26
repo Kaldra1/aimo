@@ -10,6 +10,8 @@ export interface SessionMeta {
   topic: number;
   /** Чи є автоперевірка варіантів (розв'язки збираються в базу). */
   checkable: boolean;
+  /** Машина, на якій розв'язують варіанти з автоперевіркою. */
+  machine?: 'post' | 'turing' | 'markov' | undefined;
 }
 
 export interface SolveRow {

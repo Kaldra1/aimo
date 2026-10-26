@@ -1,5 +1,7 @@
 ---
 /** Таблиця індивідуальних варіантів заняття з src/data/variants/<id>.yaml. */
+import 'katex/dist/katex.min.css';
+import { inlineTask } from '../lib/variants/inline';
 import { url } from '../lib/url';
 import { loadVariants, loadVariantTests } from '../lib/variants/load';
 import { tasksOf, VARIANTS, variantTaskId, variantTaskPath } from '../lib/variants/variants';
@@ -13,11 +15,6 @@ const { id } = Astro.props;
 const data = loadVariants(id);
 /** Кнопка «Виконати» (одна на варіант, веде до ★) — лише там, де є тести для автоперевірки. */
 const checkable = loadVariantTests(id) !== null;
-
-const escape = (text: string) =>
-  text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-/** `код` в умові — моноширинним шрифтом. */
-const inline = (text: string) => escape(text).replace(/`([^`]+)`/g, '<code>$1</code>');
 
 const rows = Array.from({ length: VARIANTS }, (_, i) => ({
   n: i + 1,
@@ -52,7 +49,7 @@ const HEADERS = ['★ — обов’язкове', '★★ — на занят�
           </th>
           {tasks.map((task, s) => (
             <td>
-              <p set:html={inline(task.task)} />
+              <p set:html={inlineTask(task.task)} />
               {(task.alphabet || task.examples.length > 0) && (
                 <p class="variants__meta">
                   {task.alphabet && <>Алфавіт: {task.alphabet}. </>}
@@ -130,6 +127,10 @@ const HEADERS = ['★ — обов’язкове', '★★ — на занят�
   .variants__meta {
     color: var(--color-text-muted);
     font-size: var(--text-sm);
+  }
+
+  .variants__meta code {
+    white-space: nowrap;
   }
 
   .variants tbody th {

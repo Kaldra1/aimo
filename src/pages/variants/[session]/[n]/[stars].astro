@@ -1,15 +1,20 @@
 ---
+import 'katex/dist/katex.min.css';
+import { inlineTask } from '../../../../lib/variants/inline';
 import '../../../../styles/emulator.css';
 import '../../../../styles/markov.css';
 import '../../../../styles/prose.css';
 import '../../../../styles/tasks.css';
 import MarkovHelp from '../../../../components/markov/MarkovHelp.astro';
+import PostHelp from '../../../../components/post/PostHelp.astro';
+import TuringHelp from '../../../../components/turing/TuringHelp.astro';
 import PrevNext from '../../../../components/PrevNext.astro';
 import TaskWorkbench, { type TaskView } from '../../../../components/tasks/TaskWorkbench';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import { loadContent } from '../../../../lib/content/collections';
 import { sessionPath, sessionShortLabel } from '../../../../lib/content/course';
 import { DEFAULT_MAX_STEPS } from '../../../../lib/tasks/check';
+import { LONG_MAX_STEPS } from '../../../../lib/cloud/solutions';
 import { url } from '../../../../lib/url';
 import { checkableSessions, loadVariants, loadVariantTests } from '../../../../lib/variants/load';
 import {
@@ -27,8 +32,9 @@ export async function getStaticPaths() {
     const session = sessions.find((s) => s.id === id);
     if (!session) throw new Error(`Варіанти «${id}»: заняття з таким файлом не знайдено`);
     const data = loadVariants(id);
-    if (data.machine !== 'markov') {
-      throw new Error(`Варіанти «${id}»: автоперевірка поки є лише для алгоритмів Маркова`);
+    const machine = data.machine;
+    if (machine !== 'markov' && machine !== 'post' && machine !== 'turing') {
+      throw new Error(`Варіанти «${id}»: автоперевірки для машини «${machine}» немає`);
     }
     const tests = loadVariantTests(id)!;
     return Array.from({ length: VARIANTS }, (_, i) => i + 1).flatMap((n) =>
@@ -47,6 +53,7 @@ export async function getStaticPaths() {
             stars,
             task,
             lines,
+            machine,
           },
         };
       }),
@@ -54,27 +61,30 @@ export async function getStaticPaths() {
   });
 }
 
-const { id, title, kind, number, n, stars, task, lines } = Astro.props;
+const { id, title, kind, number, n, stars, task, lines, machine } = Astro.props;
 const sessionHref = sessionPath(kind, number);
 const label = sessionShortLabel(kind, number);
 const starText = '★'.repeat(stars);
 
 const view: TaskView = {
   id: variantTaskId(id, n, stars),
-  machine: 'markov',
-  alphabet: (task.alphabet ?? '').replace(/[\s,]+/g, ''),
+  machine,
+  // «0–9» в умові — це всі цифри від 0 до 9.
+  alphabet: (task.alphabet ?? '')
+    .replace(/(\d)–(\d)/g, (_: string, a: string, b: string) =>
+      Array.from({ length: Number(b) - Number(a) + 1 }, (_, i) => String(Number(a) + i)).join(''),
+    )
+    .replace(/[\s,]+/g, ''),
   starter: '',
   tests: lines.map((line: string) => {
     const { input, output } = splitExample(line);
     return { input, expected: output, checkHead: false };
   }),
   hints: [],
-  maxSteps: DEFAULT_MAX_STEPS,
+  // Програми машин Поста й Тюрінга бувають довгими (множення, степінь), тож ліміт більший.
+  maxSteps: machine === 'markov' ? DEFAULT_MAX_STEPS : LONG_MAX_STEPS,
 };
 
-const escape = (text: string) =>
-  text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const inline = (text: string) => escape(text).replace(/`([^`]+)`/g, '<code>$1</code>');
 const neighbour = (s: number) =>
   s >= 1 && s <= 3
     ? { href: variantTaskPath(id, n, s), title: `Варіант ${n} · ${'★'.repeat(s)}` }
@@ -84,9 +94,11 @@ const neighbour = (s: number) =>
 <BaseLayout
   title={`${label}, варіант ${n} · ${starText}`}
   description={`Індивідуальне завдання ${label} «${title}», варіант ${n}, ${starText}. Автоматична перевірка в емуляторі.`}
-  section="practicals"
+  section={kind === 'lab' ? 'labs' : 'practicals'}
   breadcrumbs={[
-    { label: 'Практичні', href: '/practicals/' },
+    kind === 'lab'
+      ? { label: 'Лабораторні', href: '/labs/' }
+      : { label: 'Практичні', href: '/practicals/' },
     { label: `${label}. ${title}`, href: sessionHref },
     { label: `Варіант ${n} · ${starText}` },
   ]}
@@ -112,14 +124,15 @@ const neighbour = (s: number) =>
         <li>{stars === 1 ? 'Обов’язкове' : stars === 2 ? 'На занятті' : 'За бажанням, удома'}</li>
         {task.alphabet && (
           <li>
-            Алфавіт: <code>{task.alphabet}</code> (можна додати маркери)
+            Алфавіт: <code>{task.alphabet}</code> (можна додати{' '}
+            {machine === 'markov' ? 'маркери' : 'допоміжні символи'})
           </li>
         )}
       </ul>
     </header>
 
     <div class="prose task-statement">
-      <p set:html={inline(task.task)} />
+      <p set:html={inlineTask(task.task)} />
       {task.examples.length > 0 && (
         <p>
           <strong>Приклади.</strong>{' '}
@@ -138,7 +151,7 @@ const neighbour = (s: number) =>
 
     <TaskWorkbench client:load task={view} />
 
-    <MarkovHelp />
+    {machine === 'post' ? <PostHelp /> : machine === 'turing' ? <TuringHelp /> : <MarkovHelp />}
 
     <PrevNext
       prev={neighbour(stars - 1)}

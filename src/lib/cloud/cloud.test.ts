@@ -7,7 +7,7 @@ import {
   loginToEmail,
   parseRoster,
 } from './accounts';
-import { fingerprint, parseVariantTaskId, recheck } from './solutions';
+import { fingerprint, parseProgram, parseVariantTaskId, programText, recheck } from './solutions';
 
 describe('логіни', () => {
   it('група й номер з двох цифр', () => {
@@ -71,14 +71,36 @@ describe('розв’язки', () => {
   });
 
   it('однакові схеми не залежать від пробілів, стрілок і коментарів', () => {
-    expect(fingerprint('a -> b // заміна\nb ->. ')).toBe(fingerprint('a→b\n  b →· λ'));
-    expect(fingerprint('a -> b\nb -> a')).not.toBe(fingerprint('b -> a\na -> b'));
+    expect(fingerprint('markov', 'a -> b // заміна\nb ->. ')).toBe(
+      fingerprint('markov', 'a→b\n  b →· λ'),
+    );
+    expect(fingerprint('markov', 'a -> b\nb -> a')).not.toBe(
+      fingerprint('markov', 'b -> a\na -> b'),
+    );
   });
 
   it('повторна перевірка', () => {
     const lines = ['ab → b', 'aab → b', 'b → b'];
-    expect(recheck('a -> λ', lines)).toBe('ok');
-    expect(recheck('b -> λ', lines)).toBe('fail');
-    expect(recheck('a -> ', undefined)).toBe('unknown');
+    expect(recheck('markov', 'a -> λ', lines)).toBe('ok');
+    expect(recheck('markov', 'b -> λ', lines)).toBe('fail');
+    expect(recheck('markov', 'a -> ', undefined)).toBe('unknown');
+  });
+});
+
+describe('розв’язки машин Поста й Тюрінга', () => {
+  it('Тюрінг: алфавіт з допоміжними символами переживає збереження', () => {
+    const program = parseProgram('turing', '// алфавіт: abX\nq0, a -> X, R, q0\nq0, λ -> λ, N, !');
+    expect(program).not.toBeNull();
+    const text = programText('turing', program!);
+    expect(text.startsWith('// алфавіт: abX')).toBe(true);
+    expect(recheck('turing', text, ['[a]a → XX', '[a] → X'])).toBe('ok');
+    expect(recheck('turing', text, ['[b] → b'])).toBe('fail');
+  });
+
+  it('Пост: текст програми й повторна перевірка', () => {
+    const text = programText('post', parseProgram('post', '1. X 2\n2. !')!);
+    expect(text).toBe('1. X 2\n2. !');
+    expect(recheck('post', text, ['[1] 1^2 → 1^2'])).toBe('ok');
+    expect(fingerprint('post', '1.  X 2 // стерти\n2. !')).toBe(fingerprint('post', text));
   });
 });

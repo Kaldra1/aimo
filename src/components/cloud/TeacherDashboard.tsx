@@ -143,17 +143,26 @@ function Dashboard({
     return () => window.removeEventListener('beforeunload', warn);
   }, [draft]);
 
+  const machineOf = useMemo(
+    () => new Map(sessions.map((s) => [s.id, s.machine ?? 'markov'] as const)),
+    [sessions],
+  );
+
   // Повторна перевірка всіх збережених схем — один раз на завантаження даних.
   const checks = useMemo(() => {
     const result = new Map<string, Recheck>();
     for (const solve of data?.solves ?? []) {
       result.set(
         solveKey(solve.user_id, solve.session, solve.stars),
-        recheck(solve.program, tests[solve.session]?.[testsKey(solve.variant, solve.stars)]),
+        recheck(
+          machineOf.get(solve.session) ?? 'markov',
+          solve.program,
+          tests[solve.session]?.[testsKey(solve.variant, solve.stars)],
+        ),
       );
     }
     return result;
-  }, [data, tests]);
+  }, [data, tests, machineOf]);
 
   const book = useMemo<GradeBook | null>(() => {
     if (!data) return null;
@@ -590,7 +599,7 @@ function SessionTable({
     const byKey = new Map<string, SolveRow[]>();
     for (const solve of data.solves) {
       if (solve.session !== session.id) continue;
-      const key = `${solve.stars}:${fingerprint(solve.program)}`;
+      const key = `${solve.stars}:${fingerprint(session.machine ?? 'markov', solve.program)}`;
       byKey.set(key, [...(byKey.get(key) ?? []), solve]);
     }
     const loginOf = new Map(data.students.map((s) => [s.user_id, s.login]));
@@ -605,7 +614,7 @@ function SessionTable({
       }
     }
     return result;
-  }, [data.solves, data.students, session.id]);
+  }, [data.solves, data.students, session.id, session.machine]);
 
   const openSolve = open
     ? data.solves.find((s) => `${s.user_id}/${s.stars}` === open && s.session === session.id)

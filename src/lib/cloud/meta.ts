@@ -1,8 +1,14 @@
 /** Опис занять і тем для кабінету й дашборду (лише під час збирання). */
 import { loadContent } from '../content/collections';
 import { sessionShortLabel } from '../content/course';
-import { checkableSessions, loadVariantTests } from '../variants/load';
+import { checkableSessions, loadVariants, loadVariantTests } from '../variants/load';
 import type { SessionMeta } from './types';
+
+/** Машина варіантів заняття (у файлі варіантів), за замовчуванням — алгоритми Маркова. */
+function machineOf(id: string): SessionMeta['machine'] {
+  const machine = loadVariants(id).machine;
+  return machine === 'post' || machine === 'turing' ? machine : 'markov';
+}
 
 export async function loadCloudMeta(): Promise<{
   sessions: SessionMeta[];
@@ -24,6 +30,7 @@ export async function loadCloudMeta(): Promise<{
       title: s.data.title,
       topic: s.data.topic,
       checkable: checkable.has(s.id),
+      machine: checkable.has(s.id) ? machineOf(s.id) : undefined,
     }));
   const tests = Object.fromEntries([...checkable].map((id) => [id, loadVariantTests(id) ?? {}]));
   return { sessions: metas, tests };

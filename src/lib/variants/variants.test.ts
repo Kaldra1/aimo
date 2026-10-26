@@ -6,16 +6,8 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse as parseYaml } from 'yaml';
-import * as markov from '../machines/markov';
-import {
-  parseVariants,
-  parseVariantTests,
-  slotOf,
-  splitExample,
-  tasksOf,
-  testsKey,
-  VARIANTS,
-} from './variants';
+import { checkProgram, parseProgram, testsFromLines, type TaskMachine } from '../cloud/solutions';
+import { parseVariants, parseVariantTests, slotOf, tasksOf, testsKey, VARIANTS } from './variants';
 
 const DATA_DIR = join(process.cwd(), 'src', 'data', 'variants');
 const SOLUTIONS_DIR = join(process.cwd(), 'solutions', 'variants');
@@ -48,35 +40,15 @@ describe.each(files)('%s', (file) => {
   });
 
   const solutionsFile = join(SOLUTIONS_DIR, file);
-  it.skipIf(!existsSync(solutionsFile) || data.machine !== 'markov')(
-    'еталонні схеми дають результати з прикладів',
+  const machine = data.machine;
+  const checkable = machine === 'markov' || machine === 'post' || machine === 'turing';
+  it.skipIf(!existsSync(solutionsFile) || !checkable)(
+    'еталонні програми дають результати з прикладів',
     () => {
-      const solutions = parseYaml(readFileSync(solutionsFile, 'utf8')) as {
-        levels: { blocks: string[][] }[];
-      };
-      const failures: string[] = [];
-      data.levels.forEach((level, l) =>
-        level.blocks.forEach((versions, b) =>
-          versions.forEach((task, v) => {
-            const where = `${'★'.repeat(level.stars)} блок ${b + 1} версія ${v + 1}`;
-            const source = solutions.levels[l]?.blocks[b]?.[v];
-            if (!source) return failures.push(`${where}: немає еталона`);
-            const scheme = markov.parse(source);
-            if (!scheme.ok) return failures.push(`${where}: ${scheme.errors[0]?.message}`);
-            if (scheme.warnings.length) failures.push(`${where}: ${scheme.warnings[0]?.message}`);
-            for (const example of task.examples) {
-              const { input, output } = splitExample(example);
-              const result = markov.run(markov.createState(scheme.value, input), {
-                maxSteps: 10_000,
-              });
-              if (result.status !== 'halted' || result.state.word !== output) {
-                failures.push(
-                  `${where}: ${example}, отримано ${result.status} «${result.state.word}»`,
-                );
-              }
-            }
-          }),
-        ),
+      const failures = checkReferences(
+        solutionsFile,
+        machine as TaskMachine,
+        (l, b, v) => data.levels[l]!.blocks[b]![v]!.examples,
       );
       expect(failures).toEqual([]);
     },
@@ -93,29 +65,44 @@ describe('тести автоперевірки варіантів', () => {
     expect(keys.filter((key) => !tests[key])).toEqual([]);
   });
 
-  it.each(testFiles)('%s — еталонні схеми проходять усі тести', (file) => {
-    const solutionsFile = join(SOLUTIONS_DIR, file.replace('.tests.yaml', '.yaml'));
+  it.each(testFiles)('%s — еталонні програми проходять усі тести', (file) => {
+    const name = file.replace('.tests.yaml', '');
+    const solutionsFile = join(SOLUTIONS_DIR, `${name}.yaml`);
     if (!existsSync(solutionsFile)) return;
+    const machine = parseVariants(readFileSync(join(DATA_DIR, `${name}.yaml`), 'utf8')).machine;
     const tests = parseVariantTests(readFileSync(join(DATA_DIR, file), 'utf8'));
-    const solutions = parseYaml(readFileSync(solutionsFile, 'utf8')) as {
-      levels: { blocks: string[][] }[];
-    };
-    const failures: string[] = [];
-    for (const [key, lines] of Object.entries(tests)) {
-      const [stars, block, version] = key.split('-').map(Number) as [number, number, number];
-      const scheme = markov.parse(solutions.levels[stars - 1]!.blocks[block - 1]![version - 1]!);
-      if (!scheme.ok) {
-        failures.push(`${key}: еталон не розбирається`);
-        continue;
-      }
-      for (const line of lines) {
-        const { input, output } = splitExample(line);
-        const result = markov.run(markov.createState(scheme.value, input), { maxSteps: 10_000 });
-        if (result.status !== 'halted' || result.state.word !== output) {
-          failures.push(`${key}: ${line}, отримано «${result.state.word}»`);
-        }
-      }
-    }
+    const failures = checkReferences(
+      solutionsFile,
+      (machine ?? 'markov') as TaskMachine,
+      (l, b, v) => tests[`${l + 1}-${b + 1}-${v + 1}`] ?? [],
+    );
     expect(failures).toEqual([]);
   });
 });
+
+/** Проганяє кожну еталонну програму на рядках «вхід → результат»; повертає розбіжності. */
+function checkReferences(
+  solutionsFile: string,
+  machine: TaskMachine,
+  linesOf: (level: number, block: number, version: number) => readonly string[],
+): string[] {
+  const solutions = parseYaml(readFileSync(solutionsFile, 'utf8')) as {
+    levels: { blocks: string[][] }[];
+  };
+  const failures: string[] = [];
+  solutions.levels.forEach((level, l) =>
+    level.blocks.forEach((versions, b) =>
+      versions.forEach((source, v) => {
+        const where = `${'★'.repeat(l + 1)} блок ${b + 1} версія ${v + 1}`;
+        const program = parseProgram(machine, source);
+        if (!program) return failures.push(`${where}: еталон не розбирається`);
+        const lines = linesOf(l, b, v);
+        const report = checkProgram(machine, program, testsFromLines(lines), 100_000);
+        for (const r of report.results) {
+          if (!r.passed) failures.push(`${where}: ${lines[r.number - 1]}, ${r.verdict}`);
+        }
+      }),
+    ),
+  );
+  return failures;
+}

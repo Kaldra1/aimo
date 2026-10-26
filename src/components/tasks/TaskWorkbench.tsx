@@ -125,8 +125,8 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
       if (next.solved) {
         store.markSolved(task.id);
         notifyProgress();
-        if (task.machine === 'markov' && parseVariantTaskId(task.id)) {
-          saveSolve(task.id, programText(current as MarkovProgram)).then(
+        if (parseVariantTaskId(task.id)) {
+          saveSolve(task.id, programText(task.machine, current)).then(
             (result) =>
               setCloud(
                 result === 'saved'

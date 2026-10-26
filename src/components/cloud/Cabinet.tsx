@@ -1,7 +1,7 @@
 /** Кабінет студента: вхід, пошта й пароль, розв’язані завдання з датами й оцінки. */
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import { explain, getClient } from '../../lib/cloud/client';
-import { parseVariantTaskId, programText } from '../../lib/cloud/solutions';
+import { parseVariantTaskId, programFromSaved, programText } from '../../lib/cloud/solutions';
 import {
   formatStamp,
   localDate,
@@ -11,7 +11,6 @@ import {
   type SolveRow,
 } from '../../lib/cloud/types';
 import { recommendGrade, GRADE_LABELS, type Grade } from '../../lib/grading/grade';
-import { deserialize, parse } from '../../lib/machines/markov';
 import { LocalProgressStore } from '../../lib/tasks/progress';
 import { taskStorageKey } from '../../lib/tasks/meta';
 import { url } from '../../lib/url';
@@ -123,7 +122,12 @@ function StudentView({
           <h2 id="solves-title" class="panel__title">
             Індивідуальні завдання
           </h2>
-          <LocalImport journal={student.journal} solves={solves} onDone={reload} />
+          <LocalImport
+            journal={student.journal}
+            sessions={sessions}
+            solves={solves}
+            onDone={reload}
+          />
         </div>
         {loadError && <p class="message message--error">{loadError}</p>}
         {solves === null ? (
@@ -258,10 +262,12 @@ function AccountSettings({
 /** Розв'язки свого варіанта, зроблені в цьому браузері до входу, — у базу. */
 function LocalImport({
   journal,
+  sessions,
   solves,
   onDone,
 }: {
   journal: number;
+  sessions: SessionMeta[];
   solves: SolveRow[] | null;
   onDone: () => Promise<void>;
 }) {
@@ -278,15 +284,13 @@ function LocalImport({
         if (!ref || ref.variant !== journal || known.has(taskId)) return [];
         const saved = readStorage(taskStorageKey(taskId));
         if (saved === null) return [];
-        try {
-          const parsed = parse(deserialize(saved).program);
-          return parsed.ok ? [{ taskId, program: programText(parsed.value) }] : [];
-        } catch {
-          return [];
-        }
+        const machine = sessions.find((s) => s.id === ref.session)?.machine;
+        if (!machine) return [];
+        const program = programFromSaved(machine, saved);
+        return program ? [{ taskId, program: programText(machine, program) }] : [];
       }),
     );
-  }, [solves, journal]);
+  }, [solves, journal, sessions]);
 
   if (pending.length === 0) return status ? <span class="panel__hint">{status}</span> : null;
 
