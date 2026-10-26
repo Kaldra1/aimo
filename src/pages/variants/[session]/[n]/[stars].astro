@@ -121,7 +121,7 @@ const neighbour = (s: number) =>
         ))}
       </nav>
       <ul class="task-meta">
-        <li>{stars === 1 ? 'Обов’язкове' : stars === 2 ? 'На занятті' : 'За бажанням, удома'}</li>
+        <li>{stars === 1 ? 'Базова складність' : stars === 2 ? 'Середня складність' : 'Підвищена складність'}</li>
         {task.alphabet && (
           <li>
             Алфавіт: <code>{task.alphabet}</code> (можна додати{' '}
