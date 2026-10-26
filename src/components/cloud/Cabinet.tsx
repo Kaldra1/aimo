@@ -10,7 +10,8 @@ import {
   type SessionMeta,
   type SolveRow,
 } from '../../lib/cloud/types';
-import { recommendGrade, GRADE_LABELS, type Grade } from '../../lib/grading/grade';
+import { GRADE_LABELS, type Grade } from '../../lib/grading/grade';
+import { JOURNAL_TOPICS, SEMESTER_ITEM } from '../../lib/grading/journal';
 import { LocalProgressStore } from '../../lib/tasks/progress';
 import { taskStorageKey } from '../../lib/tasks/meta';
 import { url } from '../../lib/url';
@@ -326,64 +327,91 @@ function SolvesTable({
   dates: SessionDateRow[];
   grades: GradeRow[];
 }) {
-  const shown = sessions.filter((s) => s.checkable || solves.some((x) => x.session === s.id));
-  if (shown.length === 0) return <p class="panel__hint">Поки немає занять з автоперевіркою.</p>;
+  // Лише оцінки, які викладач підтвердив у дашборді (чернетки в базу не потрапляють).
+  const gradeOf = (item: string) => grades.find((g) => g.item === item)?.grade as Grade | undefined;
+  const gradeText = (grade: Grade | undefined) =>
+    grade ? `${grade} (${GRADE_LABELS[grade]})` : '—';
+  const shown = sessions.filter(
+    (s) => s.checkable || solves.some((x) => x.session === s.id) || gradeOf(s.id) !== undefined,
+  );
+  const labelOf = (id: string) => sessions.find((s) => s.id === id)?.label ?? id;
   return (
-    <div class="cloud-table">
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">Заняття</th>
-            <th scope="col">★</th>
-            <th scope="col">★★</th>
-            <th scope="col">★★★</th>
-            <th scope="col">Рекомендована</th>
-            <th scope="col">Оцінка</th>
-          </tr>
-        </thead>
-        <tbody>
-          {shown.map((session) => {
-            const mine = solves.filter((s) => s.session === session.id);
-            const date = dates.find((d) => d.session === session.id)?.date;
-            const rec = recommendGrade(
-              mine.map((s) => ({ stars: s.stars, solvedAt: new Date(s.solved_at) })),
-              date ? localDate(date) : null,
-            );
-            const final = grades.find((g) => g.item === session.id)?.grade;
-            return (
-              <tr key={session.id}>
-                <th scope="row">
-                  {session.label}
-                  {date && (
-                    <span class="cloud-muted">
-                      {' '}
-                      · {localDate(date).toLocaleDateString('uk-UA')}
-                    </span>
-                  )}
-                </th>
-                {([1, 2, 3] as const).map((stars) => {
-                  const solve = mine.find((s) => s.stars === stars);
-                  return (
-                    <td key={stars}>
-                      {solve ? (
-                        <span class="cloud-ok">✓ {formatStamp(solve.solved_at)}</span>
-                      ) : session.checkable ? (
-                        <a href={url(variantTaskPath(session.id, journal, stars))}>Виконати</a>
-                      ) : (
-                        '—'
-                      )}
-                    </td>
-                  );
-                })}
-                <td title={rec.reason}>
-                  {rec.grade ? `${rec.grade} (${GRADE_LABELS[rec.grade]})` : '—'}
-                </td>
-                <td>{final ? `${final} (${GRADE_LABELS[final as Grade]})` : '—'}</td>
+    <>
+      {shown.length === 0 ? (
+        <p class="panel__hint">Поки немає занять з автоперевіркою чи оцінками.</p>
+      ) : (
+        <div class="cloud-table">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Заняття</th>
+                <th scope="col">★</th>
+                <th scope="col">★★</th>
+                <th scope="col">★★★</th>
+                <th scope="col">Оцінка</th>
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+            </thead>
+            <tbody>
+              {shown.map((session) => {
+                const mine = solves.filter((s) => s.session === session.id);
+                const date = dates.find((d) => d.session === session.id)?.date;
+                return (
+                  <tr key={session.id}>
+                    <th scope="row">
+                      {session.label}
+                      {date && (
+                        <span class="cloud-muted">
+                          {' '}
+                          · {localDate(date).toLocaleDateString('uk-UA')}
+                        </span>
+                      )}
+                    </th>
+                    {([1, 2, 3] as const).map((stars) => {
+                      const solve = mine.find((s) => s.stars === stars);
+                      return (
+                        <td key={stars}>
+                          {solve ? (
+                            <span class="cloud-ok">✓ {formatStamp(solve.solved_at)}</span>
+                          ) : session.checkable ? (
+                            <a href={url(variantTaskPath(session.id, journal, stars))}>Виконати</a>
+                          ) : (
+                            '—'
+                          )}
+                        </td>
+                      );
+                    })}
+                    <td>{gradeText(gradeOf(session.id))}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <h3 class="cloud-subtitle">Тематичні й семестрова оцінки</h3>
+      <div class="cloud-table">
+        <table>
+          <tbody>
+            {JOURNAL_TOPICS.map((topic) => (
+              <tr key={topic.item}>
+                <th scope="row">
+                  {topic.label}
+                  <span class="cloud-muted"> · {topic.sessions.map(labelOf).join(', ')}</span>
+                </th>
+                <td>{gradeText(gradeOf(topic.item))}</td>
+              </tr>
+            ))}
+            <tr>
+              <th scope="row">Семестрова</th>
+              <td>{gradeText(gradeOf(SEMESTER_ITEM))}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="panel__hint">
+        Тут лише оцінки, які викладач уже виставив. Порожньо («—») — оцінки ще немає.
+      </p>
+    </>
   );
 }

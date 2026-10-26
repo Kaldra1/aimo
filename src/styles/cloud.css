@@ -190,3 +190,8 @@
 .cloud-confirm > span:first-child {
   margin-right: auto;
 }
+
+.cloud-subtitle {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-base);
+}
