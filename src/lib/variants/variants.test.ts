@@ -92,4 +92,30 @@ describe('тести автоперевірки варіантів', () => {
     );
     expect(keys.filter((key) => !tests[key])).toEqual([]);
   });
+
+  it.each(testFiles)('%s — еталонні схеми проходять усі тести', (file) => {
+    const solutionsFile = join(SOLUTIONS_DIR, file.replace('.tests.yaml', '.yaml'));
+    if (!existsSync(solutionsFile)) return;
+    const tests = parseVariantTests(readFileSync(join(DATA_DIR, file), 'utf8'));
+    const solutions = parseYaml(readFileSync(solutionsFile, 'utf8')) as {
+      levels: { blocks: string[][] }[];
+    };
+    const failures: string[] = [];
+    for (const [key, lines] of Object.entries(tests)) {
+      const [stars, block, version] = key.split('-').map(Number) as [number, number, number];
+      const scheme = markov.parse(solutions.levels[stars - 1]!.blocks[block - 1]![version - 1]!);
+      if (!scheme.ok) {
+        failures.push(`${key}: еталон не розбирається`);
+        continue;
+      }
+      for (const line of lines) {
+        const { input, output } = splitExample(line);
+        const result = markov.run(markov.createState(scheme.value, input), { maxSteps: 10_000 });
+        if (result.status !== 'halted' || result.state.word !== output) {
+          failures.push(`${key}: ${line}, отримано «${result.state.word}»`);
+        }
+      }
+    }
+    expect(failures).toEqual([]);
+  });
 });
