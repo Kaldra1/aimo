@@ -176,3 +176,65 @@
 .flowchart-vars td {
   word-break: break-word;
 }
+
+/* Схема на все вікно браузера. */
+.flowchart-canvas.is-expanded {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  border-radius: 0;
+  background: var(--color-bg);
+}
+
+.flowchart-canvas.is-expanded > .panel__header,
+.flowchart-canvas.is-expanded > .panel__hint {
+  grid-column: 1 / -1;
+}
+
+.flowchart-canvas.is-expanded .flowchart-canvas__scroll {
+  max-height: none;
+}
+
+.flowchart-canvas__run {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.flowchart-canvas__status {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.flowchart-canvas__status.status--crashed,
+.flowchart-canvas__status.status--error {
+  color: var(--color-danger);
+}
+
+.flowchart-canvas__side {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-width: 0;
+  overflow: auto;
+}
+
+@media (max-width: 47.99rem) {
+  .flowchart-canvas.is-expanded {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+  }
+
+  .flowchart-canvas__side {
+    max-height: 40vh;
+  }
+}

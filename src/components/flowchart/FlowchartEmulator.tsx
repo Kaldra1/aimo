@@ -89,6 +89,7 @@ export default function FlowchartEmulator({
   const [notice, setNotice] = useState<Notice | null>(null);
   const [restored, setRestored] = useState(false);
   const [resets, setResets] = useState(0);
+  const [expanded, setExpanded] = useState(false);
 
   const compiled = useMemo(() => compile(tree), [tree]);
   const program = compiled.ok ? compiled.value : null;
@@ -185,6 +186,21 @@ export default function FlowchartEmulator({
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [menu]);
+
+  // Схема на все вікно: Esc згортає (якщо не відкрито меню), сторінка під нею не прокручується.
+  useEffect(() => {
+    if (!expanded) return undefined;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !menu) setExpanded(false);
+    };
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = overflow;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [expanded, menu]);
 
   const { state, playing, limitReached } = snapshot;
   const touched = state !== null && (state.steps > 0 || state.status !== 'running');
@@ -287,6 +303,33 @@ export default function FlowchartEmulator({
     { header: 'Дія', cell: (e) => e.text, mono: true },
   ];
 
+  const blockEditor = selectedNode ? (
+    <>
+      <label class="field" for="flowchart-block-text">
+        <span class="field__label">{BLOCK_META[selectedNode.type].title}</span>
+        <textarea
+          id="flowchart-block-text"
+          class="input input--mono"
+          rows={3}
+          value={selectedNode.text}
+          readOnly={!editing}
+          spellcheck={false}
+          aria-invalid={errors.has(selectedNode.id)}
+          onInput={(event) => setTree(updateText(tree, selectedNode.id, event.currentTarget.value))}
+        />
+      </label>
+      {errors.has(selectedNode.id) && (
+        <p class="message message--error">{errors.get(selectedNode.id)}</p>
+      )}
+      <p class="panel__hint">{BLOCK_META[selectedNode.type].hint}</p>
+      <button type="button" class="button button--secondary" disabled={!editing} onClick={remove}>
+        Видалити блок
+      </button>
+    </>
+  ) : (
+    <p class="panel__hint">Виберіть блок на схемі, щоб змінити його текст.</p>
+  );
+
   const vars = state ? describeEnv(state.env) : [];
   const output = state?.output ?? [];
 
@@ -337,11 +380,67 @@ export default function FlowchartEmulator({
       />
 
       <div class="emulator__workspace">
-        <section class="panel flowchart-canvas" aria-labelledby="flowchart-title">
+        <section
+          class={`panel flowchart-canvas${expanded ? ' is-expanded' : ''}`}
+          aria-labelledby="flowchart-title"
+          {...(expanded ? { role: 'dialog', 'aria-modal': 'true' } : {})}
+        >
           <div class="panel__header">
             <h2 id="flowchart-title" class="panel__title">
               Схема алгоритму
             </h2>
+            {expanded && (
+              <div class="flowchart-canvas__run">
+                <button
+                  type="button"
+                  class="button button--secondary"
+                  disabled={!canContinue}
+                  onClick={() => runner.stepOnce()}
+                >
+                  Крок
+                </button>
+                {playing ? (
+                  <button
+                    type="button"
+                    class="button button--secondary"
+                    onClick={() => runner.pause()}
+                  >
+                    Пауза
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    class="button button--primary"
+                    disabled={!canContinue}
+                    onClick={() => runner.play()}
+                  >
+                    Пуск
+                  </button>
+                )}
+                <button
+                  type="button"
+                  class="button button--secondary"
+                  disabled={!(touched || playing)}
+                  onClick={() => runner.reset(initial)}
+                >
+                  Скинути
+                </button>
+                <span class={`flowchart-canvas__status status--${status.kind}`} role="status">
+                  {status.text}
+                </span>
+              </div>
+            )}
+            <button
+              type="button"
+              class="button button--secondary"
+              aria-pressed={expanded}
+              onClick={() => {
+                setExpanded(!expanded);
+                setMenu(null);
+              }}
+            >
+              {expanded ? 'Згорнути' : 'На все вікно'}
+            </button>
           </div>
           <p class="panel__hint">
             Натисніть <b>+</b> на лінії, щоб вставити блок; натисніть блок, щоб змінити його текст.
@@ -486,6 +585,14 @@ export default function FlowchartEmulator({
               </div>
             )}
           </div>
+          {expanded && (
+            <aside class="flowchart-canvas__side" aria-label="Блок і вивід">
+              <h3 class="panel__title">Блок</h3>
+              {blockEditor}
+              <h3 class="panel__title">Вивід</h3>
+              <pre class="flowchart-output">{output.length ? output.join('\n') : ' '}</pre>
+            </aside>
+          )}
         </section>
 
         <div class="emulator__side">
@@ -493,38 +600,10 @@ export default function FlowchartEmulator({
             <h2 id="flowchart-block-title" class="panel__title">
               Блок
             </h2>
-            {selectedNode ? (
-              <>
-                <label class="field" for="flowchart-block-text">
-                  <span class="field__label">{BLOCK_META[selectedNode.type].title}</span>
-                  <textarea
-                    id="flowchart-block-text"
-                    class="input input--mono"
-                    rows={3}
-                    value={selectedNode.text}
-                    readOnly={!editing}
-                    spellcheck={false}
-                    aria-invalid={errors.has(selectedNode.id)}
-                    onInput={(event) =>
-                      setTree(updateText(tree, selectedNode.id, event.currentTarget.value))
-                    }
-                  />
-                </label>
-                {errors.has(selectedNode.id) && (
-                  <p class="message message--error">{errors.get(selectedNode.id)}</p>
-                )}
-                <p class="panel__hint">{BLOCK_META[selectedNode.type].hint}</p>
-                <button
-                  type="button"
-                  class="button button--secondary"
-                  disabled={!editing}
-                  onClick={remove}
-                >
-                  Видалити блок
-                </button>
-              </>
+            {expanded ? (
+              <p class="panel__hint">Схему розгорнуто на все вікно — блок редагується там.</p>
             ) : (
-              <p class="panel__hint">Виберіть блок на схемі, щоб змінити його текст.</p>
+              blockEditor
             )}
           </section>
 
