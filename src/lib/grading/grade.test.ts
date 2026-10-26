@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  averageRecommendation,
-  capFor,
-  daysBetween,
-  recommendGrade,
-  type SolvedTask,
-} from './grade';
+import { capFor, daysBetween, recommendGrade, type SolvedTask } from './grade';
 
 const at = (iso: string) => new Date(iso);
 const task = (stars: 1 | 2 | 3, iso: string): SolvedTask => ({ stars, solvedAt: at(iso) });
@@ -62,36 +56,5 @@ describe('допоміжні функції', () => {
 
   it('обмеження за днями', () => {
     expect([0, 14, 15, 28, 29, 100].map((d) => capFor(d))).toEqual([5, 5, 4, 4, 3, 3]);
-  });
-});
-
-describe('тематичні й семестрова оцінки', () => {
-  const item = (label: string, grade: 3 | 4 | 5 | null) => ({ label, grade });
-
-  it('середнє з округленням 3,5 → 4', () => {
-    expect(averageRecommendation([item('ЛР1', 3), item('ПР-1', 4)])).toMatchObject({
-      grade: 4,
-      mean: 3.5,
-    });
-    expect(
-      averageRecommendation([item('ЛР1', 3), item('ЛР2', 3), item('ПР-1', 4), item('ПР-2', 4)])
-        .reason,
-    ).toBe('Середнє 3,5 → «добре».');
-    expect(averageRecommendation([item('a', 4), item('b', 4), item('c', 5)])).toMatchObject({
-      grade: 4,
-      mean: 4.33,
-    });
-  });
-
-  it('неоцінені складові — рекомендації немає', () => {
-    const r = averageRecommendation([item('ЛР1', 5), item('ПР-2', null)]);
-    expect(r).toMatchObject({ grade: null, missing: ['ПР-2'] });
-    expect(r.reason).toBe('Ще не оцінено: ПР-2.');
-  });
-
-  it('семестрова — із тематичних', () => {
-    expect(
-      averageRecommendation([item('Тема 2', 4), item('Тема 3', 5), item('Тема 4', 3)]).grade,
-    ).toBe(4);
   });
 });

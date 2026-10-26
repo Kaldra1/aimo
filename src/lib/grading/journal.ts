@@ -2,7 +2,7 @@
  * Журнал оцінок викладача: як таблиця в Google Sheets — семестрова, тематичні й заняття.
  * Тематичні тут — атестаційні (як у журналі групи), а не теми програми курсу.
  */
-import { roundGrade, type Grade } from './grade';
+import type { Grade } from './grade';
 
 export interface JournalTopic {
   /** Ключ оцінки в базі: topic-1. */
@@ -31,21 +31,28 @@ export const SEMESTER_ITEM = 'semester';
 export const journalSessions = () => JOURNAL_TOPICS.flatMap((topic) => topic.sessions);
 
 export interface Average {
-  /** Округлена оцінка (3,5 → 4); null — немає жодної оцінки. */
+  /** Оцінка, округлена вниз (3,75 → 3); null — немає жодної оцінки. */
   grade: Grade | null;
   /** Середнє з двома знаками. */
   mean: number | null;
-  /** Скільки складових ще без оцінки. */
+  /** Скільки складових без оцінки (рахуються як 2). */
   missing: number;
 }
 
-/** Середнє наявних оцінок, як AVERAGE у таблиці: порожні клітинки пропускаються. */
+/** Найнижча оцінка шкали: нездане заняття — «незадовільно», а не нуль. */
+export const UNSATISFACTORY: Grade = 2;
+
+/**
+ * Тематична чи семестрова: середнє за шкалою 2–5, де нездане (порожня клітинка) — 2,
+ * округлене вниз. Приклад: 5, 4, 3 і нездане → (5 + 4 + 3 + 2) / 4 = 3,5 → 3.
+ * Поки немає жодної оцінки, рахувати нічого — null.
+ */
 export function averageOf(values: readonly (Grade | null)[]): Average {
-  const grades = values.filter((v): v is Grade => v !== null);
-  const missing = values.length - grades.length;
-  if (grades.length === 0) return { grade: null, mean: null, missing };
-  const mean = Math.round((grades.reduce((sum, g) => sum + g, 0) / grades.length) * 100) / 100;
-  return { grade: roundGrade(mean), mean, missing };
+  const missing = values.filter((v) => v === null).length;
+  if (missing === values.length) return { grade: null, mean: null, missing };
+  const sum = values.reduce<number>((total, v) => total + (v ?? UNSATISFACTORY), 0);
+  const mean = Math.round((sum / values.length) * 100) / 100;
+  return { grade: Math.floor(mean) as Grade, mean, missing };
 }
 
 export const formatMean = (mean: number) => String(mean).replace('.', ',');

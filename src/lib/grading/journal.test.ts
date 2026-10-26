@@ -22,9 +22,11 @@ describe('журнал', () => {
     ]);
   });
 
-  it('середнє пропускає порожні клітинки, як AVERAGE', () => {
-    expect(averageOf([5, 4, null, 4])).toEqual({ grade: 4, mean: 4.33, missing: 1 });
-    expect(averageOf([5, 4])).toEqual({ grade: 5, mean: 4.5, missing: 0 });
+  it('нездане рахується як 2, округлення вниз', () => {
+    expect(averageOf([5, 4, 3, null])).toEqual({ grade: 3, mean: 3.5, missing: 1 });
+    expect(averageOf([5, 5, 5, 4])).toEqual({ grade: 4, mean: 4.75, missing: 0 });
+    expect(averageOf([5, 5, 5, 5])).toEqual({ grade: 5, mean: 5, missing: 0 });
+    expect(averageOf([3, null])).toEqual({ grade: 2, mean: 2.5, missing: 1 });
     expect(averageOf([null, null])).toEqual({ grade: null, mean: null, missing: 2 });
   });
 

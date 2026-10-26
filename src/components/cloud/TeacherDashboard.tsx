@@ -426,8 +426,8 @@ const averageHint = (average: Average) =>
 const averageTitle = (average: Average, parts: string) =>
   average.mean === null
     ? `Ще немає оцінок (${parts}).`
-    : `Середнє ${formatMean(average.mean)} → ${average.grade}` +
-      (average.missing > 0 ? `; без оцінки ще ${average.missing}` : '') +
+    : `Середнє ${formatMean(average.mean)} → ${average.grade} (вниз)` +
+      (average.missing > 0 ? `, нездане (${average.missing}) — як 2` : '') +
       ` (${parts}). Сірим — підказка; впишіть оцінку, щоб зафіксувати.`;
 
 // ---------- Журнал ----------
@@ -458,8 +458,9 @@ function JournalTable({
     <section class="panel cloud-card" aria-label="Журнал оцінок">
       <p class="panel__hint">
         Впишіть оцінку 2–5 або зітріть її; Enter і стрілки переходять між клітинками. Сірим —
-        підказка: за заняття — рекомендована з розв’язків, за тему й семестр — середнє (з «…», якщо
-        оцінено не все). Зміни потрапляють у базу після «Підтвердити зміни».
+        підказка: за заняття — рекомендована з розв’язків, за тему й семестр — середнє, де нездане
+        рахується як 2, округлене вниз («…» — є нездане). Зміни потрапляють у базу після
+        «Підтвердити зміни».
       </p>
       <div class="cloud-table">
         <table class="cloud-journal">
