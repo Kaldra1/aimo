@@ -1,0 +1,178 @@
+/* Конструктор блок-схем. */
+
+.flowchart-canvas {
+  min-width: 0;
+}
+
+.flowchart-canvas__scroll {
+  position: relative;
+  overflow: auto;
+  max-height: 80vh;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-card);
+}
+
+.flowchart-svg {
+  display: block;
+}
+
+.flowchart-line {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 1.4;
+}
+
+.flowchart-arrow {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 1.6;
+}
+
+.flowchart-shape {
+  fill: var(--color-card);
+  stroke: var(--color-text);
+  stroke-width: 1.4;
+}
+
+.flowchart-block[role='button'] {
+  cursor: pointer;
+}
+
+.flowchart-block[role='button']:hover .flowchart-shape {
+  fill: var(--color-surface);
+}
+
+.flowchart-block:focus-visible {
+  outline: none;
+}
+
+.flowchart-block:focus-visible .flowchart-shape {
+  stroke: var(--color-focus);
+  stroke-width: 2.6;
+}
+
+.flowchart-shape.is-selected {
+  stroke: var(--color-primary);
+  stroke-width: 2.6;
+}
+
+.flowchart-shape.is-current {
+  fill: var(--color-accent-soft);
+  stroke: var(--color-accent);
+  stroke-width: 2.6;
+}
+
+.flowchart-shape.is-crashed {
+  fill: var(--color-danger-soft);
+  stroke: var(--color-danger);
+}
+
+.flowchart-shape.is-error {
+  stroke: var(--color-danger);
+  stroke-dasharray: 5 3;
+}
+
+.flowchart-text {
+  fill: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.flowchart-label {
+  fill: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.flowchart-plus {
+  cursor: pointer;
+}
+
+.flowchart-plus circle {
+  fill: var(--color-primary-soft);
+  stroke: var(--color-primary);
+}
+
+.flowchart-plus path {
+  stroke: var(--color-primary);
+  stroke-width: 2;
+}
+
+.flowchart-plus:hover circle,
+.flowchart-plus:focus-visible circle {
+  fill: var(--color-primary);
+}
+
+.flowchart-plus:hover path,
+.flowchart-plus:focus-visible path {
+  stroke: var(--color-on-primary);
+}
+
+.flowchart-plus:focus-visible {
+  outline: none;
+}
+
+.flowchart-menu {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  gap: 2px;
+  min-width: 13rem;
+  padding: var(--space-1);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-card);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.flowchart-menu__item {
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.flowchart-menu__item:hover,
+.flowchart-menu__item:focus-visible {
+  background: var(--color-surface);
+}
+
+.flowchart-menu__item.is-cancel {
+  color: var(--color-text-muted);
+}
+
+.flowchart-output {
+  min-height: 3rem;
+  margin: 0;
+  padding: var(--space-2);
+  overflow-x: auto;
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  white-space: pre-wrap;
+}
+
+.flowchart-vars {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.flowchart-vars th,
+.flowchart-vars td {
+  padding: 2px var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.flowchart-vars td {
+  word-break: break-word;
+}

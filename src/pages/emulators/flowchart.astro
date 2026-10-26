@@ -1,0 +1,27 @@
+---
+import '../../styles/emulator.css';
+import '../../styles/flowchart.css';
+import '../../styles/prose.css';
+import FlowchartEmulator from '../../components/flowchart/FlowchartEmulator';
+import FlowchartHelp from '../../components/flowchart/FlowchartHelp.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { MACHINE_META } from '../../lib/machines/meta';
+
+const machine = MACHINE_META.flowchart;
+---
+
+<BaseLayout
+  title={machine.title}
+  description="Конструктор блок-схем за ГОСТ 19.701-90: схема з блоків, покрокове виконання, змінні, вивід і збереження схеми у SVG для звіту."
+  section="emulators"
+  breadcrumbs={[{ label: 'Емулятори', href: '/emulators/' }, { label: machine.title }]}
+>
+  <div class="container page page--emulator">
+    <header class="page-header page-header--compact">
+      <p class="eyebrow">Емулятор</p>
+      <h1>{machine.title}</h1>
+    </header>
+    <FlowchartEmulator client:load />
+    <FlowchartHelp />
+  </div>
+</BaseLayout>

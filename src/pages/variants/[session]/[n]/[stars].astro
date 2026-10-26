@@ -2,9 +2,11 @@
 import 'katex/dist/katex.min.css';
 import { inlineTask } from '../../../../lib/variants/inline';
 import '../../../../styles/emulator.css';
+import '../../../../styles/flowchart.css';
 import '../../../../styles/markov.css';
 import '../../../../styles/prose.css';
 import '../../../../styles/tasks.css';
+import FlowchartHelp from '../../../../components/flowchart/FlowchartHelp.astro';
 import MarkovHelp from '../../../../components/markov/MarkovHelp.astro';
 import PostHelp from '../../../../components/post/PostHelp.astro';
 import TuringHelp from '../../../../components/turing/TuringHelp.astro';
@@ -33,7 +35,12 @@ export async function getStaticPaths() {
     if (!session) throw new Error(`Варіанти «${id}»: заняття з таким файлом не знайдено`);
     const data = loadVariants(id);
     const machine = data.machine;
-    if (machine !== 'markov' && machine !== 'post' && machine !== 'turing') {
+    if (
+      machine !== 'markov' &&
+      machine !== 'post' &&
+      machine !== 'turing' &&
+      machine !== 'flowchart'
+    ) {
       throw new Error(`Варіанти «${id}»: автоперевірки для машини «${machine}» немає`);
     }
     const tests = loadVariantTests(id)!;
@@ -157,7 +164,15 @@ const neighbour = (s: number) =>
 
     <TaskWorkbench client:load task={view} />
 
-    {machine === 'post' ? <PostHelp /> : machine === 'turing' ? <TuringHelp /> : <MarkovHelp />}
+    {machine === 'post' ? (
+      <PostHelp />
+    ) : machine === 'turing' ? (
+      <TuringHelp />
+    ) : machine === 'flowchart' ? (
+      <FlowchartHelp />
+    ) : (
+      <MarkovHelp />
+    )}
 
     <PrevNext
       prev={neighbour(stars - 1)}

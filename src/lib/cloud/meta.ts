@@ -7,7 +7,7 @@ import type { SessionMeta } from './types';
 /** Машина варіантів заняття (у файлі варіантів), за замовчуванням — алгоритми Маркова. */
 function machineOf(id: string): SessionMeta['machine'] {
   const machine = loadVariants(id).machine;
-  return machine === 'post' || machine === 'turing' ? machine : 'markov';
+  return machine === 'post' || machine === 'turing' || machine === 'flowchart' ? machine : 'markov';
 }
 
 export async function loadCloudMeta(): Promise<{

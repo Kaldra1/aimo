@@ -6,6 +6,7 @@
  * нескінченній стрічці воно записане. Положення каретки перевіряється, лише якщо в тесті
  * `checkHead: true`; тоді воно рахується від початку слова.
  */
+import * as flowchart from '../machines/flowchart';
 import * as markov from '../machines/markov';
 import { parseCells } from '../machines/notation';
 import * as post from '../machines/post';
@@ -352,4 +353,50 @@ export function checkMarkov(
   maxSteps = DEFAULT_MAX_STEPS,
 ): CheckReport {
   return runTests(markovChecker(program, maxSteps), tests, maxSteps);
+}
+
+// ---------- Блок-схеми ----------
+
+const FLOW_WORDING: Wording = {
+  wrong: 'Схема виконалася, але вивід не такий, як очікувалося.',
+  notStopped: 'Схема не дійшла до кінця',
+};
+
+/** Вивід як послідовність лексем: порівнюються значення, а не пробіли й переноси рядків. */
+function tokenCells(text: string): Map<number, string> {
+  return new Map(
+    text
+      .split(/\s+/)
+      .filter((token) => token !== '')
+      .map((token, index) => [index, token] as const),
+  );
+}
+
+function flowchartChecker(program: flowchart.FlowProgram, maxSteps: number): Checker {
+  return {
+    wording: FLOW_WORDING,
+    execute: (input) => {
+      const result = flowchart.run(flowchart.createState(program, input), { maxSteps });
+      return {
+        ok: true,
+        outcome: {
+          status: result.status,
+          steps: result.steps,
+          ...(result.state.error ? { error: result.state.error } : {}),
+          cells: tokenCells(result.state.output.join(' ')),
+          head: 0,
+        },
+      };
+    },
+    parseExpected: (text) => ({ ok: true, cells: tokenCells(text), head: 0 }),
+    format: (cells) => (cells.size === 0 ? 'нічого не виведено' : [...cells.values()].join(' ')),
+  };
+}
+
+export function checkFlowchart(
+  program: flowchart.FlowProgram,
+  tests: readonly TaskTest[],
+  maxSteps = DEFAULT_MAX_STEPS,
+): CheckReport {
+  return runTests(flowchartChecker(program, maxSteps), tests, maxSteps);
 }

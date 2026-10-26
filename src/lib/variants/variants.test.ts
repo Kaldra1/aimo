@@ -41,7 +41,8 @@ describe.each(files)('%s', (file) => {
 
   const solutionsFile = join(SOLUTIONS_DIR, file);
   const machine = data.machine;
-  const checkable = machine === 'markov' || machine === 'post' || machine === 'turing';
+  const checkable =
+    machine === 'markov' || machine === 'post' || machine === 'turing' || machine === 'flowchart';
   it.skipIf(!existsSync(solutionsFile) || !checkable)(
     'еталонні програми дають результати з прикладів',
     () => {

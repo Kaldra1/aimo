@@ -11,7 +11,7 @@ export interface SessionMeta {
   /** Чи є автоперевірка варіантів (розв'язки збираються в базу). */
   checkable: boolean;
   /** Машина, на якій розв'язують варіанти з автоперевіркою. */
-  machine?: 'post' | 'turing' | 'markov' | undefined;
+  machine?: 'post' | 'turing' | 'markov' | 'flowchart' | undefined;
 }
 
 export interface SolveRow {

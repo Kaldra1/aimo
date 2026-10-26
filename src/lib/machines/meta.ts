@@ -1,6 +1,6 @@
 /** Перелік машин і їхні назви. Модуль без залежностей: його імпортують і сторінки, і острови. */
 
-export const MACHINES = ['post', 'turing', 'markov', 'sorting', 'cpp'] as const;
+export const MACHINES = ['post', 'turing', 'markov', 'flowchart', 'sorting', 'cpp'] as const;
 export type MachineId = (typeof MACHINES)[number];
 
 export function isMachineId(value: unknown): value is MachineId {
@@ -31,6 +31,13 @@ export const MACHINE_META: Record<
     genitive: 'нормальних алгоритмів Маркова',
     path: '/emulators/markov/',
     summary: 'Схема підстановок, підсвітка заміни й трасувальна таблиця.',
+    ready: true,
+  },
+  flowchart: {
+    title: 'Блок-схеми',
+    genitive: 'конструктора блок-схем',
+    path: '/emulators/flowchart/',
+    summary: 'Схема алгоритму за ГОСТ 19.701 з блоків: покрокове виконання, змінні й вивід.',
     ready: true,
   },
   sorting: {

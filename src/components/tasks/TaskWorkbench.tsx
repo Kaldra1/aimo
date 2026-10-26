@@ -1,5 +1,6 @@
 /** Острів сторінки задачі: підказки, емулятор, перевірка на всіх тестах і позначка «розв’язано». */
 import { useCallback, useMemo, useRef, useState } from 'preact/hooks';
+import type { FlowProgram, FlowSaved } from '../../lib/machines/flowchart';
 import type { MarkovProgram, MarkovSaved } from '../../lib/machines/markov';
 import type { PostProgram, PostSaved } from '../../lib/machines/post';
 import {
@@ -12,6 +13,7 @@ import { saveSolve } from '../../lib/cloud/client';
 import { parseVariantTaskId, programText } from '../../lib/cloud/solutions';
 import { plural } from '../../lib/plural';
 import {
+  checkFlowchart,
   checkMarkov,
   checkPost,
   checkTuring,
@@ -21,6 +23,7 @@ import {
 } from '../../lib/tasks/check';
 import { formatSolvedDate, taskStorageKey } from '../../lib/tasks/meta';
 import { formatNumber, removeStorage, type EmulatorApi } from '../emulator/support';
+import FlowchartEmulator from '../flowchart/FlowchartEmulator';
 import MarkovEmulator from '../markov/MarkovEmulator';
 import PostEmulator from '../post/PostEmulator';
 import TuringEmulator from '../turing/TuringEmulator';
@@ -29,7 +32,7 @@ import { notifyProgress, useProgress } from './progress';
 /** Те, що острів отримує від сторінки: лише потрібні для роботи поля задачі. */
 export interface TaskView {
   id: string;
-  machine: 'post' | 'turing' | 'markov';
+  machine: 'post' | 'turing' | 'markov' | 'flowchart';
   alphabet: string;
   starter: string;
   tests: TaskTest[];
@@ -39,7 +42,7 @@ export interface TaskView {
   shortest?: number | undefined;
 }
 
-type Program = PostProgram | TuringProgram | MarkovProgram;
+type Program = PostProgram | TuringProgram | MarkovProgram | FlowProgram;
 
 const NO_EXAMPLES: readonly never[] = [];
 
@@ -67,13 +70,22 @@ function initialMarkov(task: TaskView): MarkovSaved {
   };
 }
 
-function initialOf(task: TaskView): PostSaved | TuringSaved | MarkovSaved {
+function initialFlow(task: TaskView): FlowSaved {
+  const input = task.tests[0]?.input ?? '';
+  return { tree: [], input: input === '—' ? '' : input, comment: '' };
+}
+
+function initialOf(task: TaskView): PostSaved | TuringSaved | MarkovSaved | FlowSaved {
+  if (task.machine === 'flowchart') return initialFlow(task);
   if (task.machine === 'post') return initialPost(task);
   if (task.machine === 'turing') return initialTuring(task);
   return initialMarkov(task);
 }
 
 function checkTask(task: TaskView, program: Program): CheckReport {
+  if (task.machine === 'flowchart') {
+    return checkFlowchart(program as FlowProgram, task.tests, task.maxSteps);
+  }
   if (task.machine === 'post') return checkPost(program as PostProgram, task.tests, task.maxSteps);
   if (task.machine === 'turing') {
     return checkTuring(program as TuringProgram, task.tests, task.maxSteps);
@@ -97,7 +109,12 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
   const emulatorRef = useRef<HTMLDivElement>(null);
 
   const initialState = useMemo(() => initialOf(task), [task]);
-  const empty = task.machine === 'markov' ? 'λ (порожнє слово)' : 'порожня стрічка';
+  const empty =
+    task.machine === 'markov'
+      ? 'λ (порожнє слово)'
+      : task.machine === 'flowchart'
+        ? 'немає'
+        : 'порожня стрічка';
   const [rules, setRules] = useState<number | null>(null);
   const [cloud, setCloud] = useState<string | null>(null);
   const solvedAt = progress?.solved[task.id];
@@ -146,7 +163,7 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
   };
 
   const openInEmulator = (result: TestResult) => {
-    emulatorApiRef.current?.loadInput(result.input);
+    emulatorApiRef.current?.loadInput(result.input === '—' ? '' : result.input);
     emulatorRef.current?.scrollIntoView({ block: 'start', behavior: scrollBehavior() });
   };
 
@@ -220,6 +237,17 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
             onReady={onReady}
             actions={actions}
           />
+        ) : task.machine === 'flowchart' ? (
+          <FlowchartEmulator
+            key={generation}
+            storageKey={taskStorageKey(task.id)}
+            initial={initialState as FlowSaved}
+            examples={NO_EXAMPLES}
+            fileName={`${task.id.replaceAll('/', '-')}.json`}
+            onChange={onChange}
+            onReady={onReady}
+            actions={actions}
+          />
         ) : task.machine === 'post' ? (
           <PostEmulator
             key={generation}
@@ -264,7 +292,9 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
           лімітом {formatNumber(task.maxSteps)} кроків на кожен.{' '}
           {task.machine === 'markov'
             ? 'Слово після зупинки має точно збігтися з очікуваним.'
-            : 'Порожні комірки по краях стрічки не враховуються.'}{' '}
+            : task.machine === 'flowchart'
+              ? 'Вивід порівнюється за значеннями: пробіли й переноси рядків не важливі.'
+              : 'Порожні комірки по краях стрічки не враховуються.'}{' '}
           Задачу зараховано, коли пройдено всі тести; прогрес зберігається лише в цьому браузері.
         </p>
         {task.shortest !== undefined && (

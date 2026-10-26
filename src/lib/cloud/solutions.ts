@@ -2,10 +2,12 @@
  * Розв'язки в базі: розбір ідентифікатора задачі, текст програми для збереження, пошук однакових
  * програм і повторна перевірка. Три машини: Пост, Тюрінг, нормальні алгоритми Маркова.
  */
+import * as flowchart from '../machines/flowchart';
 import * as markov from '../machines/markov';
 import * as post from '../machines/post';
 import * as turing from '../machines/turing';
 import {
+  checkFlowchart,
   checkMarkov,
   checkPost,
   checkTuring,
@@ -14,8 +16,9 @@ import {
 } from '../tasks/check';
 import { splitExample } from '../variants/ids';
 
-export type TaskMachine = 'post' | 'turing' | 'markov';
-export type AnyProgram = post.PostProgram | turing.TuringProgram | markov.MarkovProgram;
+export type TaskMachine = 'post' | 'turing' | 'markov' | 'flowchart';
+export type AnyProgram =
+  post.PostProgram | turing.TuringProgram | markov.MarkovProgram | flowchart.FlowProgram;
 
 export interface VariantRef {
   session: string;
@@ -39,6 +42,7 @@ const ALPHABET_LINE = /^\/\/ алфавіт: (.*)$/m;
 
 /** Програма для збереження: без коментарів студента й зайвих пробілів. */
 export function programText(machine: TaskMachine, program: AnyProgram): string {
+  if (machine === 'flowchart') return flowchart.treeText((program as flowchart.FlowProgram).tree);
   if (machine === 'post') {
     return (program as post.PostProgram).commands.map(post.formatCommand).join('\n');
   }
@@ -51,6 +55,14 @@ export function programText(machine: TaskMachine, program: AnyProgram): string {
 
 /** Збережений текст → програма; null — текст не розбирається. */
 export function parseProgram(machine: TaskMachine, text: string): AnyProgram | null {
+  if (machine === 'flowchart') {
+    try {
+      const compiled = flowchart.compile(flowchart.normalizeTree(JSON.parse(text)));
+      return compiled.ok ? compiled.value : null;
+    } catch {
+      return null;
+    }
+  }
   if (machine === 'post') {
     const parsed = post.parse(text);
     return parsed.ok ? parsed.value : null;
@@ -69,6 +81,9 @@ export function parseProgram(machine: TaskMachine, text: string): AnyProgram | n
  */
 export function fingerprint(machine: TaskMachine, text: string): string {
   const program = parseProgram(machine, text);
+  if (machine === 'flowchart' && program) {
+    return flowchart.treeShape((program as flowchart.FlowProgram).tree);
+  }
   return (program ? programText(machine, program) : text).replace(/\s+/g, '');
 }
 
@@ -85,6 +100,9 @@ export function checkProgram(
   tests: readonly TaskTest[],
   maxSteps = DEFAULT_MAX_STEPS,
 ) {
+  if (machine === 'flowchart') {
+    return checkFlowchart(program as flowchart.FlowProgram, tests, maxSteps);
+  }
   if (machine === 'post') return checkPost(program as post.PostProgram, tests, maxSteps);
   if (machine === 'turing') return checkTuring(program as turing.TuringProgram, tests, maxSteps);
   return checkMarkov(program as markov.MarkovProgram, tests, maxSteps);
@@ -111,6 +129,10 @@ export function recheck(
 /** Програма з автозбереження сторінки задачі (для перенесення розв'язків у кабінет). */
 export function programFromSaved(machine: TaskMachine, saved: string): AnyProgram | null {
   try {
+    if (machine === 'flowchart') {
+      const compiled = flowchart.compile(flowchart.deserialize(saved).tree);
+      return compiled.ok ? compiled.value : null;
+    }
     if (machine === 'post') return parseProgram('post', post.deserialize(saved).program);
     if (machine === 'turing') {
       const built = turing.buildProgram(turing.deserialize(saved).table);
