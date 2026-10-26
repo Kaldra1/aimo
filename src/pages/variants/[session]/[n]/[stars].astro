@@ -8,7 +8,7 @@ import PrevNext from '../../../../components/PrevNext.astro';
 import TaskWorkbench, { type TaskView } from '../../../../components/tasks/TaskWorkbench';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import { loadContent } from '../../../../lib/content/collections';
-import { sessionPath } from '../../../../lib/content/course';
+import { sessionPath, sessionShortLabel } from '../../../../lib/content/course';
 import { DEFAULT_MAX_STEPS } from '../../../../lib/tasks/check';
 import { url } from '../../../../lib/url';
 import { checkableSessions, loadVariants, loadVariantTests } from '../../../../lib/variants/load';
@@ -56,7 +56,7 @@ export async function getStaticPaths() {
 
 const { id, title, kind, number, n, stars, task, lines } = Astro.props;
 const sessionHref = sessionPath(kind, number);
-const label = `${kind === 'lab' ? 'ЛР' : 'ПЗ'}${number}`;
+const label = sessionShortLabel(kind, number);
 const starText = '★'.repeat(stars);
 
 const view: TaskView = {
@@ -97,6 +97,17 @@ const neighbour = (s: number) =>
       <h1>
         Варіант {n} · {starText}
       </h1>
+      <nav class="variant-levels" aria-label="Рівні завдання">
+        {[1, 2, 3].map((s) => (
+          <a
+            class={`button ${s === stars ? 'button--primary' : 'button--secondary'}`}
+            href={url(variantTaskPath(id, n, s))}
+            aria-current={s === stars ? 'page' : undefined}
+          >
+            {'★'.repeat(s)}
+          </a>
+        ))}
+      </nav>
       <ul class="task-meta">
         <li>{stars === 1 ? 'Обов’язкове' : stars === 2 ? 'На занятті' : 'За бажанням, удома'}</li>
         {task.alphabet && (
@@ -137,3 +148,12 @@ const neighbour = (s: number) =>
     />
   </article>
 </BaseLayout>
+
+<style>
+  .variant-levels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-block: var(--space-2);
+  }
+</style>

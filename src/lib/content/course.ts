@@ -49,7 +49,8 @@ export const SESSION_META: Record<
   practical: {
     title: 'Практичне заняття',
     plural: 'Практичні заняття',
-    short: 'ПЗ',
+    // «ПР-2», а не «ПЗ2»: «З» легко прочитати як «3».
+    short: 'ПР-',
     segment: 'practicals',
     prev: 'Попереднє заняття',
     next: 'Наступне заняття',

@@ -69,12 +69,12 @@ describe('тематичні й семестрова оцінки', () => {
   const item = (label: string, grade: 3 | 4 | 5 | null) => ({ label, grade });
 
   it('середнє з округленням 3,5 → 4', () => {
-    expect(averageRecommendation([item('ЛР1', 3), item('ПЗ1', 4)])).toMatchObject({
+    expect(averageRecommendation([item('ЛР1', 3), item('ПР-1', 4)])).toMatchObject({
       grade: 4,
       mean: 3.5,
     });
     expect(
-      averageRecommendation([item('ЛР1', 3), item('ЛР2', 3), item('ПЗ1', 4), item('ПЗ2', 4)])
+      averageRecommendation([item('ЛР1', 3), item('ЛР2', 3), item('ПР-1', 4), item('ПР-2', 4)])
         .reason,
     ).toBe('Середнє 3,5 → «добре».');
     expect(averageRecommendation([item('a', 4), item('b', 4), item('c', 5)])).toMatchObject({
@@ -84,9 +84,9 @@ describe('тематичні й семестрова оцінки', () => {
   });
 
   it('неоцінені складові — рекомендації немає', () => {
-    const r = averageRecommendation([item('ЛР1', 5), item('ПЗ2', null)]);
-    expect(r).toMatchObject({ grade: null, missing: ['ПЗ2'] });
-    expect(r.reason).toBe('Ще не оцінено: ПЗ2.');
+    const r = averageRecommendation([item('ЛР1', 5), item('ПР-2', null)]);
+    expect(r).toMatchObject({ grade: null, missing: ['ПР-2'] });
+    expect(r.reason).toBe('Ще не оцінено: ПР-2.');
   });
 
   it('семестрова — із тематичних', () => {

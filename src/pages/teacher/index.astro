@@ -3,12 +3,13 @@ import '../../styles/emulator.css';
 import '../../styles/cloud.css';
 import TeacherDashboard from '../../components/cloud/TeacherDashboard';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { course, loadContent } from '../../lib/content/collections';
-import { groupByTopic, sessionShortLabel, topicLabel } from '../../lib/content/course';
 import { loadCloudMeta } from '../../lib/cloud/meta';
 import { DEFAULT_RULES, GRADE_LABELS, type Grade } from '../../lib/grading/grade';
+import { JOURNAL_TOPICS } from '../../lib/grading/journal';
 
 const meta = await loadCloudMeta();
+const labelOf = (id: string) => meta.sessions.find((s) => s.id === id)?.label ?? id;
+const topics = JOURNAL_TOPICS.map((t) => `${t.label} — ${t.sessions.map(labelOf).join(', ')}`);
 const [early, middle] = DEFAULT_RULES.windows;
 const label = (grade: Grade) => `«${GRADE_LABELS[grade]}»`;
 const volume =
@@ -17,17 +18,6 @@ const volume =
     ? `, до ★★★ — ${label(DEFAULT_RULES.byStars[3])}`
     : '; ★★★ — для охочих, оцінку не підвищує');
 const deadline = `до ${early!.days} днів — без обмежень, до ${middle!.days} днів — не вище ${label(middle!.cap)}, пізніше — не вище ${label(DEFAULT_RULES.lateCap)}`;
-
-// Структура оцінювання: теми, у яких є лабораторні чи практичні.
-const { lectures, sessions } = await loadContent();
-const topics = groupByTopic(course, lectures, sessions)
-  .flatMap((module) => module.topics)
-  .filter((group) => group.sessions.length > 0)
-  .map((group) => ({
-    label: topicLabel(group.topic.number),
-    title: group.topic.title,
-    sessions: group.sessions.map((s) => sessionShortLabel(s.data.kind, s.data.number)),
-  }));
 ---
 
 <BaseLayout
@@ -45,12 +35,7 @@ const topics = groupByTopic(course, lectures, sessions)
       </p>
     </header>
 
-    <TeacherDashboard
-      client:only="preact"
-      sessions={meta.sessions}
-      topics={meta.topics}
-      tests={meta.tests}
-    />
+    <TeacherDashboard client:only="preact" sessions={meta.sessions} tests={meta.tests} />
 
     <section class="teacher-grading" aria-labelledby="grading-title">
       <h2 id="grading-title">Оцінювання</h2>
@@ -76,62 +61,27 @@ const topics = groupByTopic(course, lectures, sessions)
 
       <h3>Тематична</h3>
       <p>
-        Рекомендована — середнє арифметичне остаточних оцінок за заняття теми, округлене за
-        звичайним правилом (3,5 → 4). Поки якесь заняття теми не оцінене, рекомендації немає.
+        Середнє арифметичне оцінок за заняття теми, округлене за звичайним правилом (3,5 → 4).
+        Неоцінені заняття пропускаються, як у таблиці, а підказка позначається «…». Теми журналу:
+        {topics.join('; ')}.
       </p>
 
       <h3>Семестрова</h3>
       <p>
-        Рекомендована — середнє тематичних оцінок. Наприкінці семестру — залік, на якому студент
-        може підвищити оцінку, тож остаточну семестрову викладач ставить вручну.
+        Середнє тематичних оцінок. Наприкінці семестру — залік, на якому студент може підвищити
+        оцінку, тож остаточну семестрову викладач ставить вручну.
       </p>
-    </section>
-
-    <section class="teacher-structure" aria-labelledby="structure-title">
-      <h2 id="structure-title">Структура оцінок курсу</h2>
-      <p class="teacher-note">
-        Так виглядатиме рядок кожного студента в дашборді: рекомендовані й остаточні оцінки.
-      </p>
-      <div class="teacher-table">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Тема</th>
-              <th scope="col">Заняття</th>
-              <th scope="col">Тематична: рекомендована / остаточна</th>
-            </tr>
-          </thead>
-          <tbody>
-            {topics.map((topic) => (
-              <tr>
-                <th scope="row">
-                  {topic.label}. {topic.title}
-                </th>
-                <td>{topic.sessions.join(', ')}</td>
-                <td>— / —</td>
-              </tr>
-            ))}
-            <tr class="teacher-total">
-              <th scope="row">Семестрова</th>
-              <td>середнє тематичних ({topics.map((t) => t.label).join(', ')}), потім залік</td>
-              <td>— / —</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
     </section>
   </div>
 </BaseLayout>
 
 <style>
-  .teacher-grading,
-  .teacher-structure {
+  .teacher-grading {
     max-width: var(--width-prose);
     margin-top: var(--space-7);
   }
 
-  .teacher-grading h2,
-  .teacher-structure h2 {
+  .teacher-grading h2 {
     margin-bottom: var(--space-3);
   }
 
@@ -145,33 +95,5 @@ const topics = groupByTopic(course, lectures, sessions)
     gap: var(--space-2);
     margin: var(--space-2) 0;
     padding-left: 1.5em;
-  }
-
-  .teacher-note {
-    margin-bottom: var(--space-3);
-    color: var(--color-text-muted);
-  }
-
-  .teacher-table {
-    overflow-x: auto;
-  }
-
-  .teacher-table table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .teacher-table th,
-  .teacher-table td {
-    padding: var(--space-2) var(--space-3);
-    border-bottom: 1px solid var(--color-border);
-    text-align: left;
-    vertical-align: top;
-  }
-
-  .teacher-total th,
-  .teacher-total td {
-    font-weight: 600;
-    background: var(--color-surface);
   }
 </style>

@@ -4,19 +4,12 @@
 export interface SessionMeta {
   /** practical-02 */
   id: string;
-  /** ПЗ2 */
+  /** ПР-2 */
   label: string;
   title: string;
   topic: number;
   /** Чи є автоперевірка варіантів (розв'язки збираються в базу). */
   checkable: boolean;
-}
-
-export interface TopicMeta {
-  number: number;
-  /** Тема 2 */
-  label: string;
-  title: string;
 }
 
 export interface SolveRow {

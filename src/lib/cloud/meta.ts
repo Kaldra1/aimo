@@ -1,12 +1,11 @@
 /** Опис занять і тем для кабінету й дашборду (лише під час збирання). */
-import { course, loadContent } from '../content/collections';
-import { sessionShortLabel, topicLabel } from '../content/course';
+import { loadContent } from '../content/collections';
+import { sessionShortLabel } from '../content/course';
 import { checkableSessions, loadVariantTests } from '../variants/load';
-import type { SessionMeta, TopicMeta } from './types';
+import type { SessionMeta } from './types';
 
 export async function loadCloudMeta(): Promise<{
   sessions: SessionMeta[];
-  topics: TopicMeta[];
   tests: Record<string, Record<string, string[]>>;
 }> {
   const { sessions } = await loadContent();
@@ -26,9 +25,6 @@ export async function loadCloudMeta(): Promise<{
       topic: s.data.topic,
       checkable: checkable.has(s.id),
     }));
-  const topics = course.modules
-    .flatMap((m) => m.topics)
-    .map((t) => ({ number: t.number, label: topicLabel(t.number), title: t.title }));
   const tests = Object.fromEntries([...checkable].map((id) => [id, loadVariantTests(id) ?? {}]));
-  return { sessions: metas, topics, tests };
+  return { sessions: metas, tests };
 }

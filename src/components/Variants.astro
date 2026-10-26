@@ -11,7 +11,7 @@ interface Props {
 
 const { id } = Astro.props;
 const data = loadVariants(id);
-/** Кнопка «Виконати» — лише там, де є тести для автоперевірки. */
+/** Кнопка «Виконати» (одна на варіант, веде до ★) — лише там, де є тести для автоперевірки. */
 const checkable = loadVariantTests(id) !== null;
 
 const escape = (text: string) =>
@@ -39,7 +39,17 @@ const HEADERS = ['★ — обов’язкове', '★★ — на занят�
     <tbody>
       {rows.map(({ n, tasks }) => (
         <tr>
-          <th scope="row">{n}</th>
+          <th scope="row">
+            <span class="variants__number">{n}</span>
+            {checkable && (
+              <a
+                class="button button--secondary variants__button"
+                href={url(variantTaskPath(id, n, 1))}
+              >
+                Виконати
+              </a>
+            )}
+          </th>
           {tasks.map((task, s) => (
             <td>
               <p set:html={inline(task.task)} />
@@ -60,17 +70,8 @@ const HEADERS = ['★ — обов’язкове', '★★ — на занят�
                 </p>
               )}
               {checkable && (
-                <p class="variants__run">
-                  <a
-                    class="button button--secondary variants__button"
-                    href={url(variantTaskPath(id, n, s + 1))}
-                    data-task-id={variantTaskId(id, n, s + 1)}
-                  >
-                    Виконати
-                  </a>
-                  <span class="variants__solved" hidden>
-                    ✓ Розв’язано
-                  </span>
+                <p class="variants__solved" data-task-id={variantTaskId(id, n, s + 1)} hidden>
+                  ✓ Розв’язано
                 </p>
               )}
             </td>
@@ -86,10 +87,8 @@ const HEADERS = ['★ — обов’язкове', '★★ — на занят�
   try {
     const raw = window.localStorage.getItem('aimo:progress');
     const solved: Record<string, string> = raw ? (JSON.parse(raw).solved ?? {}) : {};
-    document.querySelectorAll<HTMLAnchorElement>('[data-task-id]').forEach((link) => {
-      if (solved[link.dataset.taskId ?? ''] === undefined) return;
-      link.textContent = 'Відкрити';
-      (link.nextElementSibling as HTMLElement | null)?.removeAttribute('hidden');
+    document.querySelectorAll<HTMLElement>('[data-task-id]').forEach((mark) => {
+      if (solved[mark.dataset.taskId ?? ''] !== undefined) mark.removeAttribute('hidden');
     });
   } catch {
     // Сховище недоступне — просто без позначок.
@@ -97,14 +96,6 @@ const HEADERS = ['★ — обов’язкове', '★★ — на занят�
 </script>
 
 <style>
-  .variants__run {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2);
-    margin-top: var(--space-2) !important;
-  }
-
   .variants__button {
     min-height: 2.25rem;
     padding-block: var(--space-1);
@@ -112,6 +103,7 @@ const HEADERS = ['★ — обов’язкове', '★★ — на занят�
   }
 
   .variants__solved {
+    margin-top: var(--space-2) !important;
     color: var(--color-primary);
     font-size: var(--text-sm);
     font-weight: 600;
@@ -143,6 +135,14 @@ const HEADERS = ['★ — обов’язкове', '★★ — на занят�
   .variants tbody th {
     text-align: center;
     vertical-align: top;
+  }
+
+  .variants__number {
+    display: block;
+  }
+
+  .variants__button {
+    margin-top: var(--space-2);
   }
 
   .variants td {

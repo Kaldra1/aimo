@@ -1,8 +1,8 @@
 /**
- * Дашборд викладача: група × заняття × ★/★★/★★★ з датами й схемами, повторна перевірка,
- * однакові схеми, рекомендовані й остаточні оцінки, акаунти студентів.
+ * Дашборд викладача: журнал оцінок (як таблиця групи), заняття × ★/★★/★★★ з датами й схемами,
+ * повторна перевірка й однакові схеми, акаунти студентів. Оцінки спершу змінюються в чернетці
+ * й потрапляють у базу лише після «Підтвердити зміни».
  */
-import { Fragment } from 'preact';
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import { credentialsCsv, parseRoster } from '../../lib/cloud/accounts';
 import { explain, getClient } from '../../lib/cloud/client';
@@ -16,24 +16,36 @@ import {
   type SessionMeta,
   type SolveRow,
   type StudentRow,
-  type TopicMeta,
 } from '../../lib/cloud/types';
 import {
-  averageRecommendation,
   GRADE_LABELS,
   recommendGrade,
   type Grade,
+  type Recommendation,
 } from '../../lib/grading/grade';
+import {
+  averageOf,
+  cellKey,
+  draftToWrites,
+  editDraft,
+  formatMean,
+  JOURNAL_TOPICS,
+  parseGradeInput,
+  SEMESTER_ITEM,
+  type Average,
+  type Draft,
+} from '../../lib/grading/journal';
 import { testsKey } from '../../lib/variants/ids';
 import { downloadText } from '../emulator/support';
 import LoginForm from './LoginForm';
 import { useAuth } from './useAuth';
 
+type Tests = Record<string, Record<string, string[]>>;
+
 interface Props {
   sessions: SessionMeta[];
-  topics: TopicMeta[];
   /** Тести варіантів для повторної перевірки: заняття → ключ «зірки-блок-версія» → рядки. */
-  tests: Record<string, Record<string, string[]>>;
+  tests: Tests;
 }
 
 interface Data {
@@ -44,7 +56,7 @@ interface Data {
   grades: GradeRow[];
 }
 
-type Tab = 'session' | 'summary' | 'students';
+type Tab = 'journal' | 'session' | 'students';
 
 export default function TeacherDashboard(props: Props) {
   const { state, error, signIn, signOut } = useAuth();
@@ -69,20 +81,31 @@ export default function TeacherDashboard(props: Props) {
   return <Dashboard {...props} email={state.session.user.email ?? ''} onSignOut={signOut} />;
 }
 
+/** Оцінки: збережені в базі, чернетка й рекомендації. Спільне для журналу й таблиці заняття. */
+interface GradeBook {
+  saved: (userId: string, item: string) => Grade | null;
+  value: (userId: string, item: string) => Grade | null;
+  changed: (userId: string, item: string) => boolean;
+  edit: (userId: string, item: string, value: Grade | null) => void;
+  recommend: (userId: string, session: string) => Recommendation;
+}
+
 function Dashboard({
   sessions,
-  topics,
   tests,
   email,
   onSignOut,
 }: Props & { email: string; onSignOut: () => void }) {
   const [data, setData] = useState<Data | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>('session');
+  const [tab, setTab] = useState<Tab>('journal');
   const [groupId, setGroupId] = useState<string>('');
   const [sessionId, setSessionId] = useState<string>(
     sessions.find((s) => s.checkable)?.id ?? sessions[0]?.id ?? '',
   );
+  const [draft, setDraft] = useState<Draft>(new Map());
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     const client = await getClient();
@@ -112,7 +135,87 @@ function Dashboard({
     if (groupId === '' && data?.groups[0]) setGroupId(data.groups[0].id);
   }, [data, groupId]);
 
-  if (data === null) return <p class="panel__hint">Завантаження…</p>;
+  // Незбережені оцінки: браузер попередить, якщо закрити вкладку.
+  useEffect(() => {
+    if (draft.size === 0) return undefined;
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [draft]);
+
+  // Повторна перевірка всіх збережених схем — один раз на завантаження даних.
+  const checks = useMemo(() => {
+    const result = new Map<string, Recheck>();
+    for (const solve of data?.solves ?? []) {
+      result.set(
+        solveKey(solve.user_id, solve.session, solve.stars),
+        recheck(solve.program, tests[solve.session]?.[testsKey(solve.variant, solve.stars)]),
+      );
+    }
+    return result;
+  }, [data, tests]);
+
+  const book = useMemo<GradeBook | null>(() => {
+    if (!data) return null;
+    const savedMap = new Map(
+      data.grades.map((g) => [cellKey(g.user_id, g.item), g.grade as Grade]),
+    );
+    const groupOf = new Map(data.students.map((s) => [s.user_id, s.group_id]));
+    const saved = (userId: string, item: string) => savedMap.get(cellKey(userId, item)) ?? null;
+    return {
+      saved,
+      value: (userId, item) => {
+        const key = cellKey(userId, item);
+        return draft.has(key) ? draft.get(key)! : saved(userId, item);
+      },
+      changed: (userId, item) => draft.has(cellKey(userId, item)),
+      edit: (userId, item, value) =>
+        setDraft((current) =>
+          editDraft(current, cellKey(userId, item), value, saved(userId, item)),
+        ),
+      recommend: (userId, session) => {
+        const date = data.dates.find(
+          (d) => d.group_id === groupOf.get(userId) && d.session === session,
+        )?.date;
+        return recommendGrade(
+          data.solves
+            .filter((s) => s.user_id === userId && s.session === session)
+            .filter((s) => checks.get(solveKey(userId, session, s.stars)) !== 'fail')
+            .map((s) => ({ stars: s.stars, solvedAt: new Date(s.solved_at) })),
+          date ? localDate(date) : null,
+        );
+      },
+    };
+  }, [data, draft, checks]);
+
+  const save = async () => {
+    setSaving(true);
+    setSaveError(null);
+    const client = await getClient();
+    const { upserts, deletes } = draftToWrites(draft);
+    const failed: string[] = [];
+    if (upserts.length > 0) {
+      const { error } = await client.from('grades').upsert(upserts);
+      if (error) failed.push(explain(error));
+    }
+    for (const row of deletes) {
+      const { error } = await client.from('grades').delete().match(row);
+      if (error) failed.push(explain(error));
+    }
+    await reload();
+    if (failed.length > 0) {
+      setSaveError(`Не все збережено: ${failed[0]}`);
+    } else {
+      setDraft(new Map());
+    }
+    setSaving(false);
+  };
+
+  const discard = () => {
+    if (window.confirm(`Скасувати незбережені зміни (${draft.size})?`)) setDraft(new Map());
+  };
+
+  if (data === null || book === null) return <p class="panel__hint">Завантаження…</p>;
 
   const students = data.students.filter((s) => s.group_id === groupId);
   const session = sessions.find((s) => s.id === sessionId);
@@ -133,8 +236,8 @@ function Dashboard({
         <div class="cloud-tabs" role="tablist" aria-label="Розділ дашборду">
           {(
             [
+              ['journal', 'Журнал'],
               ['session', 'Заняття'],
-              ['summary', 'Зведена'],
               ['students', 'Студенти'],
             ] as const
           ).map(([key, label]) => (
@@ -151,7 +254,12 @@ function Dashboard({
           ))}
         </div>
         <span class="cloud-muted">{email}</span>
-        <button type="button" class="button button--secondary" onClick={() => void reload()}>
+        <button
+          type="button"
+          class="button button--secondary"
+          onClick={() => void reload()}
+          title="Підтягнути нові розв’язки студентів. Незбережені оцінки лишаються."
+        >
           Оновити
         </button>
         <button type="button" class="button button--secondary" onClick={onSignOut}>
@@ -160,6 +268,15 @@ function Dashboard({
       </div>
       {loadError && <p class="message message--error">{loadError}</p>}
 
+      {tab === 'journal' && (
+        <JournalTable
+          sessions={sessions}
+          groupId={groupId}
+          students={students}
+          dates={data.dates}
+          book={book}
+        />
+      )}
       {tab === 'session' && (
         <>
           <label class="field field--inline">
@@ -183,72 +300,263 @@ function Dashboard({
               groupId={groupId}
               students={students}
               data={data}
-              tests={tests[session.id]}
+              checks={checks}
+              book={book}
               onChanged={reload}
             />
           )}
         </>
       )}
-      {tab === 'summary' && (
-        <SummaryTable
-          sessions={sessions}
-          topics={topics}
-          students={students}
-          grades={data.grades}
-          onChanged={reload}
-        />
-      )}
       {tab === 'students' && (
         <StudentsPanel groupId={groupId} students={students} onChanged={reload} />
+      )}
+
+      {(draft.size > 0 || saveError) && (
+        <div class="cloud-confirm" role="region" aria-label="Незбережені оцінки">
+          <span>
+            Незбережених змін: <strong>{draft.size}</strong>
+          </span>
+          {saveError && <span class="message message--error">{saveError}</span>}
+          <button
+            type="button"
+            class="button button--secondary"
+            disabled={saving || draft.size === 0}
+            onClick={discard}
+          >
+            Скасувати
+          </button>
+          <button
+            type="button"
+            class="button button--primary"
+            disabled={saving || draft.size === 0}
+            onClick={() => void save()}
+          >
+            {saving ? 'Зберігаємо…' : 'Підтвердити зміни'}
+          </button>
+        </div>
       )}
     </div>
   );
 }
 
-// ---------- Оцінки ----------
+const solveKey = (userId: string, session: string, stars: number) =>
+  `${userId}/${session}/${stars}`;
 
-const GRADES: readonly Grade[] = [5, 4, 3, 2];
+// ---------- Клітинка оцінки ----------
 
-function GradeSelect({
+/** Перехід між клітинками стрілками й Enter, як у таблиці. */
+function moveFocus(input: HTMLInputElement, dRow: number, dCol: number): boolean {
+  const row = Number(input.dataset.row) + dRow;
+  const col = Number(input.dataset.col) + dCol;
+  const next = input
+    .closest('table')
+    ?.querySelector<HTMLInputElement>(`input[data-row="${row}"][data-col="${col}"]`);
+  if (!next) return false;
+  next.focus();
+  next.select();
+  return true;
+}
+
+function GradeCell({
+  book,
   userId,
   item,
-  grades,
   label,
-  onChanged,
+  hint,
+  hintTitle,
+  row,
+  col,
 }: {
+  book: GradeBook;
   userId: string;
   item: string;
-  grades: GradeRow[];
   label: string;
-  onChanged: () => Promise<void>;
+  /** Що показати сірим, коли оцінки немає: рекомендація чи середнє. */
+  hint: string;
+  hintTitle?: string;
+  row: number;
+  col: number;
 }) {
-  const current = grades.find((g) => g.user_id === userId && g.item === item)?.grade;
-  const [error, setError] = useState<string | null>(null);
-  const change = async (value: string) => {
-    const client = await getClient();
-    const { error: failed } =
-      value === ''
-        ? await client.from('grades').delete().match({ user_id: userId, item })
-        : await client.from('grades').upsert({ user_id: userId, item, grade: Number(value) });
-    setError(failed ? explain(failed) : null);
-    await onChanged();
-  };
+  const value = book.value(userId, item);
+  const changed = book.changed(userId, item);
+  const saved = book.saved(userId, item);
+  const title = [hintTitle, changed ? `Було: ${saved ?? 'порожньо'}. Ще не збережено.` : undefined]
+    .filter(Boolean)
+    .join(' ');
   return (
-    <select
-      class="input cloud-grade"
+    <input
+      class={`cloud-cell${changed ? ' is-changed' : ''}`}
+      inputMode="numeric"
+      maxLength={1}
       aria-label={label}
-      title={error ?? undefined}
-      aria-invalid={error ? 'true' : undefined}
-      value={current === undefined ? '' : String(current)}
-      onChange={(e) => void change(e.currentTarget.value)}
-    >
-      <option value="">—</option>
-      {GRADES.map((g) => (
-        <option key={g} value={String(g)}>
-          {g}
-        </option>
-      ))}
-    </select>
+      title={title || undefined}
+      placeholder={hint}
+      data-row={row}
+      data-col={col}
+      value={value === null ? '' : String(value)}
+      onFocus={(e) => e.currentTarget.select()}
+      onInput={(e) => {
+        const input = e.currentTarget;
+        const parsed = parseGradeInput(input.value);
+        if (parsed === undefined) {
+          input.value = value === null ? '' : String(value);
+          return;
+        }
+        book.edit(userId, item, parsed);
+      }}
+      onKeyDown={(e) => {
+        const input = e.currentTarget;
+        const moves: Record<string, [number, number]> = {
+          Enter: [e.shiftKey ? -1 : 1, 0],
+          ArrowDown: [1, 0],
+          ArrowUp: [-1, 0],
+          ArrowRight: [0, 1],
+          ArrowLeft: [0, -1],
+        };
+        const move = moves[e.key];
+        if (move && moveFocus(input, move[0], move[1])) e.preventDefault();
+      }}
+    />
+  );
+}
+
+const averageHint = (average: Average) =>
+  average.grade === null ? '' : `${average.grade}${average.missing > 0 ? '…' : ''}`;
+
+const averageTitle = (average: Average, parts: string) =>
+  average.mean === null
+    ? `Ще немає оцінок (${parts}).`
+    : `Середнє ${formatMean(average.mean)} → ${average.grade}` +
+      (average.missing > 0 ? `; без оцінки ще ${average.missing}` : '') +
+      ` (${parts}). Сірим — підказка; впишіть оцінку, щоб зафіксувати.`;
+
+// ---------- Журнал ----------
+
+function JournalTable({
+  sessions,
+  groupId,
+  students,
+  dates,
+  book,
+}: {
+  sessions: SessionMeta[];
+  groupId: string;
+  students: StudentRow[];
+  dates: SessionDateRow[];
+  book: GradeBook;
+}) {
+  const meta = new Map(sessions.map((s) => [s.id, s]));
+  const columns = JOURNAL_TOPICS.flatMap((topic) => topic.sessions).filter((id) => meta.has(id));
+  const dateOf = (session: string) => {
+    const date = dates.find((d) => d.group_id === groupId && d.session === session)?.date;
+    return date
+      ? localDate(date).toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit' })
+      : '';
+  };
+
+  return (
+    <section class="panel cloud-card" aria-label="Журнал оцінок">
+      <p class="panel__hint">
+        Впишіть оцінку 2–5 або зітріть її; Enter і стрілки переходять між клітинками. Сірим —
+        підказка: за заняття — рекомендована з розв’язків, за тему й семестр — середнє (з «…», якщо
+        оцінено не все). Зміни потрапляють у базу після «Підтвердити зміни».
+      </p>
+      <div class="cloud-table">
+        <table class="cloud-journal">
+          <thead>
+            <tr>
+              <th scope="col">№</th>
+              <th scope="col">Студент</th>
+              <th scope="col" class="cloud-journal__total">
+                Семестр
+              </th>
+              {JOURNAL_TOPICS.map((topic) => (
+                <th key={topic.item} scope="col" class="cloud-journal__topic">
+                  {topic.label}
+                </th>
+              ))}
+              {columns.map((id) => (
+                <th key={id} scope="col">
+                  {meta.get(id)!.label}
+                  <span class="cloud-journal__date">{dateOf(id)}</span>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {students.map((student, row) => {
+              const userId = student.user_id;
+              const topicAverages = JOURNAL_TOPICS.map((topic) =>
+                averageOf(topic.sessions.map((id) => book.value(userId, id))),
+              );
+              const semester = averageOf(
+                JOURNAL_TOPICS.map(
+                  (topic, i) => book.value(userId, topic.item) ?? topicAverages[i]!.grade,
+                ),
+              );
+              return (
+                <tr key={userId}>
+                  <td>{student.journal}</td>
+                  <th scope="row">{student.full_name}</th>
+                  <td class="cloud-journal__total">
+                    <GradeCell
+                      book={book}
+                      userId={userId}
+                      item={SEMESTER_ITEM}
+                      label={`${student.full_name}: семестрова`}
+                      hint={averageHint(semester)}
+                      hintTitle={averageTitle(
+                        semester,
+                        JOURNAL_TOPICS.map((t) => t.label).join(', '),
+                      )}
+                      row={row}
+                      col={0}
+                    />
+                  </td>
+                  {JOURNAL_TOPICS.map((topic, i) => (
+                    <td key={topic.item} class="cloud-journal__topic">
+                      <GradeCell
+                        book={book}
+                        userId={userId}
+                        item={topic.item}
+                        label={`${student.full_name}: ${topic.label}`}
+                        hint={averageHint(topicAverages[i]!)}
+                        hintTitle={averageTitle(
+                          topicAverages[i]!,
+                          topic.sessions.map((id) => meta.get(id)?.label ?? id).join(', '),
+                        )}
+                        row={row}
+                        col={1 + i}
+                      />
+                    </td>
+                  ))}
+                  {columns.map((id, j) => {
+                    const rec = book.recommend(userId, id);
+                    return (
+                      <td key={id}>
+                        <GradeCell
+                          book={book}
+                          userId={userId}
+                          item={id}
+                          label={`${student.full_name}: ${meta.get(id)!.label}`}
+                          hint={rec.grade === null ? '' : String(rec.grade)}
+                          hintTitle={
+                            rec.grade === null ? undefined : `Рекомендована: ${rec.reason}`
+                          }
+                          row={row}
+                          col={1 + JOURNAL_TOPICS.length + j}
+                        />
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      {students.length === 0 && <p class="panel__hint">У групі ще немає студентів.</p>}
+    </section>
   );
 }
 
@@ -261,18 +569,19 @@ function SessionTable({
   groupId,
   students,
   data,
-  tests,
+  checks,
+  book,
   onChanged,
 }: {
   session: SessionMeta;
   groupId: string;
   students: StudentRow[];
   data: Data;
-  tests: Record<string, string[]> | undefined;
+  checks: ReadonlyMap<string, Recheck>;
+  book: GradeBook;
   onChanged: () => Promise<void>;
 }) {
   const dateRow = data.dates.find((d) => d.group_id === groupId && d.session === session.id);
-  const sessionDate = dateRow ? localDate(dateRow.date) : null;
   const [open, setOpen] = useState<string | null>(null);
 
   // Однакові схеми в межах заняття й рівня — серед усіх груп.
@@ -296,18 +605,6 @@ function SessionTable({
     }
     return result;
   }, [data.solves, data.students, session.id]);
-
-  const checks = useMemo(() => {
-    const result = new Map<string, Recheck>();
-    for (const solve of data.solves) {
-      if (solve.session !== session.id) continue;
-      result.set(
-        `${solve.user_id}/${solve.stars}`,
-        recheck(solve.program, tests?.[testsKey(solve.variant, solve.stars)]),
-      );
-    }
-    return result;
-  }, [data.solves, session.id, tests]);
 
   const openSolve = open
     ? data.solves.find((s) => `${s.user_id}/${s.stars}` === open && s.session === session.id)
@@ -341,16 +638,11 @@ function SessionTable({
             </tr>
           </thead>
           <tbody>
-            {students.map((student) => {
+            {students.map((student, row) => {
               const mine = data.solves.filter(
                 (s) => s.user_id === student.user_id && s.session === session.id,
               );
-              const rec = recommendGrade(
-                mine
-                  .filter((s) => checks.get(`${s.user_id}/${s.stars}`) !== 'fail')
-                  .map((s) => ({ stars: s.stars, solvedAt: new Date(s.solved_at) })),
-                sessionDate,
-              );
+              const rec = book.recommend(student.user_id, session.id);
               return (
                 <tr key={student.user_id}>
                   <td>{student.journal}</td>
@@ -362,7 +654,7 @@ function SessionTable({
                     const solve = mine.find((s) => s.stars === stars);
                     if (!solve) return <td key={stars}>—</td>;
                     const key = `${student.user_id}/${stars}`;
-                    const check = checks.get(key);
+                    const check = checks.get(solveKey(student.user_id, session.id, stars));
                     const twin = twins.get(key);
                     return (
                       <td key={stars}>
@@ -392,12 +684,14 @@ function SessionTable({
                   })}
                   <td title={rec.reason}>{gradeText(rec.grade)}</td>
                   <td>
-                    <GradeSelect
+                    <GradeCell
+                      book={book}
                       userId={student.user_id}
                       item={session.id}
-                      grades={data.grades}
                       label={`${student.full_name}: остаточна за ${session.label}`}
-                      onChanged={onChanged}
+                      hint={rec.grade === null ? '' : String(rec.grade)}
+                      row={row}
+                      col={0}
                     />
                   </td>
                 </tr>
@@ -458,116 +752,6 @@ function SessionDate({
       </span>
       {error && <span class="message message--error">{error}</span>}
     </div>
-  );
-}
-
-// ---------- Зведена ----------
-
-function SummaryTable({
-  sessions,
-  topics,
-  students,
-  grades,
-  onChanged,
-}: {
-  sessions: SessionMeta[];
-  topics: TopicMeta[];
-  students: StudentRow[];
-  grades: GradeRow[];
-  onChanged: () => Promise<void>;
-}) {
-  const used = topics.filter((t) => sessions.some((s) => s.topic === t.number));
-  const finalOf = (userId: string, item: string) =>
-    (grades.find((g) => g.user_id === userId && g.item === item)?.grade ?? null) as Grade | null;
-
-  return (
-    <section class="panel cloud-card" aria-label="Зведена відомість">
-      <p class="panel__hint">
-        Тематична рекомендована — середнє остаточних оцінок занять теми; семестрова — середнє
-        остаточних тематичних. Наведіть на рекомендацію, щоб побачити пояснення.
-      </p>
-      <div class="cloud-table">
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">№</th>
-              <th scope="col">Студент</th>
-              {used.map((topic) => (
-                <th key={topic.number} scope="col" colSpan={2}>
-                  {topic.label}:{' '}
-                  {sessions
-                    .filter((s) => s.topic === topic.number)
-                    .map((s) => s.label)
-                    .join(', ')}
-                </th>
-              ))}
-              <th scope="col" colSpan={2}>
-                Семестрова
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {students.map((student) => {
-              const topicItems = used.map((topic) => {
-                const rec = averageRecommendation(
-                  sessions
-                    .filter((s) => s.topic === topic.number)
-                    .map((s) => ({ label: s.label, grade: finalOf(student.user_id, s.id) })),
-                );
-                return { topic, rec };
-              });
-              const semester = averageRecommendation(
-                used.map((topic) => ({
-                  label: topic.label,
-                  grade: finalOf(student.user_id, `topic-${topic.number}`),
-                })),
-              );
-              return (
-                <tr key={student.user_id}>
-                  <td>{student.journal}</td>
-                  <th scope="row">{student.full_name}</th>
-                  {topicItems.map(({ topic, rec }) => (
-                    <Fragment key={topic.number}>
-                      <td title={rec.reason}>
-                        {rec.grade ?? '—'}
-                        <span class="cloud-muted">
-                          {' '}
-                          (
-                          {sessions
-                            .filter((s) => s.topic === topic.number)
-                            .map((s) => finalOf(student.user_id, s.id) ?? '·')
-                            .join(' ')}
-                          )
-                        </span>
-                      </td>
-                      <td>
-                        <GradeSelect
-                          userId={student.user_id}
-                          item={`topic-${topic.number}`}
-                          grades={grades}
-                          label={`${student.full_name}: остаточна за ${topic.label}`}
-                          onChanged={onChanged}
-                        />
-                      </td>
-                    </Fragment>
-                  ))}
-                  <td title={semester.reason}>{semester.grade ?? '—'}</td>
-                  <td>
-                    <GradeSelect
-                      userId={student.user_id}
-                      item="semester"
-                      grades={grades}
-                      label={`${student.full_name}: семестрова`}
-                      onChanged={onChanged}
-                    />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </section>
   );
 }
 
