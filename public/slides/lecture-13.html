@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<script src="./resources.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/styles.css">
+<script src="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/_ds_bundle.js"></script>
+<link rel="stylesheet" href="fonts/fonts.css">
+<title>АІМО — Лекція 13 · Складність алгоритмів сортування</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  --h: "Manrope", system-ui, sans-serif;
+  --b: "IBM Plex Sans", system-ui, sans-serif;
+  --m: "IBM Plex Mono", ui-monospace, monospace;
+  --bg: #f5f7f5; --bg2: #e7efeb; --ink: #16262b; --mut: #56696d; --ln: rgba(22,38,43,.16);
+  --acc: #0d6e63; --fill: #f0b45a; --acc-ink: #1b2620;
+  --hair: 1px solid var(--ln);
+  --mk-c: rgba(22,38,43,.45);
+  --mk-img: linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c));
+  --mk-pos: 0 -7px, -7px 0, right 0 top -7px, right -7px top 0, 0 bottom -7px, -7px bottom 0, right 0 bottom -7px, right -7px bottom 0;
+  --mk-size: 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px;
+  --grid: linear-gradient(rgba(238,243,239,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(238,243,239,.045) 1px, transparent 1px);
+}
+a { color: var(--acc); text-decoration: none; }
+a:hover { color: var(--ink); }
+</style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" data-uneditable="">
+
+<section data-label="Титул" data-screen-label="01" data-speaker-notes="У лекціях 11–12 рахували порівняння й обміни. Сьогодні робимо це строго: асимптотичні позначення, аналіз циклів і рекурсії, і доведення, що сортування порівняннями не буває швидшим за n log n." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;gap:60px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
+    <div style="align-self:flex-start;border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Лекція 13 · Алгоритми і методи обчислень</div>
+    <div>
+      <h1 style="margin:0;font-family:var(--h);font-weight:800;font-size:108px;line-height:1.02;letter-spacing:-.02em"><span style="color:var(--acc)">Складність</span><br>алгоритмів<br>сортування</h1>
+      <p style="margin:30px 0 0;font-size:36px;line-height:1.3;color:var(--mut);max-width:900px">Асимптотичні оцінки, аналіз циклів і рекурсії, нижня межа n log n</p>
+    </div>
+    <div style="display:flex;gap:18px;font-size:24px;color:var(--mut)"><span>Змістовий модуль 1</span><span>·</span><span>Тема 3. Представлення та основні структури алгоритмів</span></div>
+  </div>
+  <div style="width:640px;flex:none;display:flex;flex-direction:column;justify-content:center">
+    <div style="padding:44px 48px;display:grid;grid-template-columns:auto 1fr;gap:26px 36px;align-items:baseline;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <span style="font-family:var(--m);font-size:64px;color:var(--acc)">O</span><span style="font-size:28px;line-height:1.35">росте <b style="font-weight:600">не швидше</b></span>
+      <span style="font-family:var(--m);font-size:64px;color:var(--acc)">Ω</span><span style="font-size:28px;line-height:1.35">росте <b style="font-weight:600">не повільніше</b></span>
+      <span style="font-family:var(--m);font-size:64px;color:var(--acc)">Θ</span><span style="font-size:28px;line-height:1.35">росте <b style="font-weight:600">так само</b></span>
+    </div>
+  </div>
+</section>
+
+<section data-label="Навіщо оцінювати" data-screen-label="02" data-speaker-notes="Час залежить від комп'ютера, компілятора, навантаження. Тому рахуємо операції як функцію від n. Головне питання — що буде, коли даних стане більше: тисяча записів за мілісекунду — а мільйон?" style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Вступ</span><span style="display:var(--hdr,inline);color:var(--mut)">01</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Навіщо оцінювати складність</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Порівнюємо <b style="font-weight:600;color:var(--ink)">алгоритми</b>, а не комп'ютери</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.25fr;gap:44px;min-height:0">
+    <div style="padding:34px 40px;display:flex;flex-direction:column;justify-content:center;gap:26px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Що рахуємо</div>
+      <p style="margin:0;font-size:30px;line-height:1.4">Кількість <b style="font-weight:600">елементарних операцій</b> — порівнянь, присвоювань, арифметичних дій — як функцію від <b style="font-weight:600">розміру входу</b></p>
+      <div style="font-family:var(--m);font-size:56px;text-align:center;padding:26px 0;background:var(--bg2);color:var(--acc)">T(n)</div>
+      <p style="margin:0;font-size:26px;line-height:1.4;color:var(--mut)">Для сортування <span style="font-family:var(--m);color:var(--ink)">n</span> — кількість елементів масиву</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="grid-column:1 / 3;padding:16px 30px;background:var(--bg2);font-size:26px">Даних стало в <b style="font-weight:600">1000 разів більше</b>: <span style="font-family:var(--m)">10³ → 10⁶</span></div>
+        <div style="padding:28px 32px;display:flex;flex-direction:column;justify-content:center;gap:14px;border-right:var(--hair)">
+          <span style="font-family:var(--m);font-size:34px">n²</span>
+          <span style="font-family:var(--m);font-size:76px;line-height:1">×10⁶</span>
+          <span style="font-size:26px;color:var(--mut)">мілісекунда → хвилини</span>
+        </div>
+        <div style="padding:28px 32px;display:flex;flex-direction:column;justify-content:center;gap:14px">
+          <span style="font-family:var(--m);font-size:34px;color:var(--acc)">n log n</span>
+          <span style="font-family:var(--m);font-size:76px;line-height:1;color:var(--acc)">×2000</span>
+          <span style="font-size:26px;color:var(--mut)">мілісекунда → частка секунди</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:22px 30px;display:flex;flex-direction:column;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Часова</h3><span style="font-size:24px;color:var(--mut)">кількість операцій</span></div>
+        <div style="background:var(--bg);padding:22px 30px;display:flex;flex-direction:column;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Просторова (ємнісна)</h3><span style="font-size:24px;color:var(--mut)">додаткова пам'ять понад вхідні дані</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Три випадки" data-screen-label="03" data-speaker-notes="Навіть за однакового n кількість операцій залежить від даних. Вставки: на відсортованому n−1 порівнянь, на зворотному n(n−1)/2. Для систем реального часу й захисту від атак підібраними даними важливий найгірший випадок." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Випадки</span><span style="display:var(--hdr,inline);color:var(--mut)">02</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Найкращий, середній і найгірший випадки</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg2);padding:34px 38px;display:flex;flex-direction:column;gap:18px">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Гарантія</div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:40px">Найгірший</h3>
+      <p style="margin:0;font-size:26px;line-height:1.42">Максимум операцій серед усіх входів розміру <span style="font-family:var(--m)">n</span>. Алгоритм <b style="font-weight:600">ніколи</b> не працюватиме довше</p>
+    </div>
+    <div style="background:var(--bg);padding:34px 38px;display:flex;flex-direction:column;gap:18px">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Типова поведінка</div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:40px">Середній</h3>
+      <p style="margin:0;font-size:26px;line-height:1.42">Середнє за певного розподілу входів — зазвичай усі перестановки <b style="font-weight:600">рівноймовірні</b></p>
+    </div>
+    <div style="background:var(--bg);padding:34px 38px;display:flex;flex-direction:column;gap:18px">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Підказка</div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:40px">Найкращий</h3>
+      <p style="margin:0;font-size:26px;line-height:1.42">Мінімум операцій. Сам мало що каже, але показує, де метод сильний — вставки на <b style="font-weight:600">майже відсортованих</b> даних</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1.1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:22px 30px;display:flex;flex-direction:column;gap:8px"><span style="font-size:24px;color:var(--mut)">Вставки · відсортований масив</span><span style="font-family:var(--m);font-size:38px">n − 1</span></div>
+    <div style="background:var(--bg);padding:22px 30px;display:flex;flex-direction:column;gap:8px"><span style="font-size:24px;color:var(--mut)">Вставки · зворотний порядок</span><span style="font-family:var(--m);font-size:38px;color:var(--acc)">n(n − 1) / 2</span></div>
+    <div style="background:var(--bg2);padding:22px 30px;display:flex;align-items:center;font-size:25px;line-height:1.4">Швидке з поганим опорним — ризик, пірамідальне — ні</div>
+  </div>
+</section>
+
+<section data-label="Асимптотика · розділ" data-screen-label="04" data-speaker-notes="Точна формула громіздка. Для великих n важливий лише старший член, а сталий множник залежить від того, що саме рахувати. Тому оцінюємо з точністю до сталого множника." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:40px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Позначення</div><span style="display:var(--hdr,inline);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;color:var(--mut)">03</span></div>
+  <div>
+    <div style="font-family:var(--m);font-size:40px;color:var(--acc)">n → ∞</div>
+    <h2 style="margin:18px 0 0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Асимптотичні позначення</h2>
+  </div>
+  <div style="padding:34px 40px;display:flex;gap:40px;align-items:center;flex-wrap:wrap;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m);font-size:48px">
+    <span>T(n) = 3n² + 5n + 7</span><span style="color:var(--mut)">→</span><span>3n²</span><span style="color:var(--mut)">→</span><span style="color:var(--acc)">n²</span>
+    <span style="margin-left:auto;font-family:var(--b);font-size:26px;color:var(--mut)">лишаємо старший член, відкидаємо множник</span>
+  </div>
+</section>
+
+<section data-label="O, Ω, Θ" data-screen-label="05" data-speaker-notes="Три означення. Приклад: для n ≥ 1 кожен доданок не більший за відповідну частку 15n², тому c = 15, n₀ = 1. Для Θ треба оцінки з обох боків." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Позначення</span><span style="display:var(--hdr,inline);color:var(--mut)">04</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Оцінки зверху, знизу й точна</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:32px 36px;display:flex;flex-direction:column;justify-content:center;gap:24px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--m);font-size:80px;line-height:1;color:var(--acc)">O</span><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">зверху</span></div>
+      <div style="font-family:var(--m);font-size:30px;line-height:1.5;padding:18px 22px;background:var(--bg2)">T(n) ≤ c · g(n)</div>
+      <p style="margin:0;font-size:26px;line-height:1.4">Росте <b style="font-weight:600">не швидше</b> за <span style="font-family:var(--m)">g(n)</span></p>
+    </div>
+    <div style="background:var(--bg);padding:32px 36px;display:flex;flex-direction:column;justify-content:center;gap:24px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--m);font-size:80px;line-height:1;color:var(--acc)">Ω</span><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">знизу</span></div>
+      <div style="font-family:var(--m);font-size:30px;line-height:1.5;padding:18px 22px;background:var(--bg2)">T(n) ≥ c · g(n)</div>
+      <p style="margin:0;font-size:26px;line-height:1.4">Росте <b style="font-weight:600">не повільніше</b> за <span style="font-family:var(--m)">g(n)</span></p>
+    </div>
+    <div style="background:var(--bg);padding:32px 36px;display:flex;flex-direction:column;justify-content:center;gap:24px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--m);font-size:80px;line-height:1;color:var(--acc)">Θ</span><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">точна</span></div>
+      <div style="font-family:var(--m);font-size:30px;line-height:1.5;padding:18px 22px;background:var(--bg2)">O(g) і Ω(g) водночас</div>
+      <p style="margin:0;font-size:26px;line-height:1.4">Росте <b style="font-weight:600">так само</b>, як <span style="font-family:var(--m)">g(n)</span></p>
+    </div>
+  </div>
+  <div style="padding:18px 30px;font-size:25px;color:var(--mut);background:var(--bg2);border:var(--hair)">Для O і Ω: існують <span style="font-family:var(--m);color:var(--ink)">c &gt; 0</span> і <span style="font-family:var(--m);color:var(--ink)">n₀</span>, такі що нерівність виконується для всіх <span style="font-family:var(--m);color:var(--ink)">n ≥ n₀</span></div>
+  <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:22px 30px;display:flex;flex-direction:column;gap:8px"><span style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Приклад O · c = 15, n₀ = 1</span><span style="font-family:var(--m);font-size:32px">3n² + 5n + 7 ≤ 15n² ⇒ O(n²)</span></div>
+    <div style="background:var(--bg);padding:22px 30px;display:flex;flex-direction:column;gap:8px"><span style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Приклад Θ · вибір</span><span style="font-family:var(--m);font-size:32px">n(n − 1) / 2 = Θ(n²)</span></div>
+  </div>
+</section>
+
+<section data-label="Правила" data-screen-label="06" data-speaker-notes="Три правила спрощення. Основа логарифма не важлива: log₂n і lg n відрізняються лише сталим множником 1/lg 2." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Позначення</span><span style="display:var(--hdr,inline);color:var(--mut)">05</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Корисні правила</h2>
+  <div style="flex:1;display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:24px 40px;display:grid;grid-template-columns:80px 1fr 1fr;gap:32px;align-items:center"><span style="font-family:var(--m);font-size:44px;color:var(--acc)">1</span><span style="font-size:32px;line-height:1.35">Сталі множники <b style="font-weight:600">відкидають</b></span><span style="font-family:var(--m);font-size:44px">O(5n) = O(n)</span></div>
+    <div style="background:var(--bg);padding:24px 40px;display:grid;grid-template-columns:80px 1fr 1fr;gap:32px;align-items:center"><span style="font-family:var(--m);font-size:44px;color:var(--acc)">2</span><span style="font-size:32px;line-height:1.35">У сумі лишають <b style="font-weight:600">найшвидше зростаючий</b> доданок</span><span style="font-family:var(--m);font-size:44px">O(n² + n log n) = O(n²)</span></div>
+    <div style="background:var(--bg);padding:24px 40px;display:grid;grid-template-columns:80px 1fr 1fr;gap:32px;align-items:center"><span style="font-family:var(--m);font-size:44px;color:var(--acc)">3</span><span style="font-size:32px;line-height:1.35">Основа логарифма <b style="font-weight:600">не важлива</b> — різниця у сталому множнику</span><span style="font-family:var(--m);font-size:44px">log₂n, lg n → O(log n)</span></div>
+  </div>
+</section>
+
+<section data-label="Класи складності" data-screen-label="07" data-speaker-notes="Шість класів від найповільнішого зростання до найшвидшого. Підрахунок лінійний лише коли k значно менше за n." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Класи</span><span style="display:var(--hdr,inline);color:var(--mut)">06</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Класи складності</h2>
+  <div style="flex:1;display:grid;grid-template-columns:320px 1fr 1.6fr;grid-template-rows:auto repeat(6,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="padding:14px 30px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Порядок</div>
+    <div style="padding:14px 30px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Назва</div>
+    <div style="padding:14px 30px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Приклад</div>
+    <sc-for list="{{ classes }}" as="r" hint-placeholder-count="6">
+      <div style="padding:6px 30px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:36px;color:var(--acc)">{{ r.o }}</div>
+      <div style="padding:6px 30px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:30px">{{ r.name }}</div>
+      <div style="padding:6px 30px;display:flex;align-items:center;border-top:var(--hair);font-size:27px">{{ r.ex }}</div>
+    </sc-for>
+  </div>
+</section>
+
+<section data-label="Скільки це операцій" data-screen-label="08" data-speaker-notes="При 10⁹ операцій за секунду. Мільйон елементів: n log n — соті частки секунди, n² — близько 17 хвилин. Експоненційний перебір для n = 100 — понад 10¹³ років." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Класи</span><span style="display:var(--hdr,inline);color:var(--mut)">07</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Скільки це операцій</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:auto repeat(4,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-family:var(--m);font-size:34px">
+    <div style="padding:14px 30px;background:var(--bg2);color:var(--mut);font-size:28px">n</div>
+    <div style="padding:14px 30px;background:var(--bg2);color:var(--mut);font-size:28px">log₂n</div>
+    <div style="padding:14px 30px;background:var(--bg2);color:var(--acc);font-size:28px">n log₂n</div>
+    <div style="padding:14px 30px;background:var(--bg2);color:var(--mut);font-size:28px">n²</div>
+    <div style="padding:14px 30px;background:var(--bg2);color:var(--mut);font-size:28px">2ⁿ</div>
+    <sc-for list="{{ ops }}" as="r" hint-placeholder-count="4">
+      <div style="padding:6px 30px;display:flex;align-items:center;border-top:var(--hair);font-weight:600">{{ r.n }}</div>
+      <div style="padding:6px 30px;display:flex;align-items:center;border-top:var(--hair)">{{ r.l }}</div>
+      <div style="padding:6px 30px;display:flex;align-items:center;border-top:var(--hair);color:var(--acc)">{{ r.nl }}</div>
+      <div style="padding:6px 30px;display:flex;align-items:center;border-top:var(--hair)">{{ r.n2 }}</div>
+      <div style="padding:6px 30px;display:flex;align-items:center;border-top:var(--hair)">{{ r.e }}</div>
+    </sc-for>
+  </div>
+  <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg2);padding:20px 30px;display:flex;align-items:center;font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">10⁹ операцій / с</div>
+    <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;gap:4px"><span style="font-size:22px;color:var(--mut)">n log n, n = 10⁶</span><span style="font-family:var(--m);font-size:32px;color:var(--acc)">соті частки секунди</span></div>
+    <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;gap:4px"><span style="font-size:22px;color:var(--mut)">n², n = 10⁶</span><span style="font-family:var(--m);font-size:32px">≈ 17 хвилин</span></div>
+    <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;gap:4px"><span style="font-size:22px;color:var(--mut)">2ⁿ, n = 100</span><span style="font-family:var(--m);font-size:32px">понад 10¹³ років</span></div>
+  </div>
+</section>
+
+<section data-label="Аналіз · розділ" data-screen-label="09" data-speaker-notes="Переходимо від означень до практики: як отримати оцінку, дивлячись на код." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:40px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Аналіз</div><span style="display:var(--hdr,inline);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;color:var(--mut)">08</span></div>
+  <div>
+    <div style="font-family:var(--m);font-size:40px;color:var(--acc)">for · while · T(n) = …</div>
+    <h2 style="margin:18px 0 0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Як оцінювати алгоритми</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:28px 34px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--h);font-weight:700;font-size:36px">Цикли</span><span style="font-size:26px;color:var(--mut)">рахуємо ітерації: множимо вкладені, додаємо послідовні</span></div>
+    <div style="background:var(--bg);padding:28px 34px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--h);font-weight:700;font-size:36px">Рекурсія</span><span style="font-size:26px;color:var(--mut)">складаємо й розв'язуємо рекурентне співвідношення</span></div>
+  </div>
+</section>
+
+<section data-label="Цикли" data-screen-label="10" data-speaker-notes="П'ять шаблонів. Залежні межі — сортування вибором: сума арифметичної прогресії. Ділення навпіл: для n = 1024 — 10 ітерацій." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Цикли</span><span style="display:var(--hdr,inline);color:var(--mut)">09</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Оцінка циклів</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <sc-for list="{{ loops }}" as="l" hint-placeholder-count="5">
+      <div style="background:var(--bg);padding:24px 30px;display:flex;flex-direction:column;gap:14px;min-height:0">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:16px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">{{ l.t }}</h3><span style="font-family:var(--m);font-size:30px;color:var(--acc);white-space:nowrap">{{ l.o }}</span></div>
+        <pre style="margin:0;flex:1;display:flex;align-items:center;font-family:var(--m);font-size:22px;line-height:1.5;background:var(--bg2);padding:14px 20px;white-space:pre">{{ l.code }}</pre>
+        <span style="font-size:23px;line-height:1.35;color:var(--mut)">{{ l.note }}</span>
+      </div>
+    </sc-for>
+    <div style="background:var(--bg2);padding:24px 30px;display:flex;flex-direction:column;justify-content:center;gap:14px">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Залежні межі · вибір</div>
+      <div style="font-family:var(--m);font-size:26px;line-height:1.6">Σ (n − 1 − i)<br>= (n−1) + … + 1<br>= <span style="color:var(--acc)">n(n−1)/2 = Θ(n²)</span></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Рекурсія · злиття" data-screen-label="11" data-speaker-notes="Дві задачі вдвічі меншого розміру плюс злиття за cn. Розгортаємо для n = 2ᵏ. На кожному з log₂n рівнів — загалом cn роботи." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Рекурсія</span><span style="display:var(--hdr,inline);color:var(--mut)">10</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Рекурентне співвідношення</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Сортування злиттям: дві половини + злиття за <span style="font-family:var(--m);color:var(--ink)">cn</span></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.15fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--m);font-size:40px;color:var(--acc)">T(n) = 2T(n/2) + cn</div>
+        <div style="font-family:var(--m);font-size:28px;color:var(--mut)">T(1) = c</div>
+      </div>
+      <div style="flex:1;padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Розгортаємо · n = 2ᵏ</div>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:space-around;font-family:var(--m);font-size:29px">
+          <span>T(n) = 2T(n/2) + cn</span>
+          <span>     = 4T(n/4) + 2cn</span>
+          <span>     = 8T(n/8) + 3cn</span>
+          <span style="color:var(--mut)">       ⋮</span>
+          <span>     = 2ᵏT(1) + k · cn</span>
+          <span style="background:var(--bg2);padding:6px 12px">     = cn + cn log₂n = <span style="color:var(--acc)">Θ(n log n)</span></span>
+        </div>
+      </div>
+    </div>
+    <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)"><span>Дерево рекурсії</span><span style="color:var(--acc)">робота рівня</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-around;min-height:0">
+        <sc-for list="{{ recTree }}" as="r" hint-placeholder-count="5">
+          <div style="display:grid;grid-template-columns:1fr 100px;gap:20px;align-items:center">
+            <div style="display:flex;gap:8px">
+              <sc-for list="{{ r.boxes }}" as="b" hint-placeholder-count="2"><span style="flex:1;height:60px;display:flex;align-items:center;justify-content:center;border:{{ r.bd }};font-family:var(--m);font-size:24px;background:{{ r.bg }};color:{{ r.fg }}">{{ b }}</span></sc-for>
+            </div>
+            <span style="font-family:var(--m);font-size:28px;color:var(--acc);text-align:right">{{ r.cost }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="padding-top:14px;border-top:var(--hair);font-size:25px"><span style="font-family:var(--m)">log₂n</span> рівнів × <span style="font-family:var(--m)">cn</span> = <span style="font-family:var(--m);color:var(--acc)">cn log₂n</span></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Рекурсія · швидке" data-screen-label="12" data-speaker-notes="Найгірший випадок швидкого: одна частина щоразу порожня. Рівнів не log n, а n, і робота рівнів — арифметична прогресія." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Рекурсія</span><span style="display:var(--hdr,inline);color:var(--mut)">11</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Чому швидке буває квадратичним</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:16px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Розбиття навпіл</h3><span style="font-family:var(--m);font-size:26px;color:var(--acc)">log₂n рівнів</span></div>
+      <div style="font-family:var(--m);font-size:28px;padding:14px 20px;background:var(--bg2)">T(n) = 2T(n/2) + cn</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-around">
+        <sc-for list="{{ balanced }}" as="r" hint-placeholder-count="4">
+          <div style="display:flex;gap:8px"><sc-for list="{{ r }}" as="b" hint-placeholder-count="2"><span style="flex:1;height:40px;background:var(--acc)"></span></sc-for></div>
+        </sc-for>
+      </div>
+      <div style="font-family:var(--m);font-size:32px;color:var(--acc)">Θ(n log n)</div>
+    </div>
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:16px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Одна частина порожня</h3><span style="font-family:var(--m);font-size:26px;color:var(--acc)">n рівнів</span></div>
+      <div style="font-family:var(--m);font-size:28px;padding:14px 20px;background:var(--bg2)">T(n) = T(n − 1) + cn</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-around">
+        <sc-for list="{{ skewed }}" as="w" hint-placeholder-count="8"><span style="display:block;height:22px;width:{{ w }};background:var(--fill)"></span></sc-for>
+      </div>
+      <div style="font-family:var(--m);font-size:32px">c(n + (n−1) + … + 1) = <span style="background:var(--fill);color:var(--acc-ink);padding:0 8px">Θ(n²)</span></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Дерево рішень" data-screen-label="13" data-speaker-notes="Будь-яке сортування порівняннями — це дерево рішень. Вузол — порівняння, листок — перестановка-відповідь. Для трьох елементів 3! = 6 листків, висота 3: у найгіршому випадку 3 порівняння." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Нижня оцінка</span><span style="display:var(--hdr,inline);color:var(--mut)">12</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Дерево рішень</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Чи можна сортувати порівняннями швидше за <span style="font-family:var(--m);color:var(--ink)">n log n</span>? <b style="font-weight:600;color:var(--ink)">Ні</b> — і це можна довести</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.7fr 1fr;gap:44px;min-height:0">
+    <div style="padding:24px 30px;display:flex;flex-direction:column;gap:10px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Три елементи a₁, a₂, a₃</div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 1060 500" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+          <path d="M530 70L270 185M530 70L790 185M270 185L130 305M270 185L410 305M790 185L650 305M790 185L930 305M410 305L330 425M410 305L490 425M930 305L850 425M930 305L1000 425"></path>
+          <g font-size="24" fill="var(--mut)" stroke="none"><text x="370" y="118">≤</text><text x="672" y="118">&gt;</text><text x="168" y="242">≤</text><text x="352" y="242">&gt;</text><text x="690" y="242">≤</text><text x="870" y="242">&gt;</text><text x="338" y="362">≤</text><text x="462" y="362">&gt;</text><text x="858" y="362">≤</text><text x="972" y="362">&gt;</text></g>
+          <rect x="455" y="42" width="150" height="56" fill="var(--bg)"></rect><text x="530" y="79" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">a₁ : a₂</text>
+          <rect x="195" y="157" width="150" height="56" fill="var(--bg)"></rect><text x="270" y="194" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">a₂ : a₃</text>
+          <rect x="715" y="157" width="150" height="56" fill="var(--bg)"></rect><text x="790" y="194" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">a₁ : a₃</text>
+          <rect x="335" y="277" width="150" height="56" fill="var(--bg)"></rect><text x="410" y="314" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">a₁ : a₃</text>
+          <rect x="855" y="277" width="150" height="56" fill="var(--bg)"></rect><text x="930" y="314" text-anchor="middle" font-size="26" fill="currentColor" stroke="none">a₂ : a₃</text>
+          <g stroke="var(--acc)">
+            <rect x="60" y="277" width="140" height="56" fill="var(--acc)"></rect><text x="130" y="314" text-anchor="middle" font-size="24" fill="var(--bg)" stroke="none">1 2 3</text>
+            <rect x="580" y="277" width="140" height="56" fill="var(--acc)"></rect><text x="650" y="314" text-anchor="middle" font-size="24" fill="var(--bg)" stroke="none">2 1 3</text>
+            <rect x="260" y="397" width="140" height="56" fill="var(--acc)"></rect><text x="330" y="434" text-anchor="middle" font-size="24" fill="var(--bg)" stroke="none">1 3 2</text>
+            <rect x="420" y="397" width="140" height="56" fill="var(--acc)"></rect><text x="490" y="434" text-anchor="middle" font-size="24" fill="var(--bg)" stroke="none">3 1 2</text>
+            <rect x="780" y="397" width="140" height="56" fill="var(--acc)"></rect><text x="850" y="434" text-anchor="middle" font-size="24" fill="var(--bg)" stroke="none">2 3 1</text>
+            <rect x="930" y="397" width="128" height="56" fill="var(--acc)"></rect><text x="994" y="434" text-anchor="middle" font-size="24" fill="var(--bg)" stroke="none">3 2 1</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:repeat(3,1fr) auto;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Вузол</h3><p style="margin:0;font-size:24px;line-height:1.38">Порівняння двох елементів; дві гілки — дві відповіді</p></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Листок</h3><p style="margin:0;font-size:24px;line-height:1.38">Перестановка, яку алгоритм видає як відповідь. Потрібні <b style="font-weight:600">всі n!</b></p></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Висота h</h3><p style="margin:0;font-size:24px;line-height:1.38">Кількість порівнянь у <b style="font-weight:600">найгіршому</b> випадку</p></div>
+      <div style="background:var(--bg2);padding:18px 30px;display:flex;justify-content:space-between;font-family:var(--m);font-size:28px"><span>3! = 6 листків</span><span style="color:var(--acc)">h = 3</span></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Нижня оцінка" data-screen-label="14" data-speaker-notes="Чотири кроки доведення. Для n = 8: щонайменше 16 порівнянь у найгіршому випадку для будь-якого алгоритму. Злиття й пірамідальне асимптотично оптимальні. Обійти межу — лише не порівнюючи." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Нижня оцінка</span><span style="display:var(--hdr,inline);color:var(--mut)">13</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Межа Ω(n log n) для порівнянь</h2>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">1</span><span style="font-family:var(--m);font-size:34px">≥ n! листків</span><span style="font-size:23px;line-height:1.38;color:var(--mut)">кожна перестановка — можлива відповідь</span></div>
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">2</span><span style="font-family:var(--m);font-size:34px">≤ 2ʰ листків</span><span style="font-size:23px;line-height:1.38;color:var(--mut)">у двійковому дереві висоти h</span></div>
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">3</span><span style="font-family:var(--m);font-size:34px">h ≥ log₂n!</span><span style="font-size:23px;line-height:1.38;color:var(--mut)">з нерівності 2ʰ ≥ n!</span></div>
+    <div style="background:var(--bg2);padding:28px 30px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">4</span><span style="font-family:var(--m);font-size:34px;color:var(--acc)">h = Ω(n log n)</span><span style="font-size:23px;line-height:1.38;color:var(--mut)">Стірлінг: log₂n! ≈ n log₂n − 1,44n</span></div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="padding:28px 36px;display:flex;flex-direction:column;justify-content:center;gap:18px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Приклад · n = 8</div>
+      <div style="font-family:var(--m);font-size:36px;line-height:1.5">8! = 40 320<br>log₂ 40 320 ≈ 15,3</div>
+      <p style="margin:0;font-size:27px;line-height:1.4">Будь-якому алгоритму — <b style="font-weight:600">щонайменше 16</b> порівнянь у найгіршому випадку</p>
+    </div>
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px;color:var(--acc)">Асимптотично оптимальні</h3><p style="margin:0;font-size:25px;line-height:1.4">Злиття й пірамідальне досягають межі навіть у найгіршому випадку</p></div>
+      <div style="background:var(--bg2);padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Як обійти межу</h3><p style="margin:0;font-size:25px;line-height:1.4">Не порівнювати, а використати структуру ключів: підрахунок <span style="font-family:var(--m)">O(n + k)</span>, порозрядне</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Пам'ять і стійкість" data-screen-label="15" data-speaker-notes="Час — не єдиний ресурс. Масив у гігабайт для злиття — ще гігабайт. Стійкість дає змогу сортувати записи послідовно за кількома ключами." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Ресурси</span><span style="display:var(--hdr,inline);color:var(--mut)">14</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Пам'ять і стійкість</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.3fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:16px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Додаткова пам'ять</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-around">
+        <div style="display:grid;grid-template-columns:240px 1fr 170px;gap:24px;align-items:center"><span style="font-family:var(--h);font-weight:700;font-size:30px">злиттям</span><span style="height:44px;width:100%;background:var(--fill)"></span><span style="font-family:var(--m);font-size:32px">O(n)</span></div>
+        <div style="display:grid;grid-template-columns:240px 1fr 170px;gap:24px;align-items:center"><span style="font-family:var(--h);font-weight:700;font-size:30px">швидке</span><span style="height:44px;width:12%;background:var(--acc)"></span><span style="font-family:var(--m);font-size:32px">O(log n)</span></div>
+        <div style="display:grid;grid-template-columns:240px 1fr 170px;gap:24px;align-items:center"><span style="font-family:var(--h);font-weight:700;font-size:30px">пірамідальне</span><span style="height:44px;width:4px;background:var(--acc)"></span><span style="font-family:var(--m);font-size:32px">O(1)</span></div>
+      </div>
+      <p style="margin:0;padding-top:16px;border-top:var(--hair);font-size:25px;line-height:1.4;color:var(--mut)">Масив у гігабайт для злиття — <b style="font-weight:600;color:var(--ink)">ще гігабайт</b>. Іноді саме пам'ять визначає вибір</p>
+    </div>
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:18px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Стійкість · лекція 11</div>
+      <p style="margin:0;font-size:27px;line-height:1.42">Окрема <b style="font-weight:600">якісна</b> характеристика: рівні елементи зберігають взаємний порядок</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <span style="padding:10px 20px;background:var(--acc);color:var(--bg);font-family:var(--h);font-weight:700;font-size:26px">вставки</span>
+        <span style="padding:10px 20px;background:var(--acc);color:var(--bg);font-family:var(--h);font-weight:700;font-size:26px">злиття</span>
+        <span style="padding:10px 20px;background:var(--acc);color:var(--bg);font-family:var(--h);font-weight:700;font-size:26px">підрахунок</span>
+      </div>
+      <div style="margin-top:auto;padding:20px 24px;background:var(--bg2);font-size:25px;line-height:1.4">Дає змогу сортувати записи <b style="font-weight:600">послідовно за кількома ключами</b></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Зведена таблиця" data-screen-label="16" data-speaker-notes="Усі вісім методів лекцій 11–12 в одній таблиці. Підкреслити: найгірший n² у швидкого, O(n) пам'яті у злиття." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Зведення</span><span style="display:var(--hdr,inline);color:var(--mut)">15</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Зведена таблиця</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.35fr 1fr 1.15fr 1fr .9fr .6fr;grid-template-rows:auto repeat(8,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-size:25px">
+    <div style="padding:12px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Метод</div>
+    <div style="padding:12px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Найкращий</div>
+    <div style="padding:12px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Середній</div>
+    <div style="padding:12px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Найгірший</div>
+    <div style="padding:12px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Пам'ять</div>
+    <div style="padding:12px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:22px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Стійкий</div>
+    <sc-for list="{{ summary }}" as="r" hint-placeholder-count="8">
+      <div style="padding:4px 24px;display:flex;flex-direction:column;justify-content:center;border-top:var(--hair)"><span style="font-family:var(--h);font-weight:700;font-size:28px">{{ r.name }}</span><span style="font-size:19px;color:var(--mut)">{{ r.note }}</span></div>
+      <div style="padding:4px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">{{ r.best }}</div>
+      <div style="padding:4px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">{{ r.avg }}</div>
+      <div style="padding:4px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)"><span style="background:{{ r.wb }};color:{{ r.wc }};padding:0 8px">{{ r.worst }}</span></div>
+      <div style="padding:4px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">{{ r.mem }}</div>
+      <div style="padding:4px 24px;display:flex;align-items:center;border-top:var(--hair);font-weight:600;color:{{ r.sc }}">{{ r.stable }}</div>
+    </sc-for>
+  </div>
+</section>
+
+<section data-label="Експеримент" data-screen-label="17" data-speaker-notes="Сортуємо копію, щоб кожен метод отримав ті самі дані. steady_clock — монотонний годинник. Докладно — практичне заняття 4." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Експеримент</span><span style="display:var(--hdr,inline);color:var(--mut)">16</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Експериментальна перевірка</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.45fr 1fr;gap:44px;min-height:0">
+    <div style="padding:24px 30px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++ · &lt;chrono&gt;</div>
+      <pre style="margin:0;flex:1;font-family:var(--m);font-size:21px;line-height:1.45;background:var(--bg2);padding:18px 24px;white-space:pre"><span style="color:var(--acc);font-weight:600">template</span> &lt;<span style="color:var(--acc);font-weight:600">typename</span> Sort&gt;
+<span style="color:var(--acc);font-weight:600">double</span> measureMs(Sort sortFunction, <span style="color:var(--acc);font-weight:600">const</span> vector&lt;<span style="color:var(--acc);font-weight:600">int</span>&gt;&amp; data) {
+    vector&lt;<span style="color:var(--acc);font-weight:600">int</span>&gt; a = data;            <span style="color:var(--mut)">// сортуємо копію</span>
+    <span style="background:var(--fill);color:var(--acc-ink);padding:0 4px">auto start = chrono::steady_clock::now();</span>
+    sortFunction(a);
+    <span style="color:var(--acc);font-weight:600">auto</span> finish = chrono::steady_clock::now();
+    <span style="color:var(--acc);font-weight:600">return</span> chrono::duration&lt;<span style="color:var(--acc);font-weight:600">double</span>, milli&gt;(finish - start).count();
+}
+
+<span style="color:var(--acc);font-weight:600">int</span> main() {
+    mt19937 rng(2024);
+    <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> n : {1000, 2000, 4000, 8000, 16000}) {
+        vector&lt;<span style="color:var(--acc);font-weight:600">int</span>&gt; data(n);
+        <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span>&amp; x : data) x = rng();
+        <span style="color:var(--acc);font-weight:600">double</span> <span>tInsert</span> = measureMs(insertionSort, data);
+        <span style="color:var(--acc);font-weight:600">double</span> <span>tStd</span> = measureMs([](vector&lt;<span style="color:var(--acc);font-weight:600">int</span>&gt;&amp; a) {
+            sort(a.begin(), a.end()); }, data);
+        cout &lt;&lt; n &lt;&lt; '\t' &lt;&lt; tInsert &lt;&lt; " ms\t" &lt;&lt; tStd &lt;&lt; " ms\n";
+    }
+}</pre>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 30px;display:flex;flex-direction:column;gap:16px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Подвоєння n</div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:14px 24px;align-items:baseline">
+          <span style="font-family:var(--m);font-size:30px">n²</span><span style="font-family:var(--m);font-size:44px">×4</span>
+          <span style="font-family:var(--m);font-size:30px;color:var(--acc)">n log n</span><span style="font-family:var(--m);font-size:44px;color:var(--acc)">×2+</span>
+        </div>
+        <span style="font-size:23px;color:var(--mut)">трохи більше ніж удвічі</span>
+      </div>
+      <div style="flex:1;display:grid;grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:20px 28px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Малі часи неточні</h3><p style="margin:0;font-size:24px;line-height:1.38">Збільшуйте <span style="font-family:var(--m)">n</span> або повторюйте й беріть медіану</p></div>
+        <div style="background:var(--bg2);padding:20px 28px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Компілюйте з <span style="font-family:var(--m);color:var(--acc)">-O2</span></h3><p style="margin:0;font-size:24px;line-height:1.38">Інакше вимірюєте накладні витрати налагоджувальної збірки</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Підсумки" data-screen-label="18" data-speaker-notes="Шість пунктів. Нагадати про практичне заняття №4 — вимірювання." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Підсумки</span><span style="display:var(--hdr,inline);color:var(--mut)">17</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Що забрати з лекції</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">01</span><span style="font-size:26px;line-height:1.35">Складність — кількість операцій (часова) або додаткова пам'ять (просторова) як функція від <span style="font-family:var(--m)">n</span></span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">02</span><span style="font-size:26px;line-height:1.35">Найкращий, середній, найгірший випадки; <b style="font-weight:600">найгірший дає гарантію</b></span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">03</span><span style="font-size:26px;line-height:1.35"><span style="font-family:var(--m)">O</span> — зверху, <span style="font-family:var(--m)">Ω</span> — знизу, <span style="font-family:var(--m)">Θ</span> — точна; сталі й молодші доданки відкидають</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">04</span><span style="font-size:26px;line-height:1.35">Вкладені цикли перемножують, ділення навпіл дає <span style="font-family:var(--m)">log n</span>, рекурсію — через рекурентні співвідношення</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">05</span><span style="font-size:26px;line-height:1.35">Сортування порівняннями — <span style="font-family:var(--m)">Ω(n log n)</span> у найгіршому випадку; злиття й пірамідальне оптимальні</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">06</span><span style="font-size:26px;line-height:1.35">Теорію перевіряють експериментом: подвоєння <span style="font-family:var(--m)">n</span> учетверо збільшує час квадратичного алгоритму</span></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:25px;color:var(--mut);padding-top:16px;border-top:var(--hair)">
+    <span>Попередня · Лекція 12. Ефективні алгоритми сортування</span>
+    <span style="font-family:var(--h);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Далі · Лекція 14. Застосування сортування. Бібліотеки</span>
+  </div>
+</section>
+
+<section data-label="Контрольні запитання" data-screen-label="19" data-speaker-notes="Запитання 5 — упорядкувати функції разом на дошці. Решту — на самостійне опрацювання." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 13 · Перевірка</span><span style="display:var(--hdr,inline);color:var(--mut)">18</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Контрольні запитання</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.4fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Теорія</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;font-size:24px;line-height:1.3">
+        <sc-for list="{{ questions }}" as="q" hint-placeholder-count="11"><div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">{{ q.n }}</span><span>{{ q.t }}</span></div></sc-for>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:1.3fr 1fr;gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg2);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:18px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">5 · На дошці</div><p style="margin:0;font-size:30px;line-height:1.35">Упорядкуйте за швидкістю зростання</p><div style="display:flex;gap:10px;flex-wrap:wrap"><span style="padding:10px 18px;border:2px solid var(--ink);font-family:var(--m);font-size:30px;background:var(--bg)">n²</span><span style="padding:10px 18px;border:2px solid var(--ink);font-family:var(--m);font-size:30px;background:var(--bg)">log n</span><span style="padding:10px 18px;border:2px solid var(--ink);font-family:var(--m);font-size:30px;background:var(--bg)">2ⁿ</span><span style="padding:10px 18px;border:2px solid var(--ink);font-family:var(--m);font-size:30px;background:var(--bg)">n</span><span style="padding:10px 18px;border:2px solid var(--ink);font-family:var(--m);font-size:30px;background:var(--bg)">n log n</span><span style="padding:10px 18px;border:2px solid var(--ink);font-family:var(--m);font-size:30px;background:var(--bg)">1</span></div></div>
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Матеріали</div><a href="https://kaldra1.github.io/aimo/practicals/4/" style="font-size:26px">Практичне заняття №4</a><a href="https://kaldra1.github.io/aimo/lectures/13-sorting-complexity/" style="font-size:26px">Лекція 13 на сайті курсу</a></div>
+    </div>
+  </div>
+</section>
+
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Бурштин&quot;,&quot;М'ята&quot;],&quot;default&quot;:&quot;Бурштин&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Оформлення&quot;},&quot;showHeaderLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Оформлення&quot;}}">
+class Component extends DCLogic {
+  applyTweaks() {
+    const b = document.body.style;
+    b.setProperty("--fill", this.props.accent === "М'ята" ? "#5fd3bd" : "#f0b45a");
+    b.setProperty("--hdr", this.props.showHeaderLabels === false ? "none" : "inline");
+  }
+  componentDidMount() { this.applyTweaks(); }
+  componentDidUpdate() { this.applyTweaks(); }
+  renderVals() {
+    const box = { bd: "2px solid var(--ink)", bg: "var(--bg)", fg: "var(--ink)" };
+    return {
+      classes: [
+        { o: "O(1)", name: "стала", ex: "доступ до елемента масиву за індексом" },
+        { o: "O(log n)", name: "логарифмічна", ex: "бінарний пошук" },
+        { o: "O(n)", name: "лінійна", ex: "пошук максимуму; підрахунок при k ≪ n" },
+        { o: "O(n log n)", name: "лінійно-логарифмічна", ex: "сортування злиттям, пірамідальне" },
+        { o: "O(n²)", name: "квадратична", ex: "прості сортування" },
+        { o: "O(2ⁿ)", name: "експоненційна", ex: "перебір усіх підмножин" }
+      ],
+      ops: [
+        { n: "10", l: "3,3", nl: "33", n2: "100", e: "1024" },
+        { n: "100", l: "6,6", nl: "664", n2: "10⁴", e: "≈ 1,3·10³⁰" },
+        { n: "1000", l: "10", nl: "≈ 10⁴", n2: "10⁶", e: "≈ 10³⁰¹" },
+        { n: "10⁶", l: "20", nl: "≈ 2·10⁷", n2: "10¹²", e: "—" }
+      ],
+      loops: [
+        { t: "Один цикл", o: "O(n)", code: "for (i = 0; i < n; i++)\n    …  // O(1)", note: "n ітерацій з тілом O(1)" },
+        { t: "Вкладені", o: "O(n²)", code: "for (i = 0; i < n; i++)\n    for (j = 0; j < n; j++)\n        …", note: "кількості ітерацій перемножуються" },
+        { t: "Залежні межі", o: "Θ(n²)", code: "for (i = 0; i < n-1; i++)\n    for (j = i+1; j < n; j++)\n        …", note: "внутрішній — n − 1 − i ітерацій" },
+        { t: "Ділення навпіл", o: "O(log n)", code: "while (n > 1)\n    n /= 2;", note: "log₂n ітерацій" },
+        { t: "Послідовні частини", o: "O(n²)", code: "O(n) + O(n²)", note: "оцінки додаються — лишається старша" }
+      ],
+      recTree: [
+        Object.assign({ boxes: ["n"], cost: "cn" }, box),
+        Object.assign({ boxes: ["n/2", "n/2"], cost: "cn" }, box),
+        Object.assign({ boxes: ["n/4", "n/4", "n/4", "n/4"], cost: "cn" }, box),
+        { boxes: ["⋮"], cost: "⋮", bd: "2px solid transparent", bg: "transparent", fg: "var(--mut)" },
+        { boxes: ["1","1","1","1","1","1","1","1"], cost: "cn", bd: "2px solid var(--acc)", bg: "var(--acc)", fg: "var(--bg)" }
+      ],
+      balanced: [[1], [1,1], [1,1,1,1], [1,1,1,1,1,1,1,1]],
+      skewed: ["100%","87.5%","75%","62.5%","50%","37.5%","25%","12.5%"],
+      summary: [
+        { name: "бульбашкою", note: "з прапорцем", best: "Θ(n)", avg: "Θ(n²)", worst: "Θ(n²)", mem: "O(1)", stable: "так" },
+        { name: "вибором", note: "", best: "Θ(n²)", avg: "Θ(n²)", worst: "Θ(n²)", mem: "O(1)", stable: "ні" },
+        { name: "вставками", note: "", best: "Θ(n)", avg: "Θ(n²)", worst: "Θ(n²)", mem: "O(1)", stable: "так" },
+        { name: "Шелла", note: "кроки Кнута", best: "—", avg: "від кроків", worst: "O(n³ᐟ²)", mem: "O(1)", stable: "ні" },
+        { name: "злиттям", note: "", best: "Θ(n log n)", avg: "Θ(n log n)", worst: "Θ(n log n)", mem: "O(n)", stable: "так" },
+        { name: "швидке", note: "", best: "Θ(n log n)", avg: "Θ(n log n)", worst: "Θ(n²)", mem: "O(log n)", stable: "ні", wb: "var(--fill)", wc: "var(--acc-ink)" },
+        { name: "пірамідальне", note: "", best: "Θ(n log n)", avg: "Θ(n log n)", worst: "Θ(n log n)", mem: "O(1)", stable: "ні" },
+        { name: "підрахунком", note: "", best: "Θ(n + k)", avg: "Θ(n + k)", worst: "Θ(n + k)", mem: "O(k)", stable: "так" }
+      ].map(r => Object.assign({ wb: "transparent", wc: "inherit", sc: r.stable === "так" ? "var(--acc)" : "var(--mut)" }, r)),
+      questions: [
+        [1, "Чому складність вимірюють кількістю операцій, а не секундами?"],
+        [2, "Чим відрізняються три випадки? Який дає гарантію?"],
+        [3, "Дайте означення O, Ω, Θ. Покажіть, що 2n² + 3n = Θ(n²)"],
+        [4, "Чому в оцінках не вказують основу логарифма?"],
+        [6, "Оцініть вкладені цикли, де внутрішній виконується i разів, i = 1…n"],
+        [7, "Скільки разів виконається while (n > 1) n /= 2; для n = 1024?"],
+        [8, "Складіть і розв'яжіть рекурентне співвідношення для злиття"],
+        [9, "Чому швидке в найгіршому випадку квадратичне?"],
+        [10, "Поясніть ідею нижньої оцінки Ω(n log n)"],
+        [11, "Як підрахунку вдається бути швидшим за n log n?"],
+        [12, "Як експериментально перевірити квадратичну складність?"]
+      ].map(([n, t]) => ({ n, t }))
+    };
+  }
+}
+</script>
+</body>
+</html>
