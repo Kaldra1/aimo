@@ -1131,6 +1131,16 @@
       overlay.querySelector('.next').addEventListener('click', () => this._advance(1, 'click'));
       overlay.querySelector('.reset').addEventListener('click', () => this._go(0, 'click'));
 
+      // АІМО: озвучка лекції. Сторінка задає window.__deckNarration = { src: '…/13-{nn}.mp3' }
+      // (номер слайда з нулем попереду). Кнопка вмикає аудіо поточного слайда; коли воно
+      // догралося — перехід на наступний слайд і його аудіо.
+      const narration = window.__deckNarration;
+      if (narration && narration.src) {
+        overlay.insertAdjacentHTML('beforeend',
+          '<span class="divider"></span><button class="btn reset narration" type="button">Почати лекцію</button>');
+        this._setupNarration(overlay.querySelector('.narration'), narration.src);
+      }
+
       // Pin the controls while the user is interacting with them —
       // hovering, or keyboard focus on a control. The hidden overlay is
       // pointer-events:none, so these only ever engage while it's already
@@ -1815,6 +1825,39 @@
         e.preventDefault();
         this._flashOverlay();
       }
+    }
+
+    _setupNarration(button, pattern) {
+      const audio = new Audio();
+      audio.preload = 'auto';
+      let state = 'idle'; // 'idle' | 'playing' | 'paused'
+      let loaded = -1;
+      const label = { idle: 'Почати лекцію', playing: 'Пауза', paused: 'Продовжити' };
+      const set = (next) => { state = next; button.textContent = label[next]; };
+      const srcFor = (i) => pattern.replace('{nn}', String(i + 1).padStart(2, '0'));
+      const play = () => {
+        if (loaded !== this._index) {
+          audio.src = srcFor(this._index);
+          loaded = this._index;
+        }
+        set('playing');
+        audio.play().catch(() => set('idle'));
+      };
+      button.addEventListener('click', () => {
+        if (state === 'playing') { audio.pause(); set('paused'); }
+        else play();
+      });
+      audio.addEventListener('ended', () => {
+        if (state !== 'playing') return;
+        if (this._index >= this._slides.length - 1) { loaded = -1; set('idle'); return; }
+        this._advance(1, 'api');
+      });
+      // Перейшли на інший слайд під час лекції — грає озвучка цього слайда з початку.
+      this.addEventListener('slidechange', (e) => {
+        if (e.detail.reason === 'init' || state === 'idle') return;
+        if (state === 'playing') play();
+        else { audio.pause(); loaded = -1; }
+      });
     }
 
     _go(i, reason = 'api') {
