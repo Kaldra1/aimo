@@ -12,6 +12,8 @@ export interface SessionMeta {
   checkable: boolean;
   /** Машина, на якій розв'язують варіанти з автоперевіркою. */
   machine?: 'post' | 'turing' | 'markov' | 'flowchart' | undefined;
+  /** Чи можна сформувати звіт .docx з роботи в кабінеті. */
+  report?: boolean;
 }
 
 export interface SolveRow {

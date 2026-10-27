@@ -11,9 +11,7 @@ import MarkovHelp from '../../../../components/markov/MarkovHelp.astro';
 import PostHelp from '../../../../components/post/PostHelp.astro';
 import TuringHelp from '../../../../components/turing/TuringHelp.astro';
 import PrevNext from '../../../../components/PrevNext.astro';
-import ReportButton, { type ReportLevel } from '../../../../components/report/ReportButton';
 import TaskWorkbench, { type TaskView } from '../../../../components/tasks/TaskWorkbench';
-import { extractSections } from '../../../../lib/report/sections';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import { loadContent } from '../../../../lib/content/collections';
 import { sessionPath, sessionShortLabel } from '../../../../lib/content/course';
@@ -72,50 +70,6 @@ export async function getStaticPaths() {
 
 const { id, title, kind, number, n, stars, task, lines, machine } = Astro.props;
 
-// Звіт .docx — поки що для ЛР1; розділи беруться зі сторінки заняття.
-const REPORTS = new Set(['lab-01']);
-const sessionSources = import.meta.glob<string>('../../../../content/sessions/*.mdx', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-});
-const report = (() => {
-  if (!REPORTS.has(id)) return null;
-  const source = sessionSources[`../../../../content/sessions/${id}.mdx`];
-  if (!source) return null;
-  const sections = extractSections(source);
-  const text = (name: string) => sections.get(name)?.paragraphs ?? [];
-  const data = loadVariants(id);
-  const tests = loadVariantTests(id)!;
-  const levels: ReportLevel[] = tasksOf(data, n).map((t, i) => ({
-    stars: (i + 1) as 1 | 2 | 3,
-    statement: t.task,
-    examples: t.examples,
-    tests: tests[testsKey(n, i + 1)] ?? [],
-  }));
-  return {
-    levels,
-    lab: {
-      kind,
-      number,
-      title,
-      label: sessionShortLabel(kind, number),
-      goal: text('Мета'),
-      equipment: text('Обладнання'),
-      conventions: text('Варіанти').filter((p) => p.startsWith('Якщо')),
-      questions: sections.get('Контрольні запитання')?.items ?? [],
-      programTitle:
-        machine === 'turing'
-          ? 'Таблиця переходів'
-          : machine === 'markov'
-            ? 'Схема підстановок'
-            : machine === 'flowchart'
-              ? 'Схема (блоки)'
-              : 'Текст програми',
-      fileName: '',
-    },
-  };
-})();
 const sessionHref = sessionPath(kind, number);
 const label = sessionShortLabel(kind, number);
 const starText = '★'.repeat(stars);
@@ -210,17 +164,6 @@ const neighbour = (s: number) =>
     </div>
 
     <TaskWorkbench client:load task={view} />
-
-    {report && (
-      <ReportButton
-        client:load
-        session={id}
-        machine={machine}
-        variant={n}
-        levels={report.levels}
-        lab={report.lab}
-      />
-    )}
 
     {machine === 'post' ? (
       <PostHelp />

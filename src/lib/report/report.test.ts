@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { buildLabReport, reportFileName, type LabReportInput } from './model';
 import { renderDocxBuffer } from './render';
 import { extractSections, plainText } from './sections';
+import { reportSource } from './source';
 
 const lab1 = readFileSync('src/content/sessions/lab-01.mdx', 'utf8');
 
@@ -66,6 +67,21 @@ describe('розділи сторінки заняття', () => {
     expect(plainText('[емулятор](/x/) і `1^3`, **важливо**, число $n + 1$ і $m \\ge n$')).toBe(
       'емулятор і 1^3, важливо, число n + 1 і m ≥ n',
     );
+  });
+});
+
+describe('дані звіту для кабінету', () => {
+  it('ЛР1, варіант 4: три рівні з тестами, розділи сторінки', () => {
+    const source = reportSource(
+      { id: 'lab-01', kind: 'lab', number: 1, title: 'Побудова машин Поста' },
+      4,
+    );
+    expect(source).toMatchObject({ session: 'lab-01', machine: 'post', variant: 4 });
+    expect(source.levels.map((l) => l.stars)).toEqual([1, 2, 3]);
+    expect(source.levels.every((l) => l.tests.length > 0)).toBe(true);
+    expect(source.lab.label).toBe('ЛР1');
+    expect(source.lab.questions).toHaveLength(10);
+    expect(source.lab.programTitle).toBe('Текст програми');
   });
 });
 

@@ -1,6 +1,7 @@
 /** Опис занять і тем для кабінету й дашборду (лише під час збирання). */
 import { loadContent } from '../content/collections';
 import { sessionShortLabel } from '../content/course';
+import { REPORT_SESSIONS } from '../report/source';
 import { checkableSessions, loadVariants, loadVariantTests } from '../variants/load';
 import type { SessionMeta } from './types';
 
@@ -31,6 +32,7 @@ export async function loadCloudMeta(): Promise<{
       topic: s.data.topic,
       checkable: checkable.has(s.id),
       machine: checkable.has(s.id) ? machineOf(s.id) : undefined,
+      report: REPORT_SESSIONS.has(s.id),
     }));
   const tests = Object.fromEntries([...checkable].map((id) => [id, loadVariantTests(id) ?? {}]));
   return { sessions: metas, tests };

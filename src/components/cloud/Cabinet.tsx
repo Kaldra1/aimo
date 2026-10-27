@@ -20,6 +20,7 @@ import { readStorage } from '../emulator/support';
 import LoginForm from './LoginForm';
 import { useAuth } from './useAuth';
 import type { Profile } from '../../lib/cloud/client';
+import type { ReportSource } from '../../lib/report/source';
 
 interface Props {
   sessions: SessionMeta[];
@@ -140,6 +141,7 @@ function StudentView({
             solves={solves}
             dates={dates}
             grades={grades}
+            student={student}
           />
         )}
       </section>
@@ -314,15 +316,76 @@ function LocalImport({
   );
 }
 
+/** ki2406 → КІ-2406 */
+const groupTitle = (id: string) => {
+  const m = /^([a-z]+)(\d+)$/.exec(id);
+  if (!m) return id;
+  return `${m[1]!.replace(/k/g, 'К').replace(/i/g, 'І').toUpperCase()}-${m[2]}`;
+};
+
+/** Звіт .docx з роботи: умови свого варіанта, програми всіх розв’язаних рівнів, тести. */
+function ReportCell({
+  session,
+  student,
+  solves,
+}: {
+  session: string;
+  student: NonNullable<Profile['student']>;
+  solves: SolveRow[];
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const download = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const response = await fetch(url(`/reports/${session}/${student.journal}.json`));
+      if (!response.ok) throw new Error(`немає даних варіанта (${response.status})`);
+      const source = (await response.json()) as ReportSource;
+      const { collectReport, downloadReport } = await import('../../lib/report/collect');
+      const model = collectReport(
+        source,
+        {
+          name: student.fullName.split(/\s+/).slice(0, 2).join(' '),
+          group: groupTitle(student.groupId),
+        },
+        new Map(solves.map((s) => [s.stars, s.program])),
+      );
+      await downloadReport(model);
+    } catch (e) {
+      setError(`Не вдалося сформувати звіт: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        class="button button--secondary"
+        disabled={busy}
+        onClick={() => void download()}
+      >
+        {busy ? 'Формуємо…' : '.docx'}
+      </button>
+      {error && <span class="message message--error">{error}</span>}
+    </>
+  );
+}
+
 function SolvesTable({
   sessions,
   journal,
   solves,
   dates,
   grades,
+  student,
 }: {
   sessions: SessionMeta[];
   journal: number;
+  student: NonNullable<Profile['student']>;
   solves: SolveRow[];
   dates: SessionDateRow[];
   grades: GradeRow[];
@@ -335,6 +398,7 @@ function SolvesTable({
     (s) => s.checkable || solves.some((x) => x.session === s.id) || gradeOf(s.id) !== undefined,
   );
   const labelOf = (id: string) => sessions.find((s) => s.id === id)?.label ?? id;
+  const withReports = shown.some((s) => s.report);
   return (
     <>
       {shown.length === 0 ? (
@@ -349,6 +413,7 @@ function SolvesTable({
                 <th scope="col">★★</th>
                 <th scope="col">★★★</th>
                 <th scope="col">Оцінка</th>
+                {withReports && <th scope="col">Звіт</th>}
               </tr>
             </thead>
             <tbody>
@@ -381,12 +446,28 @@ function SolvesTable({
                       );
                     })}
                     <td>{gradeText(gradeOf(session.id))}</td>
+                    {withReports && (
+                      <td>
+                        {session.report ? (
+                          <ReportCell session={session.id} student={student} solves={mine} />
+                        ) : (
+                          '—'
+                        )}
+                      </td>
+                    )}
                   </tr>
                 );
               })}
             </tbody>
           </table>
         </div>
+      )}
+      {withReports && (
+        <p class="panel__hint">
+          Звіт у Word містить тему, мету, обладнання, завдання вашого варіанта й програми всіх
+          розв’язаних рівнів з результатами тестів. Висновки й відповіді на контрольні запитання
+          допишіть самі.
+        </p>
       )}
 
       <h3 class="cloud-subtitle">Тематичні й семестрова оцінки</h3>
