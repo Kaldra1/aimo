@@ -675,3 +675,14 @@ describe('перевірка на тестах (сторінка завданн�
     ).toMatchObject({ verdict: 'step-limit' });
   });
 });
+
+describe('однакові схеми', () => {
+  it('структура без id і пробілів; букви не губляться', async () => {
+    const { treeShape } = await import('./index');
+    const a = build([['process', 's = s + 1']]);
+    const b = build([['process', 's=s+1']], { id: 50 });
+    const c = build([['process', 't = t + 1']]);
+    expect(treeShape(a)).toBe(treeShape(b));
+    expect(treeShape(a)).not.toBe(treeShape(c));
+  });
+});

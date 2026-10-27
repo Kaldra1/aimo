@@ -85,7 +85,7 @@ export function treeShape(tree: readonly FlowNode[]): string {
   const strip = (list: readonly FlowNode[]): unknown[] =>
     list.map((n) => [
       n.type,
-      n.text.replace(/s+/g, ''),
+      n.text.replace(/\s+/g, ''),
       ...[n.yes, n.no, n.body].filter(Boolean).map((l) => strip(l!)),
     ]);
   return JSON.stringify(strip(tree));
