@@ -218,6 +218,24 @@
       visibility: visible;
     }
 
+    .narration {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 2147483000;
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 18px;
+      background: #000;
+      color: #fff;
+      font: 600 14px/1.2 system-ui, sans-serif;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    }
+    .narration:hover { background: #222; }
+    .narration:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
     .overlay {
       position: fixed;
       left: 50%;
@@ -626,7 +644,7 @@
         page-break-after: auto;
       }
       ::slotted([data-deck-skip]) { display: none !important; }
-      .overlay, .rail, .rail-resize, .ctxmenu, .confirm-backdrop { display: none !important; }
+      .overlay, .rail, .rail-resize, .ctxmenu, .confirm-backdrop, .narration { display: none !important; }
     }
   `;
 
@@ -1132,13 +1150,16 @@
       overlay.querySelector('.reset').addEventListener('click', () => this._go(0, 'click'));
 
       // АІМО: озвучка лекції. Сторінка задає window.__deckNarration = { src: '…/13-{nn}.mp3' }
-      // (номер слайда з нулем попереду). Кнопка вмикає аудіо поточного слайда; коли воно
-      // догралося — перехід на наступний слайд і його аудіо.
+      // (номер слайда з нулем попереду). Кнопка (видно завжди, праворуч унизу) вмикає аудіо
+      // поточного слайда; коли воно догралося — перехід на наступний слайд і його аудіо.
+      let narrationButton = null;
       const narration = window.__deckNarration;
       if (narration && narration.src) {
-        overlay.insertAdjacentHTML('beforeend',
-          '<span class="divider"></span><button class="btn reset narration" type="button">Почати лекцію</button>');
-        this._setupNarration(overlay.querySelector('.narration'), narration.src);
+        narrationButton = document.createElement('button');
+        narrationButton.type = 'button';
+        narrationButton.className = 'narration export-hidden';
+        narrationButton.textContent = 'Почати лекцію';
+        this._setupNarration(narrationButton, narration.src);
       }
 
       // Pin the controls while the user is interacting with them —
@@ -1298,6 +1319,7 @@
       });
 
       this._root.append(style, rail, resize, stage, overlay, menu, confirm);
+      if (narrationButton) this._root.append(narrationButton);
       this._canvas = canvas;
       this._stage = stage;
       this._slot = slot;
