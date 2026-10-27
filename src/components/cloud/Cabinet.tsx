@@ -323,6 +323,8 @@ const groupTitle = (id: string) => {
   return `${m[1]!.replace(/k/g, 'К').replace(/i/g, 'І').toUpperCase()}-${m[2]}`;
 };
 
+const REPORT_MIN_SOLVED = 2;
+
 /** Звіт .docx з роботи: умови свого варіанта, програми всіх розв’язаних рівнів, тести. */
 function ReportCell({
   session,
@@ -360,15 +362,18 @@ function ReportCell({
     }
   };
 
+  // У базі лише розв’язки, що пройшли перевірку; звіт — після двох таких рівнів.
+  const ready = solves.length >= REPORT_MIN_SOLVED;
   return (
     <>
       <button
         type="button"
         class="button button--secondary"
-        disabled={busy}
+        disabled={busy || !ready}
+        title={ready ? undefined : 'Стане доступно після двох розв’язаних завдань'}
         onClick={() => void download()}
       >
-        {busy ? 'Формуємо…' : '.docx'}
+        {busy ? 'Формуємо…' : 'Скачати'}
       </button>
       {error && <span class="message message--error">{error}</span>}
     </>
@@ -464,9 +469,9 @@ function SolvesTable({
       )}
       {withReports && (
         <p class="panel__hint">
-          Звіт у Word містить тему, мету, обладнання, завдання вашого варіанта й програми всіх
-          розв’язаних рівнів з результатами тестів. Висновки й відповіді на контрольні запитання
-          допишіть самі.
+          Звіт у Word можна скачати, коли розв’язано щонайменше два завдання роботи. Він містить
+          тему, мету, обладнання, завдання вашого варіанта й програми всіх розв’язаних рівнів з
+          результатами тестів. Висновки й відповіді на контрольні запитання допишіть самі.
         </p>
       )}
 
