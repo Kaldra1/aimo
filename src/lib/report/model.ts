@@ -9,7 +9,9 @@ export type Block =
   | { kind: 'h2'; text: string }
   | { kind: 'code'; lines: string[] }
   | { kind: 'table'; header: string[]; rows: string[][] }
-  | { kind: 'list'; items: string[] };
+  | { kind: 'list'; items: string[] }
+  /** Рисунок PNG; width і height — розмір на сторінці в пікселях (96 точок на дюйм). */
+  | { kind: 'image'; data: Uint8Array; width: number; height: number };
 
 export interface ReportSection {
   title: string;
@@ -39,6 +41,8 @@ export interface LevelReport {
   examples: string[];
   /** Текст програми; null — завдання ще не розв’язували на сайті. */
   program: string | null;
+  /** Як показати програму (таблиця, рисунок); без нього — лістинг тексту програми. */
+  listing?: Block[];
   /** Ідея розв’язку (блок «Коментар» емулятора). */
   idea: string;
   tests: TestRow[];
@@ -123,7 +127,7 @@ export function buildLabReport(input: LabReportInput): ReportModel {
         placeholder: true,
       });
     solution.push({ kind: 'p', text: `${input.programTitle}:` });
-    solution.push({ kind: 'code', lines: level.program.split(/\r?\n/) });
+    solution.push(...(level.listing ?? [{ kind: 'code', lines: level.program.split(/\r?\n/) }]));
     if (level.tests.length) {
       const passed = level.tests.filter((t) => t.passed).length;
       solution.push({

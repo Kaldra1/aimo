@@ -88,6 +88,20 @@ function buildDocument(d: Docx, model: ReportModel) {
             table(b.header, b.rows),
             new d.Paragraph({ indent: { firstLine: 0 }, children: [] }),
           ];
+        case 'image':
+          return [
+            new d.Paragraph({
+              alignment: d.AlignmentType.CENTER,
+              indent: { firstLine: 0 },
+              children: [
+                new d.ImageRun({
+                  type: 'png',
+                  data: b.data,
+                  transformation: { width: b.width, height: b.height },
+                }),
+              ],
+            }),
+          ];
         case 'list':
           return b.items.map(
             (text) =>

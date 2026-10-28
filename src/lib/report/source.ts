@@ -5,13 +5,13 @@
 import { readFileSync } from 'node:fs';
 import type { TaskMachine } from '../cloud/solutions';
 import { sessionShortLabel } from '../content/course';
-import { loadVariants, loadVariantTests } from '../variants/load';
+import { checkableSessions, loadVariants, loadVariantTests } from '../variants/load';
 import { tasksOf, testsKey } from '../variants/variants';
 import type { LabReportInput } from './model';
 import { extractSections } from './sections';
 
-/** Заняття, для яких кабінет формує звіт. */
-export const REPORT_SESSIONS = new Set(['lab-01']);
+/** Заняття, для яких кабінет формує звіт: усі з автоперевіркою варіантів. */
+export const REPORT_SESSIONS = new Set(checkableSessions());
 
 export interface ReportLevelSource {
   stars: 1 | 2 | 3;
@@ -33,7 +33,7 @@ const PROGRAM_TITLE: Record<TaskMachine, string> = {
   post: 'Текст програми',
   turing: 'Таблиця переходів',
   markov: 'Схема підстановок',
-  flowchart: 'Схема (блоки)',
+  flowchart: 'Схема алгоритму',
 };
 
 export function reportSource(

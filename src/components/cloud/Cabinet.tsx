@@ -346,7 +346,7 @@ function ReportCell({
       if (!response.ok) throw new Error(`немає даних варіанта (${response.status})`);
       const source = (await response.json()) as ReportSource;
       const { collectReport, downloadReport } = await import('../../lib/report/collect');
-      const model = collectReport(
+      const model = await collectReport(
         source,
         {
           name: student.fullName.split(/\s+/).slice(0, 2).join(' '),
