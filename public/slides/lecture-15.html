@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<script src="./resources.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/styles.css">
+<script src="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/_ds_bundle.js"></script>
+<link rel="stylesheet" href="fonts/fonts.css">
+<title>АІМО — Лекція 15 · Похибки обчислень</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  --h: "Manrope", system-ui, sans-serif;
+  --b: "IBM Plex Sans", system-ui, sans-serif;
+  --m: "IBM Plex Mono", ui-monospace, monospace;
+  --bg: #f5f7f5; --bg2: #e7efeb; --ink: #16262b; --mut: #56696d; --ln: rgba(22,38,43,.16);
+  --acc: #0d6e63; --fill: #f0b45a; --acc-ink: #1b2620;
+  --hair: 1px solid var(--ln);
+  --mk-c: rgba(22,38,43,.45);
+  --mk-img: linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c));
+  --mk-pos: 0 -7px, -7px 0, right 0 top -7px, right -7px top 0, 0 bottom -7px, -7px bottom 0, right 0 bottom -7px, right -7px bottom 0;
+  --mk-size: 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px;
+  --grid: linear-gradient(rgba(238,243,239,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(238,243,239,.045) 1px, transparent 1px);
+}
+a { color: var(--acc); text-decoration: none; }
+a:hover { color: var(--ink); }
+</style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" data-uneditable="">
+
+<section data-label="Титул" data-screen-label="01" data-speaker-notes="Початок модуля 2. Швидкість не робить результат точним: дані вже неточні, метод наближений, а пам'ять скінченна. Вчимося описувати похибки й обчислювати стійко." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;gap:60px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
+    <div style="align-self:flex-start;border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Лекція 15 · Алгоритми і методи обчислень</div>
+    <div>
+      <h1 style="margin:0;font-family:var(--h);font-weight:800;font-size:120px;line-height:1.02;letter-spacing:-.02em"><span style="color:var(--acc)">Похибки</span><br>обчислень</h1>
+      <p style="margin:30px 0 0;font-size:36px;line-height:1.3;color:var(--mut);max-width:900px">Джерела й міри похибок, IEEE 754, стійкі обчислення</p>
+    </div>
+    <div style="display:flex;gap:18px;font-size:24px;color:var(--mut)"><span>Змістовий модуль 2. Методи обчислень</span><span>·</span><span>Тема 4. Чисельні методи розв'язання прикладних задач</span></div>
+  </div>
+  <div style="width:620px;flex:none;display:flex;flex-direction:column;justify-content:center">
+    <div style="padding:44px 48px;display:flex;flex-direction:column;gap:22px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m)">
+      <div style="font-size:36px">0.1 + 0.2 == 0.3</div>
+      <div style="font-size:52px;color:var(--acc)">false</div>
+      <div style="font-size:30px;color:var(--mut)">0.30000000000000004</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Джерела похибок" data-screen-label="02" data-speaker-notes="Приклад: програма оцінює добові витрати енергії за датчиком. Калібрування — неусувна, дискретні відліки — похибка методу, сумування у скінченній розрядності — округлення. Перевіряти причини окремо." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 15 · Джерела</span><span style="display:var(--hdr,inline);color:var(--mut)">01</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Звідки береться неточність</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:32px 36px;display:flex;flex-direction:column;gap:18px">
+      <span style="font-family:var(--m);font-size:30px;color:var(--acc)">1</span>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:38px">Неусувна</h3>
+      <p style="margin:0;font-size:26px;line-height:1.42">Приходить із вихідними даними чи моделлю. Точнішим виконанням алгоритму її не усунути</p>
+      <div style="margin-top:auto;padding:16px 20px;background:var(--bg2);font-size:24px;line-height:1.38">Довжина деталі — з точністю до міліметра</div>
+    </div>
+    <div style="background:var(--bg);padding:32px 36px;display:flex;flex-direction:column;gap:18px">
+      <span style="font-family:var(--m);font-size:30px;color:var(--acc)">2</span>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:38px">Похибка методу</h3>
+      <p style="margin:0;font-size:26px;line-height:1.42">Точну процедуру замінили скінченною. Залежить від кроку, кількості доданків чи ітерацій</p>
+      <div style="margin-top:auto;padding:16px 20px;background:var(--bg2);font-size:24px;line-height:1.38">Ряд обірвали, інтеграл замінили сумою</div>
+    </div>
+    <div style="background:var(--bg);padding:32px 36px;display:flex;flex-direction:column;gap:18px">
+      <span style="font-family:var(--m);font-size:30px;color:var(--acc)">3</span>
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:38px">Обчислювальна</h3>
+      <p style="margin:0;font-size:26px;line-height:1.42">Округлення через скінченну розрядність чисел і операцій</p>
+      <div style="margin-top:auto;padding:16px 20px;background:var(--bg2);font-size:24px;line-height:1.38">Більше кроків — більше округлень</div>
+    </div>
+  </div>
+  <div style="padding:22px 32px;font-size:26px;line-height:1.4;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">«Чим більше обчислень, тим точніше» — <b style="font-weight:600;color:var(--acc)">загалом неправильно</b>. Датчик з похибкою <span style="font-family:var(--m)">10⁻³</span> — не вимагайте від алгоритму <span style="font-family:var(--m)">10⁻¹⁴</span></div>
+</section>
+
+<section data-label="Міри похибок" data-screen-label="03" data-speaker-notes="Точне x зазвичай невідоме, тому встановлюють граничну похибку — гарантовану межу. Гарантовану верхню межу відносної похибки округлюють угору." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 15 · Міри</span><span style="display:var(--hdr,inline);color:var(--mut)">02</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Абсолютна, відносна, гранична</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:30px 36px;display:flex;flex-direction:column;justify-content:center;gap:20px">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Абсолютна</div>
+      <div style="font-family:var(--m);font-size:40px;padding:18px 22px;background:var(--bg2)">Δx = |x̃ − x|</div>
+      <p style="margin:0;font-size:25px;line-height:1.4">В одиницях самої величини</p>
+    </div>
+    <div style="background:var(--bg);padding:30px 36px;display:flex;flex-direction:column;justify-content:center;gap:20px">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Відносна</div>
+      <div style="font-family:var(--m);font-size:40px;padding:18px 22px;background:var(--bg2)">δx = Δx / |x|</div>
+      <p style="margin:0;font-size:25px;line-height:1.4">Безрозмірна; порівнює точність величин різного масштабу</p>
+    </div>
+    <div style="background:var(--bg);padding:30px 36px;display:flex;flex-direction:column;justify-content:center;gap:20px">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Гранична</div>
+      <div style="font-family:var(--m);font-size:40px;padding:18px 22px;background:var(--bg2);color:var(--acc)">|x̃ − x| ≤ Eₓ</div>
+      <p style="margin:0;font-size:25px;line-height:1.4">Гарантована межа: <span style="font-family:var(--m)">x = x̃ ± Eₓ</span></p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1.3fr;gap:44px">
+    <div style="padding:24px 32px;display:flex;flex-direction:column;gap:10px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Гарантована відносна, |x̃| &gt; Eₓ</span>
+      <span style="font-family:var(--m);font-size:36px">δx ≤ Eₓ / (|x̃| − Eₓ)</span>
+    </div>
+    <div style="padding:24px 32px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Приклад · 12.4 ± 0.05 см</span>
+      <span style="font-family:var(--m);font-size:32px">x ∈ [12.35; 12.45] · δx ≤ 0.05 / 12.35 ≈ 0.405%</span>
+    </div>
+  </div>
+</section>
+
+<section data-label="Цифри й округлення" data-screen-label="04" data-speaker-notes="Значуща — з першої ненульової. Вірна — якщо похибка не перевищує половини одиниці розряду. Округлення до найближчого — похибка ≤ h/2, обрізання — гірше." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 15 · Цифри</span><span style="display:var(--hdr,inline);color:var(--mut)">03</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Значущі й вірні цифри</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="flex:1;padding:28px 34px;display:flex;flex-direction:column;justify-content:center;gap:20px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Значущі · з першої ненульової</div>
+        <div style="display:flex;gap:6px"><sc-for list="{{ sigDigits }}" as="c" hint-placeholder-count="8"><span style="width:64px;height:76px;display:flex;align-items:center;justify-content:center;border:2px solid {{ c.bd }};font-family:var(--m);font-size:38px;background:{{ c.bg }};color:{{ c.fg }}">{{ c.v }}</span></sc-for></div>
+        <p style="margin:0;font-size:25px;line-height:1.4"><b style="font-weight:600">Чотири</b> значущі: 4, 0, 7, 0. Останній нуль каже, до якого розряду подано результат</p>
+      </div>
+      <div style="padding:24px 34px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Вірні до розряду 10ᵏ</div>
+        <div style="font-family:var(--m);font-size:40px">Δx ≤ ½ · 10ᵏ</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:auto 1fr 1fr auto;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="padding:16px 30px;background:var(--bg2);font-size:26px">Чотири знаки після крапки: <span style="font-family:var(--m)">3.14159265</span></div>
+      <div style="padding:22px 30px;display:flex;flex-direction:column;justify-content:center;gap:10px;border-top:var(--hair)"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Округлення</span><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--m);font-size:48px;color:var(--acc)">3.1416</span><span style="font-family:var(--m);font-size:28px">Δ = 0.00000735</span></div></div>
+      <div style="padding:22px 30px;display:flex;flex-direction:column;justify-content:center;gap:10px;border-top:var(--hair)"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Обрізання</span><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-family:var(--m);font-size:48px">3.1415</span><span style="font-family:var(--m);font-size:28px">Δ = 0.00009265</span></div></div>
+      <div style="padding:18px 30px;border-top:var(--hair);font-size:25px;line-height:1.4;color:var(--mut)"><span style="font-family:var(--m);color:var(--ink)">12.400000</span> не точніше за <span style="font-family:var(--m);color:var(--ink)">12.4</span> — прилад не став кращим</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Як подати відповідь" data-screen-label="05" data-speaker-notes="Не округлювати проміжні результати. У таблицях показуємо скорочено, але наступний рядок рахуємо з повного значення. std::round округлює половини від нуля, IEEE — до парного." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 15 · Цифри</span><span style="display:var(--hdr,inline);color:var(--mut)">04</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Підготовка числової відповіді</h2>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--m);font-size:34px;color:var(--acc)">1</span><span style="font-size:26px;line-height:1.38">Обчислити з <b style="font-weight:600">додатковими</b> внутрішніми розрядами</span></div>
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--m);font-size:34px;color:var(--acc)">2</span><span style="font-size:26px;line-height:1.38">Оцінити абсолютну похибку</span></div>
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--m);font-size:34px;color:var(--acc)">3</span><span style="font-size:26px;line-height:1.38">Вибрати розряд, до якого доцільно подати відповідь</span></div>
+    <div style="background:var(--bg2);padding:28px 30px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--m);font-size:34px;color:var(--acc)">4</span><span style="font-size:26px;line-height:1.38">Округлити <b style="font-weight:600">один раз наприкінці</b></span></div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.3fr 1fr;gap:44px;min-height:0">
+    <div style="padding:24px 30px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++</div>
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:25px;line-height:1.55;background:var(--bg2);padding:20px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">double</span> x = 3.14159265;
+<span style="color:var(--mut)">// лише друк — змінну не змінюємо</span>
+std::cout &lt;&lt; std::fixed
+          &lt;&lt; <span style="background:var(--fill);color:var(--acc-ink);padding:0 6px">std::setprecision(4)</span> &lt;&lt; x;
+<span style="color:var(--mut)">// 3.1416</span></pre>
+    </div>
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:22px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Проміжні — повні</h3><p style="margin:0;font-size:24px;line-height:1.38">Округлення кожного кроку погіршує подальші обчислення</p></div>
+      <div style="background:var(--bg2);padding:22px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Різні правила половин</h3><p style="margin:0;font-size:24px;line-height:1.38"><span style="font-family:var(--m)">std::round</span> — від нуля; IEEE 754 — до парного біта</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Поширення · розділ" data-screen-label="06" data-speaker-notes="Як похибки даних переходять у результат. Поки що вважаємо саму дію точною; машинне округлення — окрема складова." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:40px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Поширення</div><span style="display:var(--hdr,inline);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;color:var(--mut)">05</span></div>
+  <div>
+    <div style="font-family:var(--m);font-size:40px;color:var(--acc)">Eₓ, E_y → E_f(x, y)</div>
+    <h2 style="margin:18px 0 0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Як поширюються похибки</h2>
+  </div>
+  <div style="padding:30px 40px;display:flex;gap:40px;align-items:center;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <span style="font-family:var(--m);font-size:44px">10.0 ± 0.1 − 9.9 ± 0.1 =</span><span style="font-family:var(--m);font-size:56px;color:var(--acc)">0.1 ± 0.2</span>
+    <span style="margin-left:auto;font-size:26px;color:var(--mut)">навіть знак різниці не гарантований</span>
+  </div>
+</section>
+
+<section data-label="Арифметичні дії" data-screen-label="07" data-speaker-notes="Сума й різниця — абсолютні межі додаються. Добуток і частка — відносні приблизно додаються. Приклад з прямокутником: строга межа 0.0802 проти 0.08 першого порядку." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 15 · Поширення</span><span style="display:var(--hdr,inline);color:var(--mut)">06</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Похибки арифметичних дій</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:28px 34px;display:flex;flex-direction:column;gap:16px">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Сума й різниця · абсолютні</div>
+      <div style="font-family:var(--m);font-size:40px;color:var(--acc)">E(x ± y) ≤ Eₓ + E_y</div>
+    </div>
+    <div style="background:var(--bg);padding:28px 34px;display:flex;flex-direction:column;gap:16px">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Добуток і частка · відносні</div>
+      <div style="font-family:var(--m);font-size:40px;color:var(--acc)">δ(xy), δ(x/y) ≲ δx + δy</div>
+    </div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 34px;display:flex;flex-direction:column;gap:16px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Прямокутник 3.00 ± 0.01 × 2.00 ± 0.02 м</div>
+      <div style="font-family:var(--m);font-size:28px;padding:14px 20px;background:var(--bg2)">E(xy) ≤ |ỹ|Eₓ + |x̃|E_y + EₓE_y</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:14px;font-family:var(--m);font-size:30px">
+        <span>2·0.01 + 3·0.02 + 0.01·0.02</span>
+        <span>= <span style="color:var(--acc)">0.0802 м²</span> <span style="font-family:var(--b);font-size:24px;color:var(--mut)">строго</span></span>
+        <span style="color:var(--mut)">≈ 0.08 м² <span style="font-family:var(--b);font-size:24px">перший порядок</span></span>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:24px 30px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Віднімання не віднімає похибки</h3><p style="margin:0;font-size:25px;line-height:1.4">Малий результат порівняно з неточністю операндів — велика відносна похибка</p></div>
+      <div style="background:var(--bg2);padding:24px 30px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Знаменник біля нуля</h3><p style="margin:0;font-size:25px;line-height:1.4">Похибка частки різко зростає — це властивість самої задачі</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Диференціал" data-screen-label="08" data-speaker-notes="Локальна оцінка першого порядку. Найбільший внесок показує, яке вимірювання уточнювати насамперед. Приклад x²: 0.04 проти точних 0.0401." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 15 · Поширення</span><span style="display:var(--hdr,inline);color:var(--mut)">07</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Похибка функції через диференціал</h2>
+  <div style="padding:30px 40px;display:flex;gap:40px;align-items:center;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <span style="font-family:var(--m);font-size:48px;color:var(--acc)">E_z ≈ Σ |∂f/∂xᵢ (x̃)| · Eᵢ</span>
+    <span style="margin-left:auto;font-size:26px;line-height:1.4;color:var(--mut);max-width:520px">Локальна оцінка першого порядку для <span style="font-family:var(--m);color:var(--ink)">z = f(x₁, …, xₘ)</span></span>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-rows:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:18px 30px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:32px;color:var(--acc);flex:none">1</span><span style="font-size:26px">Записати функцію</span></div>
+      <div style="background:var(--bg);padding:18px 30px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:32px;color:var(--acc);flex:none">2</span><span style="font-size:26px">Знайти частинні похідні</span></div>
+      <div style="background:var(--bg);padding:18px 30px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:32px;color:var(--acc);flex:none">3</span><span style="font-size:26px">Підставити наближені дані</span></div>
+      <div style="background:var(--bg2);padding:18px 30px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:32px;color:var(--acc);flex:none">4</span><span style="font-size:26px">Скласти модулі внесків — найбільший уточнювати першим</span></div>
+    </div>
+    <div style="padding:28px 34px;display:flex;flex-direction:column;justify-content:center;gap:22px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Приклад · z = x², x̃ = 2, Eₓ = 0.01</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:16px 28px;align-items:baseline">
+        <span style="font-size:25px;color:var(--mut)">Диференціал</span><span style="font-family:var(--m);font-size:36px;color:var(--acc)">2·2·0.01 = 0.04</span>
+        <span style="font-size:25px;color:var(--mut)">Точно на [1.99; 2.01]</span><span style="font-family:var(--m);font-size:36px">0.0401</span>
+      </div>
+      <p style="margin:0;padding-top:16px;border-top:var(--hair);font-size:25px;line-height:1.4">Різниця <span style="font-family:var(--m)">0.0001</span> — квадратичний член, відкинутий лінеаризацією. Для гарантії — максимуми похідних на всій області</p>
+    </div>
+  </div>
+</section>
+
+<section data-label="Пам'ять · розділ" data-screen-label="09" data-speaker-notes="Як комп'ютер зберігає дійсні числа і чому десяткові дроби поводяться несподівано." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:40px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">IEEE 754</div><span style="display:var(--hdr,inline);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;color:var(--mut)">08</span></div>
+  <div>
+    <div style="font-family:var(--m);font-size:40px;color:var(--acc)">(−1)ˢ · (1.f)₂ · 2^(e − bias)</div>
+    <h2 style="margin:18px 0 0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Числа в пам'яті комп'ютера</h2>
+  </div>
+  <div style="display:flex;height:96px;border:var(--hair);font-family:var(--m);font-size:28px">
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;background:var(--acc);color:var(--bg)">s</div>
+    <div style="flex:11;display:flex;align-items:center;justify-content:center;border-left:var(--hair)">порядок e · 11</div>
+    <div style="flex:52;display:flex;align-items:center;justify-content:center;border-left:var(--hair);background:rgba(238,243,239,.06)">дріб f · 52 біти</div>
+  </div>
+</section>
+
+<section data-label="IEEE 754" data-screen-label="10" data-speaker-notes="Початкова одиниця не зберігається — тому значущих бітів на один більше. Стандарт C++ не вимагає IEEE, перевіряють через numeric_limits. Епсилон — відстань від 1 до наступного числа." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 15 · IEEE 754</span><span style="display:var(--hdr,inline);color:var(--mut)">09</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">float і double</h2>
+  <div style="display:grid;grid-template-columns:1.3fr .7fr 1fr 1fr 1fr 1fr;grid-template-rows:auto 1fr 1fr;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-size:28px">
+    <div style="padding:14px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Формат</div>
+    <div style="padding:14px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Знак</div>
+    <div style="padding:14px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Порядок</div>
+    <div style="padding:14px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Дріб</div>
+    <div style="padding:14px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Значущих</div>
+    <div style="padding:14px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">≈ цифр</div>
+    <div style="padding:16px 26px;border-top:var(--hair);display:flex;flex-direction:column"><span style="font-family:var(--m);color:var(--acc)">float</span><span style="font-size:22px;color:var(--mut)">binary32 · bias 127</span></div>
+    <div style="padding:16px 26px;border-top:var(--hair);font-family:var(--m);display:flex;align-items:center">1</div>
+    <div style="padding:16px 26px;border-top:var(--hair);font-family:var(--m);display:flex;align-items:center">8</div>
+    <div style="padding:16px 26px;border-top:var(--hair);font-family:var(--m);display:flex;align-items:center">23</div>
+    <div style="padding:16px 26px;border-top:var(--hair);font-family:var(--m);display:flex;align-items:center;color:var(--acc)">24</div>
+    <div style="padding:16px 26px;border-top:var(--hair);font-family:var(--m);display:flex;align-items:center">7</div>
+    <div style="padding:16px 26px;border-top:var(--hair);display:flex;flex-direction:column"><span style="font-family:var(--m);color:var(--acc)">double</span><span style="font-size:22px;color:var(--mut)">binary64 · bias 1023</span></div>
+    <div style="padding:16px 26px;border-top:var(--hair);font-family:var(--m);display:flex;align-items:center">1</div>
+    <div style="padding:16px 26px;border-top:var(--hair);font-family:var(--m);display:flex;align-items:center">11</div>
+    <div style="padding:16px 26px;border-top:var(--hair);font-family:var(--m);display:flex;align-items:center">52</div>
+    <div style="padding:16px 26px;border-top:var(--hair);font-family:var(--m);display:flex;align-items:center;color:var(--acc)">53</div>
+    <div style="padding:16px 26px;border-top:var(--hair);font-family:var(--m);display:flex;align-items:center">16</div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 34px;display:flex;flex-direction:column;justify-content:center;gap:16px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Машинний епсилон · epsilon()</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:12px 28px;align-items:baseline;font-family:var(--m)">
+        <span style="font-size:28px;color:var(--mut)">float</span><span style="font-size:32px">2⁻²³ ≈ 1.19·10⁻⁷</span>
+        <span style="font-size:28px;color:var(--mut)">double</span><span style="font-size:32px;color:var(--acc)">2⁻⁵² ≈ 2.22·10⁻¹⁶</span>
+      </div>
+      <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Відстань від 1 до наступного числа типу. Одинична похибка округлення <span style="font-family:var(--m);color:var(--ink)">u = ε/2</span></p>
+    </div>
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:20px 28px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Модель операції</h3><p style="margin:0;font-family:var(--m);font-size:24px">fl(a∘b) = (a∘b)(1 + θ), |θ| ≤ u</p></div>
+      <div style="background:var(--bg2);padding:20px 28px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Сітка нерівномірна</h3><p style="margin:0;font-size:24px;line-height:1.38">Крок між сусідніми числами зростає з модулем</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="0.1 + 0.2" data-screen-label="11" data-speaker-notes="0.1 = 1/10, у знаменнику множник 5 — двійковий запис нескінченний. Порівнюємо з допуском: абсолютна частина біля нуля, відносна — для масштабу. Універсальної сталої немає." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 15 · IEEE 754</span><span style="display:var(--hdr,inline);color:var(--mut)">10</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Чому десяткові дроби дивують</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)"><span style="font-family:var(--m);color:var(--ink)">1/10</span> має у знаменнику 5 — двійковий запис <b style="font-weight:600;color:var(--ink)">нескінченний</b></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:26px;line-height:1.55;background:var(--bg2);padding:22px 28px;white-space:pre;border:var(--hair)"><span style="color:var(--acc);font-weight:600">double</span> a = 0.1, b = 0.2;
+std::cout &lt;&lt; std::setprecision(17);
+std::cout &lt;&lt; a + b;            <span style="color:var(--mut)">// ?</span>
+std::cout &lt;&lt; (a + b == 0.3);   <span style="color:var(--mut)">// ?</span></pre>
+      <div style="display:grid;grid-template-rows:1fr 1fr;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="padding:16px 28px;display:block;align-content:center;font-family:var(--m);font-size:34px">0.30000000000000004</div>
+        <div style="padding:16px 28px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:34px;color:var(--acc)">false</div>
+      </div>
+    </div>
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Комбінований допуск</div>
+      <div style="font-family:var(--m);font-size:28px;line-height:1.5;padding:18px 22px;background:var(--bg2)">|a − b| ≤ τ_abs<br>  + τ_rel · max(|a|, |b|)</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:12px 20px;font-size:25px;line-height:1.38">
+        <span style="font-family:var(--m);color:var(--acc)">τ_abs</span><span>працює біля нуля</span>
+        <span style="font-family:var(--m);color:var(--acc)">τ_rel</span><span>враховує масштаб</span>
+      </div>
+      <div style="margin-top:auto;padding:16px 22px;background:var(--fill);color:var(--acc-ink);font-size:24px;line-height:1.4">Наближена рівність нетранзитивна — не для ключів контейнера. ε — не готовий допуск задачі</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Втрата значущих цифр" data-screen-label="12" data-speaker-notes="Віднімання близьких наближених чисел підсилює наявні відхилення. Помножили й поділили на спряжений вираз — віднімання зникло. Розрядність та сама, формула краща." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 15 · Нестійкість</span><span style="display:var(--hdr,inline);color:var(--mut)">11</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Втрата значущих цифр</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 90px 1fr;gap:0;align-items:stretch;min-height:0">
+    <div style="padding:30px 36px;display:flex;flex-direction:column;justify-content:center;gap:24px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Пряма формула</div>
+      <div style="font-family:var(--m);font-size:48px">√(1 + h) − 1</div>
+      <div style="padding:18px 22px;background:var(--bg2);display:flex;flex-direction:column;gap:6px"><span style="font-size:24px;color:var(--mut)">h = 10⁻¹⁶: 1 + h = 1</span><span style="font-family:var(--m);font-size:40px">= 0</span></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;font-family:var(--m);font-size:48px;color:var(--acc)">=</div>
+    <div style="padding:30px 36px;display:flex;flex-direction:column;justify-content:center;gap:24px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Перетворена</div>
+      <div style="font-family:var(--m);font-size:48px;color:var(--acc)">h / (√(1 + h) + 1)</div>
+      <div style="padding:18px 22px;background:var(--bg2);display:flex;flex-direction:column;gap:6px"><span style="font-size:24px;color:var(--mut)">без віднімання близьких чисел</span><span style="font-family:var(--m);font-size:40px;color:var(--acc)">≈ 5·10⁻¹⁷</span></div>
+    </div>
+  </div>
+  <div style="padding:22px 32px;font-size:26px;line-height:1.4;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">Сама операція віднімання може бути точною — небезпека в <b style="font-weight:600">підсиленні вже наявних</b> відхилень</div>
+</section>
+
+<section data-label="Сумування" data-screen-label="13" data-speaker-notes="Гармонічна сума для N = 10⁶ у float. Машинне додавання неасоціативне. Кехен зберігає поправку. Не вмикати -ffast-math — він руйнує компенсацію." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 15 · Нестійкість</span><span style="display:var(--hdr,inline);color:var(--mut)">12</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Порядок сумування важливий</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)"><span style="font-family:var(--m);color:var(--ink)">Σ 1/n</span>, <span style="font-family:var(--m);color:var(--ink)">N = 10⁶</span>, тип <span style="font-family:var(--m);color:var(--ink)">float</span>. Точно ≈ <span style="font-family:var(--m);color:var(--ink)">14.392726722866</span></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-columns:1fr auto auto;grid-template-rows:auto repeat(3,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="padding:12px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Спосіб</div>
+      <div style="padding:12px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Сума</div>
+      <div style="padding:12px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Відхилення</div>
+      <sc-for list="{{ harmonic }}" as="r" hint-placeholder-count="3">
+        <div style="padding:6px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:28px">{{ r.w }}</div>
+        <div style="padding:6px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:26px">{{ r.s }}</div>
+        <div style="padding:6px 26px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:28px"><span style="background:{{ r.bg }};color:{{ r.fg }};padding:2px 10px">{{ r.e }}</span></div>
+      </sc-for>
+    </div>
+    <div style="padding:24px 30px;display:flex;flex-direction:column;gap:14px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Сумування Кехена</div>
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:25px;line-height:1.55;background:var(--bg2);padding:20px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">float</span> sum = 0, c = 0;
+<span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">float</span> term : terms) {
+    <span style="color:var(--acc);font-weight:600">float</span> y = term - c;
+    <span style="color:var(--acc);font-weight:600">float</span> t = sum + y;
+    <span style="background:var(--fill);color:var(--acc-ink);padding:0 6px">c = (t - sum) - y;</span>  <span style="color:var(--mut)">// втрата</span>
+    sum = t;
+}</pre>
+      <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Для додатних — починати з <b style="font-weight:600;color:var(--ink)">найменших</b>. Ще варіант — попарне сумування</p>
+    </div>
+  </div>
+</section>
+
+<section data-label="Межі діапазону" data-screen-label="14" data-speaker-notes="Обмежений діапазон стосується проміжних величин, навіть якщо відповідь помірна. hypot масштабує всередині." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 15 · Нестійкість</span><span style="display:var(--hdr,inline);color:var(--mut)">13</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Межі діапазону</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:32px 36px;display:flex;flex-direction:column;gap:18px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:36px">Переповнення</h3>
+      <div style="font-family:var(--m);font-size:30px;padding:16px 20px;background:var(--bg2)">10³⁰⁸ · 10³⁰⁸ → inf</div>
+      <p style="margin:0;font-size:25px;line-height:1.42">Далі з нескінченностей може вийти <span style="font-family:var(--m)">NaN</span>. Перевіряйте <span style="font-family:var(--m);color:var(--acc)">std::isfinite</span> рано</p>
+    </div>
+    <div style="background:var(--bg);padding:32px 36px;display:flex;flex-direction:column;gap:18px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:36px">Антипереповнення</h3>
+      <div style="font-family:var(--m);font-size:30px;padding:16px 20px;background:var(--bg2)">дуже мале → 0</div>
+      <p style="margin:0;font-size:25px;line-height:1.42"><b style="font-weight:600">Субнормальні</b> числа дають поступовий перехід до нуля, але з меншою відносною точністю</p>
+    </div>
+    <div style="background:var(--bg2);padding:32px 36px;display:flex;flex-direction:column;gap:18px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:36px;color:var(--acc)">Масштабування</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;font-family:var(--m);font-size:28px"><span style="color:var(--mut);text-decoration:line-through">sqrt(x*x + y*y)</span><span style="color:var(--acc)">std::hypot(x, y)</span></div>
+      <p style="margin:0;font-size:25px;line-height:1.42">Уникає проміжного переповнення й антипереповнення</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:18px 28px;display:flex;flex-direction:column;gap:4px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">min()</span><span style="font-size:23px;color:var(--mut)">найменше додатне нормальне</span></div>
+    <div style="background:var(--bg);padding:18px 28px;display:flex;flex-direction:column;gap:4px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">denorm_min()</span><span style="font-size:23px;color:var(--mut)">найменше додатне субнормальне</span></div>
+    <div style="background:var(--bg);padding:18px 28px;display:flex;flex-direction:column;gap:4px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">lowest()</span><span style="font-size:23px;color:var(--mut)">найбільш від'ємне скінченне</span></div>
+  </div>
+</section>
+
+<section data-label="Квадратне рівняння" data-screen-label="15" data-speaker-notes="Коли |b| велике, один чисельник віднімає близькі числа. Обчислюємо корінь без віднімання, другий — за Вієтом. Для x² + 10⁸x + 1 пряма формула помиляється на 25.5%." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 15 · Стійкість</span><span style="display:var(--hdr,inline);color:var(--mut)">14</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Стійке квадратне рівняння</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.15fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Звична формула</div>
+        <div style="font-family:var(--m);font-size:34px">x = (−b ± √D) / 2a</div>
+        <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Один чисельник віднімає близькі числа, коли <span style="font-family:var(--m);color:var(--ink)">|b| ≫ √|ac|</span></p>
+      </div>
+      <div style="flex:1;padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:16px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Стійкий варіант · D &gt; 0</div>
+        <div style="font-family:var(--m);font-size:34px;color:var(--acc)">q = −½ (b + sgn(b)·√D)</div>
+        <div style="display:flex;gap:40px;font-family:var(--m);font-size:34px"><span>x₁ = q / a</span><span>x₂ = c / q</span></div>
+        <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Доданки в дужках одного знака; <span style="font-family:var(--m);color:var(--ink)">x₂</span> — за Вієтом <span style="font-family:var(--m);color:var(--ink)">x₁x₂ = c/a</span></p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto 1fr 1fr;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="grid-column:1 / 4;padding:14px 26px;background:var(--bg2);font-size:26px">Малий корінь <span style="font-family:var(--m)">x² + 10⁸x + 1 = 0</span> ≈ <span style="font-family:var(--m)">−10⁻⁸</span></div>
+        <div style="padding:18px 26px;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:28px">Пряма</div>
+        <div style="padding:18px 26px;border-top:var(--hair);font-family:var(--m);font-size:28px">−7.4506·10⁻⁹</div>
+        <div style="padding:18px 26px;border-top:var(--hair)"><span style="font-family:var(--m);font-size:28px;background:var(--fill);color:var(--acc-ink);padding:2px 10px">25.5%</span></div>
+        <div style="padding:18px 26px;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Стійка</div>
+        <div style="padding:18px 26px;border-top:var(--hair);font-family:var(--m);font-size:28px;color:var(--acc)">−1.0000·10⁻⁸</div>
+        <div style="padding:18px 26px;border-top:var(--hair);font-family:var(--m);font-size:28px;color:var(--acc)">≈ ε</div>
+      </div>
+      <div style="flex:1;display:grid;grid-template-rows:repeat(5,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <sc-for list="{{ quadSteps }}" as="s" hint-placeholder-count="5"><div style="background:var(--bg);padding:6px 26px;display:flex;gap:18px;align-items:center"><span style="font-family:var(--m);font-size:26px;color:var(--acc);flex:none">{{ s.n }}</span><span style="font-size:24px;line-height:1.3">{{ s.t }}</span></div></sc-for>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Обумовленість і стійкість" data-screen-label="16" data-speaker-notes="Ключове розрізнення. Хороший алгоритм не усуває природної чутливості задачі, але не повинен її посилювати. Майже кратні корені — погана обумовленість, пряма формула — нестійкість." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 15 · Стійкість</span><span style="display:var(--hdr,inline);color:var(--mut)">15</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Задача чи алгоритм?</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:40px 46px;display:flex;flex-direction:column;justify-content:center;gap:24px">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Властивість задачі</div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:800;font-size:56px">Обумовленість</h3>
+      <p style="margin:0;font-size:28px;line-height:1.42">Як змінюється <b style="font-weight:600">точна</b> відповідь за малих змін даних</p>
+      <div style="padding:18px 22px;background:var(--bg2);font-size:25px;line-height:1.4">Майже кратні корені, <span style="font-family:var(--m)">b² ≈ 4ac</span> — чутливі до коефіцієнтів</div>
+    </div>
+    <div style="background:var(--bg);padding:40px 46px;display:flex;flex-direction:column;justify-content:center;gap:24px">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Властивість способу обчислення</div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:800;font-size:56px;color:var(--acc)">Стійкість</h3>
+      <p style="margin:0;font-size:28px;line-height:1.42">Як поводиться <b style="font-weight:600">конкретний алгоритм</b> за округлень</p>
+      <div style="padding:18px 22px;background:var(--bg2);font-size:25px;line-height:1.4">Пряма формула коренів — нестійка, через <span style="font-family:var(--m)">q</span> — стійка</div>
+    </div>
+  </div>
+  <div style="padding:22px 32px;font-size:27px;line-height:1.4;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">Хороший алгоритм не усуває природної чутливості задачі, але <b style="font-weight:600;color:var(--acc)">не посилює її</b> без потреби</div>
+</section>
+
+<section data-label="Підсумки" data-screen-label="17" data-speaker-notes="Шість пунктів. Наступна лекція — нелінійні рівняння, де ці прийоми знадобляться." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 15 · Підсумки</span><span style="display:var(--hdr,inline);color:var(--mut)">16</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Що забрати з лекції</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">01</span><span style="font-size:26px;line-height:1.35">Неусувна, методу й округлення — різні джерела з різними засобами контролю</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">02</span><span style="font-size:26px;line-height:1.35">Абсолютна — в одиницях, відносна — масштаб; гранична — гарантована межа</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">03</span><span style="font-size:26px;line-height:1.35">Надруковані цифри ≠ точність; округлюють один раз наприкінці</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">04</span><span style="font-size:26px;line-height:1.35">Сума й різниця — абсолютні межі додаються; диференціал — локальна оцінка функції</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">05</span><span style="font-size:26px;line-height:1.35">IEEE 754 має скінченні точність і діапазон; ε характеризує формат, а не допуск задачі</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">06</span><span style="font-size:26px;line-height:1.35">Порядок сумування, Кехен, перетворення формул і Вієт поліпшують результат без зміни типу</span></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:25px;color:var(--mut);padding-top:16px;border-top:var(--hair)">
+    <span>Попередня · Лекція 14. Застосування сортування</span>
+    <span style="font-family:var(--h);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Далі · Лекція 16. Нелінійні рівняння</span>
+  </div>
+</section>
+
+<section data-label="Контрольні запитання" data-screen-label="18" data-speaker-notes="Запитання 11 — вивести стійку формулу на дошці. Решту — самостійно." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 15 · Перевірка</span><span style="display:var(--hdr,inline);color:var(--mut)">17</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Контрольні запитання</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.4fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Теорія</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;font-size:24px;line-height:1.3">
+        <sc-for list="{{ questions }}" as="q" hint-placeholder-count="11"><div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">{{ q.n }}</span><span>{{ q.t }}</span></div></sc-for>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:1.3fr 1fr;gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg2);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:16px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">11 · На дошці</div><p style="margin:0;font-size:30px;line-height:1.35">Виведіть стійку формулу коренів. Які труднощі вона не усуває?</p><div style="font-family:var(--m);font-size:30px">x² + 10⁸x + 1 = 0</div></div>
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Матеріали</div><a href="https://kaldra1.github.io/aimo/lectures/15-computational-errors/" style="font-size:26px">Лекція 15 на сайті курсу</a></div>
+    </div>
+  </div>
+</section>
+
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Бурштин&quot;,&quot;М'ята&quot;],&quot;default&quot;:&quot;Бурштин&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Оформлення&quot;},&quot;showHeaderLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Оформлення&quot;}}">
+class Component extends DCLogic {
+  applyTweaks() {
+    const b = document.body.style;
+    b.setProperty("--fill", this.props.accent === "М'ята" ? "#5fd3bd" : "#f0b45a");
+    b.setProperty("--hdr", this.props.showHeaderLabels === false ? "none" : "inline");
+  }
+  componentDidMount() { this.applyTweaks(); }
+  componentDidUpdate() { this.applyTweaks(); }
+  renderVals() {
+    return {
+      sigDigits: "0.004070".split("").map((v, i) => i >= 4 ? { v, bd: "var(--acc)", bg: "var(--acc)", fg: "var(--bg)" } : { v, bd: "var(--ln)", bg: "var(--bg2)", fg: "var(--mut)" }),
+      harmonic: [
+        { w: "Прямий", s: "14.35735798", e: "3.5·10⁻²", bg: "var(--fill)", fg: "var(--acc-ink)" },
+        { w: "Зворотний", s: "14.39265156", e: "7.5·10⁻⁵", bg: "transparent", fg: "var(--ink)" },
+        { w: "Кехен", s: "14.39272690", e: "1.8·10⁻⁷", bg: "var(--acc)", fg: "var(--bg)" }
+      ],
+      quadSteps: [
+        { n: 1, t: "a = 0 — розв'язати як лінійне" },
+        { n: 2, t: "Дискримінант; D < 0 — дійсних коренів немає" },
+        { n: 3, t: "D = 0 — подвійний корінь" },
+        { n: 4, t: "D > 0 — обчислити q, потім обидва корені" },
+        { n: 5, t: "Перевірити підстановкою з урахуванням масштабу" }
+      ],
+      questions: [
+        [1, "Три джерела похибок — з інженерним прикладом кожного"],
+        [2, "Чому фактичну абсолютну похибку зазвичай не обчислити?"],
+        [3, "Як отримати гарантовану відносну оцінку з межі Eₓ?"],
+        [4, "Чим значущі цифри відрізняються від вірних?"],
+        [5, "Чому віднімання точних наближень дає неточну різницю?"],
+        [6, "Коли оцінка через диференціал лише наближена?"],
+        [7, "Як у binary64 розподілені біти? Що вимірює epsilon()?"],
+        [8, "Чому 0.1 + 0.2 == 0.3 дає false? Як вибрати допуск?"],
+        [9, "Чому зворотне сумування точніше? Що зберігає поправка Кехена?"],
+        [10, "Антипереповнення проти переповнення; роль субнормальних"],
+        [12, "Як відрізнити погану обумовленість від нестійкості?"]
+      ].map(([n, t]) => ({ n, t }))
+    };
+  }
+}
+</script>
+</body>
+</html>

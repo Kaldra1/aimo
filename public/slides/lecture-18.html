@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<script src="./resources.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/styles.css">
+<script src="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/_ds_bundle.js"></script>
+<link rel="stylesheet" href="fonts/fonts.css">
+<title>АІМО — Лекція 18 · Метод найменших квадратів</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  --h: "Manrope", system-ui, sans-serif;
+  --b: "IBM Plex Sans", system-ui, sans-serif;
+  --m: "IBM Plex Mono", ui-monospace, monospace;
+  --bg: #f5f7f5; --bg2: #e7efeb; --ink: #16262b; --mut: #56696d; --ln: rgba(22,38,43,.16);
+  --acc: #0d6e63; --fill: #f0b45a; --acc-ink: #1b2620;
+  --hair: 1px solid var(--ln);
+  --mk-c: rgba(22,38,43,.45);
+  --mk-img: linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c));
+  --mk-pos: 0 -7px, -7px 0, right 0 top -7px, right -7px top 0, 0 bottom -7px, -7px bottom 0, right 0 bottom -7px, right -7px bottom 0;
+  --mk-size: 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px;
+  --grid: linear-gradient(rgba(238,243,239,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(238,243,239,.045) 1px, transparent 1px);
+}
+a { color: var(--acc); text-decoration: none; }
+a:hover { color: var(--ink); }
+</style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" data-uneditable="">
+
+<section data-label="Титул" data-screen-label="01" data-speaker-notes="Вимірювання дають таблицю, а для розрахунків потрібна формула. Калібрування приладів, порівняння режимів. Добра відповідність таблиці ще не гарантує правильного прогнозу за її межами." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;gap:60px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
+    <div style="align-self:flex-start;border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Лекція 18 · Алгоритми і методи обчислень</div>
+    <div>
+      <h1 style="margin:0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Метод <span style="color:var(--acc)">найменших<br>квадратів</span></h1>
+      <p style="margin:30px 0 0;font-size:36px;line-height:1.3;color:var(--mut);max-width:900px">Наближення функцій: Лагранж, пряма, парабола, лінеаризація, якість</p>
+    </div>
+    <div style="display:flex;gap:18px;font-size:24px;color:var(--mut)"><span>Змістовий модуль 2. Методи обчислень</span><span>·</span><span>Тема 4. Чисельні методи розв'язання прикладних задач</span></div>
+  </div>
+  <div style="width:620px;flex:none;display:flex;flex-direction:column;justify-content:center">
+    <div style="padding:44px 48px;display:flex;flex-direction:column;gap:22px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--m);font-size:44px;color:var(--acc)">S = Σ rᵢ² → min</div>
+      <div style="font-family:var(--m);font-size:32px">rᵢ = yᵢ − f(xᵢ)</div>
+      <div style="padding-top:20px;border-top:var(--hair);font-size:26px;line-height:1.4;color:var(--mut)">Таблиця вимірювань → зручна формула</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Інтерполяція чи апроксимація" data-screen-label="02" data-speaker-notes="Повторні вимірювання за однієї температури дають різні напруги — інтерполяція не може одночасно набувати двох значень у вузлі, МНК працює з повтореннями природно. Точніші коефіцієнти не зігнуть пряму." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 18 · Наближення</span><span style="display:var(--hdr,inline);color:var(--mut)">01</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Три способи наближення</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Дано <span style="font-family:var(--m);color:var(--ink)">n</span> пар <span style="font-family:var(--m);color:var(--ink)">(xᵢ, yᵢ)</span>, шукаємо <span style="font-family:var(--m);color:var(--ink)">ŷ = f(x)</span></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:32px 36px;display:flex;flex-direction:column;gap:18px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:38px">Інтерполяція</h3>
+      <div style="font-family:var(--m);font-size:32px;color:var(--acc)">f(xᵢ) = yᵢ</div>
+      <p style="margin:0;font-size:26px;line-height:1.42">Точний збіг у вузлах. Доречна, коли табличні значення <b style="font-weight:600">точні</b></p>
+    </div>
+    <div style="background:var(--bg2);padding:32px 36px;display:flex;flex-direction:column;gap:18px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:38px;color:var(--acc)">Апроксимація</h3>
+      <div style="font-family:var(--m);font-size:32px;color:var(--acc)">f(xᵢ) ≈ yᵢ</div>
+      <p style="margin:0;font-size:26px;line-height:1.42">Допускає відхилення заради відповідності <b style="font-weight:600">всій сукупності</b>. Природна для вимірювань із шумом</p>
+    </div>
+    <div style="background:var(--bg);padding:32px 36px;display:flex;flex-direction:column;gap:18px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:38px">Екстраполяція</h3>
+      <div style="font-family:var(--m);font-size:32px">x ∉ [x_min; x_max]</div>
+      <p style="margin:0;font-size:26px;line-height:1.42">Використання моделі <b style="font-weight:600">поза</b> дослідженим інтервалом — потребує додаткових підстав</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:18px 28px;display:flex;flex-direction:column;gap:4px"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Джерело 1</span><span style="font-size:25px">похибка вимірювання</span></div>
+    <div style="background:var(--bg);padding:18px 28px;display:flex;flex-direction:column;gap:4px"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Джерело 2</span><span style="font-size:25px">надто простий клас функцій</span></div>
+    <div style="background:var(--bg);padding:18px 28px;display:flex;flex-direction:column;gap:4px"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Джерело 3</span><span style="font-size:25px">округлення — лише її усувають знаки</span></div>
+  </div>
+</section>
+
+<section data-label="Лагранж" data-screen-label="03" data-speaker-notes="Кожна базисна функція — одиниця у своєму вузлі й нуль в інших. Для трьох точок отримали x² − 2x + 3. Великий степінь — коливання між вузлами." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 18 · Інтерполяція</span><span style="display:var(--hdr,inline);color:var(--mut)">02</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Многочлен Лагранжа</h2>
+  <div style="padding:26px 40px;display:flex;gap:60px;align-items:center;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m)">
+    <span style="font-size:42px;color:var(--acc)">Lₙ₋₁(x) = Σ yᵢ ℓᵢ(x)</span>
+    <span style="font-size:36px">ℓᵢ(x) = Π_{j≠i} (x − xⱼ) / (xᵢ − xⱼ)</span>
+    <span style="margin-left:auto;font-family:var(--b);font-size:25px;color:var(--mut);max-width:360px">ℓᵢ = 1 у своєму вузлі, 0 — в інших</span>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.15fr;gap:44px;min-height:0">
+    <div style="padding:26px 34px;display:flex;flex-direction:column;justify-content:center;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Точки (1, 2), (2, 3), (3, 6)</div>
+      <div style="font-family:var(--m);font-size:27px;line-height:1.6">(x−2)(x−3)<br>− 3(x−1)(x−3)<br>+ 3(x−1)(x−2)</div>
+      <div style="font-family:var(--m);font-size:40px;color:var(--acc)">= x² − 2x + 3</div>
+      <span style="font-size:24px;color:var(--mut)">Перевірка: 2, 3, 6 у вузлах; L₂(1.5) = 2.25</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:24px;line-height:1.55;background:var(--bg2);padding:20px 26px;white-space:pre;border:var(--hair)"><span style="color:var(--acc);font-weight:600">double</span> lagrange3(<span style="color:var(--acc);font-weight:600">double</span> t, <span style="color:var(--acc);font-weight:600">const</span> array&lt;<span style="color:var(--acc);font-weight:600">double</span>,3&gt;&amp; x,
+                 <span style="color:var(--acc);font-weight:600">const</span> array&lt;<span style="color:var(--acc);font-weight:600">double</span>,3&gt;&amp; y) {
+    <span style="color:var(--acc);font-weight:600">double</span> result = 0.0;
+    <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> i = 0; i &lt; 3; ++i) {
+        <span style="color:var(--acc);font-weight:600">double</span> term = y[i];
+        <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> j = 0; j &lt; 3; ++j)
+            <span style="color:var(--acc);font-weight:600">if</span> (j != i) <span style="background:var(--fill);color:var(--acc-ink);padding:0 4px">term *= (t - x[j]) / (x[i] - x[j]);</span>
+        result += term;
+    }
+    <span style="color:var(--acc);font-weight:600">return</span> result;
+}</pre>
+      <div style="padding:20px 30px;font-size:25px;line-height:1.4;background:var(--bg2);border:var(--hair)">Вузли — <b style="font-weight:600">попарно різні</b>. Високий степінь може сильно коливатися між вузлами</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="МНК · розділ" data-screen-label="04" data-speaker-notes="Сума залишків не годиться — додатні й від'ємні компенсуються. Квадрати невід'ємні й зважують великі відхилення сильніше. Відхилення вертикальні, xᵢ вважаємо точними." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:40px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Лінійний МНК</div><span style="display:var(--hdr,inline);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;color:var(--mut)">03</span></div>
+  <div>
+    <div style="font-family:var(--m);font-size:40px;color:var(--acc)">S(a, b) = Σ (yᵢ − a − bxᵢ)² → min</div>
+    <h2 style="margin:18px 0 0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Чому саме квадрати</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:26px 30px;display:flex;flex-direction:column;gap:8px"><span style="font-family:var(--h);font-weight:700;font-size:30px">Без компенсації</span><span style="font-size:24px;line-height:1.38;color:var(--mut)">Σ rᵢ: + і − взаємно гасяться</span></div>
+    <div style="background:var(--bg);padding:26px 30px;display:flex;flex-direction:column;gap:8px"><span style="font-family:var(--h);font-weight:700;font-size:30px">Великим — більша вага</span><span style="font-size:24px;line-height:1.38;color:var(--mut)">квадрат посилює великі відхилення</span></div>
+    <div style="background:var(--bg);padding:26px 30px;display:flex;flex-direction:column;gap:8px"><span style="font-family:var(--h);font-weight:700;font-size:30px">Вертикальні відхилення</span><span style="font-size:24px;line-height:1.38;color:var(--mut)">уздовж осі y, не по перпендикуляру</span></div>
+  </div>
+</section>
+
+<section data-label="Нормальні рівняння" data-screen-label="05" data-speaker-notes="Частинні похідні — нуль. Перше рівняння: сума залишків нуль, пряма проходить через точку середніх. D > 0, якщо є два різні x. Центровані формули стійкіші до втрати цифр." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 18 · Пряма</span><span style="display:var(--hdr,inline);color:var(--mut)">04</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Нормальні рівняння для ŷ = a + bx</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">∂S/∂a = 0, ∂S/∂b = 0</div>
+        <div style="font-family:var(--m);font-size:32px;line-height:1.6;color:var(--acc)">na + bΣxᵢ = Σyᵢ<br>aΣxᵢ + bΣxᵢ² = Σxᵢyᵢ</div>
+      </div>
+      <div style="flex:1;padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:14px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m);font-size:30px;line-height:1.5">
+        <span>D = nΣxᵢ² − (Σxᵢ)²</span>
+        <span>b = (nΣxᵢyᵢ − ΣxᵢΣyᵢ) / D</span>
+        <span>a = (Σyᵢ − bΣxᵢ) / n</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="flex:1;display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:18px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">D &gt; 0</h3><p style="margin:0;font-size:24px;line-height:1.38">Якщо є хоча б два різні xᵢ — мінімум єдиний і глобальний</p></div>
+        <div style="background:var(--bg);padding:18px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Σ rᵢ = 0</h3><p style="margin:0;font-size:24px;line-height:1.38">Пряма проходить через <span style="font-family:var(--m)">(x̄, ȳ)</span> — але кожен залишок не обов'язково малий</p></div>
+        <div style="background:var(--bg);padding:18px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Σ xᵢrᵢ = 0</h3><p style="margin:0;font-size:24px;line-height:1.38">Додаткова перевірка розрахунків</p></div>
+      </div>
+      <div style="padding:22px 30px;display:flex;flex-direction:column;gap:10px;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">У програмі — центровано</div>
+        <div style="font-family:var(--m);font-size:27px">b = Σ(xᵢ−x̄)(yᵢ−ȳ) / Σ(xᵢ−x̄)²,  a = ȳ − bx̄</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Парабола і базис" data-screen-label="06" data-speaker-notes="Модель лінійна за коефіцієнтами, навіть якщо базис нелінійний за x. Систему 3×3 розв'язуємо Гауссом із лекції 17. Єдиність — лінійна незалежність стовпців на вузлах, а не просто n ≥ m." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 18 · Загальні моделі</span><span style="display:var(--hdr,inline);color:var(--mut)">05</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Парабола й базисні функції</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 34px;display:flex;flex-direction:column;gap:20px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">ŷ = a + bx + cx² · система 3×3</div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:16px;font-family:var(--m);font-size:26px">
+        <div style="display:grid;grid-template-columns:repeat(3,auto);gap:6px">
+          <sc-for list="{{ quadM }}" as="c" hint-placeholder-count="9"><span style="padding:12px 14px;border:2px solid var(--ink);text-align:center">{{ c }}</span></sc-for>
+        </div>
+        <div style="display:grid;gap:6px"><span style="padding:12px 14px;border:2px solid var(--acc);color:var(--acc)">a</span><span style="padding:12px 14px;border:2px solid var(--acc);color:var(--acc)">b</span><span style="padding:12px 14px;border:2px solid var(--acc);color:var(--acc)">c</span></div>
+        <span>=</span>
+        <div style="display:grid;gap:6px"><span style="padding:12px 14px;border:2px solid var(--ink)">Σy</span><span style="padding:12px 14px;border:2px solid var(--ink)">Σxy</span><span style="padding:12px 14px;border:2px solid var(--ink)">Σx²y</span></div>
+      </div>
+      <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Щонайменше три різні xᵢ. Обчислювати за Горнером: <span style="font-family:var(--m);color:var(--ink)">a + x·(b + c·x)</span></p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Лінійна комбінація базису</div>
+        <div style="font-family:var(--m);font-size:34px">ŷ = Σ cⱼ φⱼ(x)</div>
+        <div style="font-family:var(--m);font-size:34px;color:var(--acc)">AᵀA c = Aᵀy,  Aᵢⱼ = φⱼ(xᵢ)</div>
+      </div>
+      <div style="flex:1;display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:16px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Лінійна за cⱼ</h3><p style="margin:0;font-size:24px;line-height:1.35"><span style="font-family:var(--m)">1, x, x²</span> · <span style="font-family:var(--m)">1, 1/x</span> · <span style="font-family:var(--m)">sin, cos</span> з відомою частотою</p></div>
+        <div style="background:var(--bg);padding:16px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Незалежні стовпці</h3><p style="margin:0;font-size:24px;line-height:1.35">Самої умови <span style="font-family:var(--m)">n ≥ m</span> недостатньо</p></div>
+        <div style="background:var(--bg2);padding:16px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Великі задачі</h3><p style="margin:0;font-size:24px;line-height:1.35">QR чи SVD без явного AᵀA; центрування й масштаб x</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Лінеаризація" data-screen-label="07" data-speaker-notes="Логарифмування змінює критерій: мінімізуємо суму квадратів логарифмів. Не додавати константу до від'ємних y заради логарифма — це інша модель. Модель a + b/x критерію не змінює." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 18 · Лінеаризація</span><span style="display:var(--hdr,inline);color:var(--mut)">06</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Звести до прямої Y = A + BX</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Область → заміна → МНК → повернення параметрів</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.2fr 1fr 1fr 1.3fr;grid-template-rows:auto repeat(3,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-size:26px">
+    <div style="padding:12px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Модель</div>
+    <div style="padding:12px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Нові змінні</div>
+    <div style="padding:12px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Повернення</div>
+    <div style="padding:12px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Умови</div>
+    <div style="padding:12px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Приклад</div>
+    <sc-for list="{{ linz }}" as="r" hint-placeholder-count="3">
+      <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:30px;color:var(--acc)">{{ r.m }}</div>
+      <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">{{ r.v }}</div>
+      <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">{{ r.r }}</div>
+      <div style="padding:8px 24px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m)">{{ r.c }}</div>
+      <div style="padding:8px 24px;display:flex;flex-direction:column;justify-content:center;gap:4px;border-top:var(--hair)"><span style="font-family:var(--m);font-size:23px;color:var(--mut)">{{ r.p }}</span><span style="font-family:var(--m)">{{ r.res }}</span></div>
+    </sc-for>
+  </div>
+  <div style="padding:22px 32px;display:flex;gap:30px;align-items:center;background:var(--fill);color:var(--acc-ink)">
+    <span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;flex:none">Увага</span>
+    <span style="font-size:26px;line-height:1.4">Після логарифма мінімізується <span style="font-family:var(--m)">Σ(ln yᵢ − ln ŷᵢ)²</span>, а не <span style="font-family:var(--m)">Σ(yᵢ − ŷᵢ)²</span> — порівнювати моделі в спільній шкалі</span>
+  </div>
+</section>
+
+<section data-label="Якість" data-screen-label="08" data-speaker-notes="RMSE з дільником n — у наших одиницях. s з n − p — оцінка шуму. R² порівнює з прогнозом середнім; може бути від'ємним на нових даних. Не ймовірність і не причинність." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 18 · Якість</span><span style="display:var(--hdr,inline);color:var(--mut)">07</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Показники якості наближення</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:28px 32px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">SSE</span><span style="font-family:var(--m);font-size:38px;color:var(--acc)">S = Σ rᵢ²</span><span style="font-size:24px;color:var(--mut)">у квадраті одиниць y</span></div>
+    <div style="background:var(--bg);padding:28px 32px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">RMSE</span><span style="font-family:var(--m);font-size:38px;color:var(--acc)">√(S / n)</span><span style="font-size:24px;color:var(--mut)">у початкових одиницях</span></div>
+    <div style="background:var(--bg);padding:28px 32px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Детермінація</span><span style="font-family:var(--m);font-size:38px;color:var(--acc)">R² = 1 − S / S_tot</span><span style="font-size:24px;color:var(--mut)">S_tot = Σ(yᵢ − ȳ)²</span></div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:24px 28px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Не плутати з s</h3><p style="margin:0;font-size:24px;line-height:1.4"><span style="font-family:var(--m)">s = √(S/(n − p))</span> — масштаб шуму з урахуванням параметрів</p></div>
+    <div style="background:var(--bg);padding:24px 28px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">R² &lt; 0</h3><p style="margin:0;font-size:24px;line-height:1.4">Після логарифма чи на нових даних — гірше за прогноз середнім</p></div>
+    <div style="background:var(--bg);padding:24px 28px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Не визначене</h3><p style="margin:0;font-size:24px;line-height:1.4">Усі yᵢ однакові — <span style="font-family:var(--m)">S_tot = 0</span></p></div>
+    <div style="background:var(--bg2);padding:24px 28px;display:flex;flex-direction:column;justify-content:center;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Знаки залишків</h3><p style="margin:0;font-size:24px;line-height:1.4">Довгі групи одного знака — неврахований вигин</p></div>
+  </div>
+</section>
+
+<section data-label="Приклад · суми" data-screen-label="09" data-speaker-notes="Шість спостережень. Усі стовпці для прямої та параболи. Пряма: b = 306/175, a = −34/75. Парабола — Гаусс: c = 1/4, b = −1/700, a = 47/25." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 18 · Приклад</span><span style="display:var(--hdr,inline);color:var(--mut)">08</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Таблиця проміжних сум</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.5fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:auto repeat(7,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-family:var(--m);font-size:26px">
+      <sc-for list="{{ sumHead }}" as="h" hint-placeholder-count="7"><div style="padding:12px 18px;background:var(--bg2);color:var(--mut);font-size:24px">{{ h }}</div></sc-for>
+      <sc-for list="{{ sumCells }}" as="c" hint-placeholder-count="49"><div style="padding:0 18px;display:flex;align-items:center;border-top:var(--hair);background:{{ c.bg }};color:{{ c.fg }};font-weight:{{ c.fw }}">{{ c.v }}</div></sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="flex:1;padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Пряма</div>
+        <div style="font-family:var(--m);font-size:26px;line-height:1.5">6a + 21b = 34<br>21a + 91b = 149.6</div>
+        <div style="font-family:var(--m);font-size:28px;color:var(--acc)">D = 105 · b ≈ 1.748571<br>a ≈ −0.453333</div>
+      </div>
+      <div style="flex:1;padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:14px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Парабола · Гаусс</div>
+        <div style="font-family:var(--m);font-size:28px">c = 1/4, b = −1/700, a = 47/25</div>
+        <div style="font-family:var(--m);font-size:30px;color:var(--acc)">ŷ = 1.88 − x/700 + 0.25x²</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Приклад · порівняння" data-screen-label="10" data-speaker-notes="Пряма занижує краї й завищує середину — вигин. Парабола зменшує S у 170 разів. Але додатковий параметр не може збільшити S: пряма — окремий випадок параболи з c = 0." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 18 · Приклад</span><span style="display:var(--hdr,inline);color:var(--mut)">09</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Пряма проти параболи</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.25fr 1fr;gap:44px;min-height:0">
+    <div style="padding:24px 30px;display:flex;flex-direction:column;gap:10px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="display:flex;gap:30px;font-size:24px"><span style="display:flex;gap:10px;align-items:center"><span style="width:28px;height:4px;background:var(--mut)"></span>пряма</span><span style="display:flex;gap:10px;align-items:center"><span style="width:28px;height:5px;background:var(--acc)"></span>парабола</span><span style="display:flex;gap:10px;align-items:center"><span style="width:16px;height:16px;background:var(--fill);border:2px solid var(--ink)"></span>вимірювання</span></div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 1000 520" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" aria-hidden="true">
+          <path d="M40 460H970M40 460V30" stroke="var(--mut)" stroke-width="2"></path>
+          <path d="M80 414.7L930 108.7" stroke="var(--mut)" stroke-width="3" stroke-dasharray="10 8"></path>
+          <path d="M80 385.5L165 374.6L250 359.3L335 339.6L420 315.6L505 287.2L590 254.4L675 217.2L760 175.7L845 129.8L930 79.5" stroke="var(--acc)" stroke-width="5"></path>
+          <g fill="var(--fill)" stroke="var(--ink)" stroke-width="3"><rect x="70" y="376.5" width="20" height="20"></rect><rect x="240" y="348.5" width="20" height="20"></rect><rect x="410" y="303" width="20" height="20"></rect><rect x="580" y="247" width="20" height="20"></rect><rect x="750" y="166.5" width="20" height="20"></rect><rect x="920" y="68.5" width="20" height="20"></rect></g>
+          <g font-size="24" fill="currentColor" stroke="none" text-anchor="middle"><text x="80" y="495">1</text><text x="250" y="495">2</text><text x="420" y="495">3</text><text x="590" y="495">4</text><text x="760" y="495">5</text><text x="930" y="495">6</text></g>
+        </svg>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;grid-template-rows:auto 1fr 1fr;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m);font-size:26px">
+        <div style="padding:12px 20px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;color:var(--mut)">Модель</div><div style="padding:12px 20px;background:var(--bg2);color:var(--mut);font-size:24px">S</div><div style="padding:12px 20px;background:var(--bg2);color:var(--mut);font-size:24px">RMSE</div><div style="padding:12px 20px;background:var(--bg2);color:var(--mut);font-size:24px">R²</div>
+        <div style="padding:16px 20px;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:28px">Пряма</div><div style="padding:16px 20px;border-top:var(--hair)">2.3470</div><div style="padding:16px 20px;border-top:var(--hair)">0.6254</div><div style="padding:16px 20px;border-top:var(--hair)">0.9580</div>
+        <div style="padding:16px 20px;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Парабола</div><div style="padding:16px 20px;border-top:var(--hair);color:var(--acc)">0.0137</div><div style="padding:16px 20px;border-top:var(--hair);color:var(--acc)">0.0478</div><div style="padding:16px 20px;border-top:var(--hair);color:var(--acc)">0.9998</div>
+      </div>
+      <div style="flex:1;display:grid;grid-template-rows:auto 1fr;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="padding:12px 24px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Знаки залишків прямої</div>
+        <div style="padding:16px 24px;display:flex;gap:8px;align-items:center;justify-content:space-between">
+          <sc-for list="{{ resSigns }}" as="s" hint-placeholder-count="6"><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px"><span style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;font-family:var(--m);font-size:32px;background:{{ s.bg }};color:{{ s.fg }};border:2px solid var(--ink)">{{ s.s }}</span><span style="font-family:var(--m);font-size:20px;color:var(--mut)">{{ s.v }}</span></div></sc-for>
+        </div>
+      </div>
+      <div style="padding:18px 28px;font-size:24px;line-height:1.4;background:var(--bg2);border:var(--hair)">Пряма — окремий випадок параболи (<span style="font-family:var(--m)">c = 0</span>): додатковий параметр <b style="font-weight:600">не може збільшити</b> S</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Реалізація" data-screen-label="11" data-speaker-notes="Перевіряємо розмір, скінченність, невиродженість. Ітерацій немає, лінійна складність. Тести: точна пряма, сталий y, однакові x — різні ситуації." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 18 · Реалізація</span><span style="display:var(--hdr,inline);color:var(--mut)">10</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">fitLine у C++17</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.35fr 1fr;gap:44px;min-height:0">
+    <pre style="margin:0;display:block;align-content:center;font-family:var(--m);font-size:22px;line-height:1.48;background:var(--bg2);padding:20px 26px;white-space:pre;border:var(--hair)">Line fitLine(<span style="color:var(--acc);font-weight:600">const</span> vector&lt;<span style="color:var(--acc);font-weight:600">double</span>&gt;&amp; x, <span style="color:var(--acc);font-weight:600">const</span> vector&lt;<span style="color:var(--acc);font-weight:600">double</span>&gt;&amp; y) {
+    <span style="color:var(--acc);font-weight:600">if</span> (x.size() != y.size() || x.size() &lt; 2)
+        <span style="color:var(--acc);font-weight:600">throw</span> runtime_error(<span style="color:var(--mut)">"Invalid data size"</span>);
+    <span style="color:var(--acc);font-weight:600">double</span> meanX = 0, meanY = 0;
+    <span style="color:var(--acc);font-weight:600">for</span> (size_t i = 0; i &lt; x.size(); ++i) {
+        <span style="color:var(--acc);font-weight:600">if</span> (!isfinite(x[i]) || !isfinite(y[i])) <span style="color:var(--acc);font-weight:600">throw</span> …;
+        meanX += x[i];  meanY += y[i];
+    }
+    meanX /= x.size();  meanY /= y.size();
+    <span style="color:var(--acc);font-weight:600">double</span> sxx = 0, sxy = 0;
+    <span style="color:var(--acc);font-weight:600">for</span> (size_t i = 0; i &lt; x.size(); ++i) {
+        <span style="color:var(--acc);font-weight:600">double</span> dx = x[i] - meanX;
+        <span style="background:var(--fill);color:var(--acc-ink);padding:0 4px">sxx += dx * dx;  sxy += dx * (y[i] - meanY);</span>
+    }
+    <span style="color:var(--acc);font-weight:600">if</span> (!(sxx &gt; 0.0)) <span style="color:var(--acc);font-weight:600">throw</span> runtime_error(<span style="color:var(--mut)">"Degenerate data"</span>);
+    <span style="color:var(--acc);font-weight:600">double</span> b = sxy / sxx;
+    <span style="color:var(--acc);font-weight:600">return</span> {meanY - b * meanX, b};
+}</pre>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Очікуваний вивід</div>
+        <div style="font-family:var(--m);font-size:26px;line-height:1.5">a = −0.453333, b = 1.748571<br>SSE = 2.347048<br>RMSE = 0.625440, R² = 0.957978</div>
+      </div>
+      <div style="flex:1;display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:16px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Без ітерацій</h3><p style="margin:0;font-size:24px;line-height:1.35">Формули, O(n); замість зупинки — перевірки даних</p></div>
+        <div style="background:var(--bg);padding:16px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Тести</h3><p style="margin:0;font-size:24px;line-height:1.35">Точна пряма · сталий y · однакові x</p></div>
+        <div style="background:var(--bg2);padding:16px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Таблиці</h3><p style="margin:0;font-size:24px;line-height:1.35">Діаграма XY, <span style="font-family:var(--m)">ЛИНЕЙН / LINEST</span>; коефіцієнти з комірок, не з підпису</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Підсумки" data-screen-label="12" data-speaker-notes="Сім пунктів. Далі — чисельне диференціювання та інтегрування." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 18 · Підсумки</span><span style="display:var(--hdr,inline);color:var(--mut)">11</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Що забрати з лекції</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">01</span><span style="font-size:26px;line-height:1.35">Інтерполяція відтворює вузли, апроксимація — загальну залежність</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">02</span><span style="font-size:26px;line-height:1.35">МНК мінімізує суму квадратів залишків; для прямої — два нормальні рівняння</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">03</span><span style="font-size:26px;line-height:1.35">Парабола — система 3×3; загальний базис — <span style="font-family:var(--m)">AᵀAc = Aᵀy</span></span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">04</span><span style="font-size:26px;line-height:1.35">Логарифмічна лінеаризація потребує додатних даних і змінює критерій</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">05</span><span style="font-size:26px;line-height:1.35">SSE, RMSE, R² доповнюють аналіз залишків, але не гарантують прогнозу</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">06</span><span style="font-size:26px;line-height:1.35">Округлюють для подання; якість — за неокругленими коефіцієнтами</span></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:25px;color:var(--mut);padding-top:16px;border-top:var(--hair)">
+    <span>Попередня · Лекція 17. Системи рівнянь</span>
+    <span style="font-family:var(--h);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Далі · Лекція 19. Диференціювання та інтегрування</span>
+  </div>
+</section>
+
+<section data-label="Контрольні запитання" data-screen-label="13" data-speaker-notes="Запитання 4 — вивести на дошці. Лабораторна робота 4 — МНК." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 18 · Перевірка</span><span style="display:var(--hdr,inline);color:var(--mut)">12</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Контрольні запитання</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.4fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Теорія</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;font-size:25px;line-height:1.3">
+        <sc-for list="{{ questions }}" as="q" hint-placeholder-count="9"><div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">{{ q.n }}</span><span>{{ q.t }}</span></div></sc-for>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:1.3fr 1fr;gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg2);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:16px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">4 · На дошці</div><p style="margin:0;font-size:30px;line-height:1.35">Виведіть нормальні рівняння для моделі <span style="font-family:var(--m)">y = a + bx</span></p></div>
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Матеріали</div><a href="https://kaldra1.github.io/aimo/lectures/18-least-squares/" style="font-size:26px">Лекція 18 на сайті курсу</a><a href="https://kaldra1.github.io/aimo/labs/4/" style="font-size:26px">Лабораторна робота №4</a></div>
+    </div>
+  </div>
+</section>
+
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Бурштин&quot;,&quot;М'ята&quot;],&quot;default&quot;:&quot;Бурштин&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Оформлення&quot;},&quot;showHeaderLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Оформлення&quot;}}">
+class Component extends DCLogic {
+  applyTweaks() {
+    const b = document.body.style;
+    b.setProperty("--fill", this.props.accent === "М'ята" ? "#5fd3bd" : "#f0b45a");
+    b.setProperty("--hdr", this.props.showHeaderLabels === false ? "none" : "inline");
+  }
+  componentDidMount() { this.applyTweaks(); }
+  componentDidUpdate() { this.applyTweaks(); }
+  renderVals() {
+    const rows = [[1,"2.10",1,1,1,"2.10","2.10"],[2,"2.90",4,8,16,"5.80","11.60"],[3,"4.20",9,27,81,"12.60","37.80"],[4,"5.80",16,64,256,"23.20","92.80"],[5,"8.10",25,125,625,"40.50","202.50"],[6,"10.90",36,216,1296,"65.40","392.40"],["Σ 21","34.00",91,441,2275,"149.60","739.20"]];
+    const res = [0.804762,-0.143810,-0.592381,-0.740952,-0.189524,0.861905];
+    return {
+      quadM: ["n","Σx","Σx²","Σx","Σx²","Σx³","Σx²","Σx³","Σx⁴"],
+      linz: [
+        { m: "y = ae^(bx)", v: "X = x, Y = ln y", r: "a = e^A, b = B", c: "y > 0", p: "(0,2) (1,4) (2,8)", res: "y = 2e^((ln2)x)" },
+        { m: "y = ax^b", v: "X = ln x, Y = ln y", r: "a = e^A, b = B", c: "x > 0, y > 0", p: "(1,3) (2,12) (4,48)", res: "y = 3x²" },
+        { m: "y = a + b/x", v: "X = 1/x, Y = y", r: "a = A, b = B", c: "x ≠ 0", p: "(1,5) (2,3) (4,2)", res: "y = 1 + 4/x" }
+      ],
+      sumHead: ["xᵢ","yᵢ","xᵢ²","xᵢ³","xᵢ⁴","xᵢyᵢ","xᵢ²yᵢ"],
+      sumCells: rows.flatMap((r, i) => r.map(v => ({ v: String(v), bg: i === 6 ? "var(--bg2)" : "transparent", fg: i === 6 ? "var(--acc)" : "var(--ink)", fw: i === 6 ? 600 : 400 }))),
+      resSigns: res.map(v => ({ s: v > 0 ? "+" : "−", v: v.toFixed(2), bg: v > 0 ? "var(--fill)" : "var(--bg)", fg: v > 0 ? "var(--acc-ink)" : "var(--ink)" })),
+      questions: [
+        [1, "Чим відрізняються інтерполяція, апроксимація й екстраполяція?"],
+        [2, "Чому Лагранж проходить через усі вузли? Вимога до вузлів?"],
+        [3, "Чому мінімізують суму квадратів, а не суму залишків?"],
+        [5, "Коли коефіцієнти прямої однозначні? Навіщо центрувати?"],
+        [6, "Які проміжні суми потрібні для квадратичної моделі?"],
+        [7, "Що означає лінійність за коефіцієнтами? Приклад"],
+        [8, "Як лінеаризувати три залежності, які обмеження?"],
+        [9, "RMSE проти залишкової похибки; коли R² не визначене?"],
+        [10, "Чому менше S і більше R² не завжди краща модель?"]
+      ].map(([n, t]) => ({ n, t }))
+    };
+  }
+}
+</script>
+</body>
+</html>

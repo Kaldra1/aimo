@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<script src="./resources.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/styles.css">
+<script src="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/_ds_bundle.js"></script>
+<link rel="stylesheet" href="fonts/fonts.css">
+<title>АІМО — Лекція 20 · Золотий перетин і дихотомія</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  --h: "Manrope", system-ui, sans-serif;
+  --b: "IBM Plex Sans", system-ui, sans-serif;
+  --m: "IBM Plex Mono", ui-monospace, monospace;
+  --bg: #f5f7f5; --bg2: #e7efeb; --ink: #16262b; --mut: #56696d; --ln: rgba(22,38,43,.16);
+  --acc: #0d6e63; --fill: #f0b45a; --acc-ink: #1b2620;
+  --hair: 1px solid var(--ln);
+  --mk-c: rgba(22,38,43,.45);
+  --mk-img: linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c));
+  --mk-pos: 0 -7px, -7px 0, right 0 top -7px, right -7px top 0, 0 bottom -7px, -7px bottom 0, right 0 bottom -7px, right -7px bottom 0;
+  --mk-size: 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px;
+  --grid: linear-gradient(rgba(238,243,239,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(238,243,239,.045) 1px, transparent 1px);
+}
+a { color: var(--acc); text-decoration: none; }
+a:hover { color: var(--ink); }
+</style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" data-uneditable="">
+
+<section data-label="Титул" data-screen-label="01" data-speaker-notes="Частота пристрою, тривалість операції, параметр алгоритму — одне числове налаштування. Похідна невідома, значення — результат тривалого моделювання. Шукаємо мінімум лише порівнянням значень." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;gap:60px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
+    <div style="align-self:flex-start;border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Лекція 20 · Алгоритми і методи обчислень</div>
+    <div>
+      <h1 style="margin:0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Метод <span style="color:var(--acc)">золотого<br>перетину</span>. Метод<br>дихотомії</h1>
+      <p style="margin:30px 0 0;font-size:36px;line-height:1.3;color:var(--mut);max-width:900px">Одновимірна оптимізація без похідних</p>
+    </div>
+    <div style="display:flex;gap:18px;font-size:24px;color:var(--mut)"><span>Змістовий модуль 2. Методи обчислень</span><span>·</span><span>Тема 4. Чисельні методи розв'язання прикладних задач</span></div>
+  </div>
+  <div style="width:580px;flex:none;display:flex;flex-direction:column;justify-content:center">
+    <div style="padding:44px 48px;display:flex;flex-direction:column;gap:22px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m)">
+      <div style="font-size:34px">f(x*) = min f(x)</div>
+      <div style="font-size:30px;color:var(--mut)">x ∈ [a₀, b₀]</div>
+      <div style="padding-top:20px;border-top:var(--hair);font-size:44px;color:var(--acc)">τ ≈ 0.618034</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Унімодальність" data-screen-label="02" data-speaker-notes="Координата мінімуму й мінімальне значення — різні результати з різними одиницями. Строга унімодальність: спадає до мінімуму, зростає після. Скінченна кількість проб не доводить унімодальності." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 20 · Постановка</span><span style="display:var(--hdr,inline);color:var(--mut)">01</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Унімодальність і правила відкидання</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.1fr 1fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Припущення</div>
+        <p style="margin:0;font-size:26px;line-height:1.42">Неперервна, єдиний мінімум, <b style="font-weight:600">строго спадає</b> до нього й <b style="font-weight:600">строго зростає</b> після. Мінімум може бути на межі</p>
+      </div>
+      <div style="flex:1;display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:16px 30px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:30px">f(x₁) &lt; f(x₂)</span><span style="font-family:var(--m);font-size:30px;color:var(--acc)">→ [a, x₂]</span></div>
+        <div style="background:var(--bg);padding:16px 30px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:30px">f(x₁) &gt; f(x₂)</span><span style="font-family:var(--m);font-size:30px;color:var(--acc)">→ [x₁, b]</span></div>
+        <div style="background:var(--bg2);padding:16px 30px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:30px">рівні</span><span style="font-size:24px;color:var(--mut)">у коді — до першої гілки</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Чому працює перше правило</div>
+        <p style="margin:0;font-size:25px;line-height:1.42">Якби мінімум лежав правіше <span style="font-family:var(--m)">x₂</span>, обидві точки були б на спадній частині: <span style="font-family:var(--m)">f(x₁) &gt; f(x₂)</span>. Суперечність</p>
+      </div>
+      <div style="flex:1;padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:14px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Зупинка · ε — похибка координати</div>
+        <div style="font-family:var(--m);font-size:36px">b − a ≤ 2ε</div>
+        <div style="font-family:var(--m);font-size:28px">x̂ = (a + b)/2,  |x̂ − x*| ≤ ε</div>
+        <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Близькість значень функції не замінює цього критерію: на пологій ділянці значення майже рівні далеко від мінімуму</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Дихотомія" data-screen-label="03" data-speaker-notes="Точки віддалені від середини на δ/2, не на δ. Скорочується вдвічі саме L − δ. δ має бути меншим за 2ε, інакше зупинки не буде. Два нові значення щокроку." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 20 · Дихотомія</span><span style="display:var(--hdr,inline);color:var(--mut)">02</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Метод дихотомії</h2>
+  <div style="padding:26px 40px;display:flex;gap:50px;align-items:center;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m)">
+    <span style="font-size:36px;color:var(--acc)">x₁,₂ = (a + b ∓ δ) / 2</span>
+    <span style="font-size:30px">0 &lt; δ &lt; 2ε</span>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:0;height:56px;width:560px;position:relative">
+      <div style="flex:1;height:4px;background:var(--ink)"></div>
+      <div style="position:absolute;left:0;top:14px;width:4px;height:28px;background:var(--ink)"></div>
+      <div style="position:absolute;right:0;top:14px;width:4px;height:28px;background:var(--ink)"></div>
+      <div style="position:absolute;left:262px;top:10px;width:16px;height:36px;background:var(--fill);border:2px solid var(--ink)"></div>
+      <div style="position:absolute;left:290px;top:10px;width:16px;height:36px;background:var(--fill);border:2px solid var(--ink)"></div>
+    </div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-rows:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:18px 30px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:32px;color:var(--acc);flex:none">1</span><span style="font-size:26px">Довжина ≤ 2ε — повернути середину</span></div>
+      <div style="background:var(--bg);padding:18px 30px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:32px;color:var(--acc);flex:none">2</span><span style="font-size:26px">Обчислити x₁, x₂ і <b style="font-weight:600">обидва</b> значення f</span></div>
+      <div style="background:var(--bg);padding:18px 30px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:32px;color:var(--acc);flex:none">3</span><span style="font-size:26px"><span style="font-family:var(--m)">f(x₁) ≤ f(x₂)</span> → b = x₂, інакше a = x₁</span></div>
+      <div style="background:var(--bg2);padding:18px 30px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:32px;color:var(--acc);flex:none">4</span><span style="font-size:26px">Повернутися до перевірки</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Закон скорочення</div>
+        <div style="font-family:var(--m);font-size:30px;line-height:1.5">Lₖ₊₁ = (Lₖ + δ)/2<br>Lₖ = δ + (L₀ − δ)/2ᵏ</div>
+      </div>
+      <div style="flex:1;padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Кроків і викликів</div>
+        <div style="font-family:var(--m);font-size:32px;color:var(--acc)">k_д = ⌈log₂ ((L₀ − δ)/(2ε − δ))⌉</div>
+        <span style="font-size:24px;color:var(--mut)">Викликів функції: <span style="font-family:var(--m);color:var(--ink)">2k_д</span>. Дуже мале δ — точки збігаються через округлення</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Не бісекція" data-screen-label="04" data-speaker-notes="Лекція 16: знак g у середині. Тут — порівняння двох значень f, знак f не важливий. Тест: додати сталу до f — мінімум і порівняння не змінюються." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 20 · Дихотомія</span><span style="display:var(--hdr,inline);color:var(--mut)">03</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Дихотомія — не бісекція</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:40px 46px;display:flex;flex-direction:column;justify-content:center;gap:22px">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Лекція 16 · корінь</div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:800;font-size:52px">Бісекція</h3>
+      <div style="font-family:var(--m);font-size:34px">g(x) = 0</div>
+      <p style="margin:0;font-size:27px;line-height:1.42"><b style="font-weight:600">Знак</b> у середині, одна проба — точне ділення навпіл. Неперервність і різні знаки на кінцях</p>
+    </div>
+    <div style="background:var(--bg2);padding:40px 46px;display:flex;flex-direction:column;justify-content:center;gap:22px">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Сьогодні · мінімум</div>
+      <h3 style="margin:0;font-family:var(--h);font-weight:800;font-size:52px;color:var(--acc)">Дихотомія</h3>
+      <div style="font-family:var(--m);font-size:34px">f(x) → min</div>
+      <p style="margin:0;font-size:27px;line-height:1.42"><b style="font-weight:600">Порівняння</b> двох значень, унімодальність. Функція може бути всюди додатною</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px">
+    <div style="padding:22px 32px;font-size:25px;line-height:1.4;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">Корінь <span style="font-family:var(--m)">f′ = 0</span> — окремий підхід: стаціонарна точка не завжди мінімум, а мінімум на межі не має нульової похідної</div>
+    <div style="padding:22px 32px;font-size:25px;line-height:1.4;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)"><b style="font-weight:600;color:var(--acc)">Тест реалізації:</b> додайте до f сталу або помножте на додатне число — результат не має змінитися</div>
+  </div>
+</section>
+
+<section data-label="Золотий перетин · розділ" data-screen-label="05" data-speaker-notes="Дихотомія скорочує швидко, але два виклики. Якщо функція дорога — розташувати точки так, щоб одна знадобилася на наступному кроці." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:40px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Золотий перетин</div><span style="display:var(--hdr,inline);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;color:var(--mut)">04</span></div>
+  <div>
+    <div style="font-family:var(--m);font-size:40px;color:var(--acc)">1/τ = τ/(1 − τ)  ⇒  τ² + τ − 1 = 0</div>
+    <h2 style="margin:18px 0 0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Одна нова точка на крок</h2>
+  </div>
+  <div style="display:flex;height:96px;border:var(--hair);font-family:var(--m);font-size:30px">
+    <div style="flex:382;display:flex;align-items:center;justify-content:center;background:rgba(238,243,239,.06)">1 − τ = τ² ≈ 0.382</div>
+    <div style="flex:618;display:flex;align-items:center;justify-content:center;border-left:var(--hair);background:var(--acc);color:var(--bg)">τ = (√5 − 1)/2 ≈ 0.618</div>
+  </div>
+</section>
+
+<section data-label="Золотий перетин · ідея" data-screen-label="06" data-speaker-notes="Зберегли [a, x₂] довжини τL. Нова права точка a + τ²L = a + (1 − τ)L — це стара x₁. Значення вже відоме. Переносити треба і координату, і значення." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 20 · Золотий перетин</span><span style="display:var(--hdr,inline);color:var(--mut)">05</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Повторне використання точки</h2>
+    <p style="margin:0 0 8px;font-family:var(--m);font-size:28px;color:var(--mut)">x₁ = a + (1−τ)(b−a),  x₂ = a + τ(b−a)</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.25fr 1fr;gap:44px;min-height:0">
+    <div style="padding:24px 30px;display:flex;flex-direction:column;gap:10px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">(x − 1.3)² + 1 на [0; 4] · крок 1</div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 1000 560" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" aria-hidden="true">
+          <rect x="599" y="60" width="321" height="380" fill="var(--bg2)" stroke="none"></rect>
+          <path d="M80 344L185 391.2L290 416L353 420L395 418.2L500 398L605 355.2L710 290L815 202.2L920 92" stroke="var(--acc)" stroke-width="5"></path>
+          <path d="M400.9 440V417.7M599.1 440V358.2" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 6"></path>
+          <circle cx="400.9" cy="417.7" r="10" fill="var(--fill)" stroke="var(--ink)" stroke-width="3"></circle>
+          <circle cx="599.1" cy="358.2" r="10" fill="var(--bg)" stroke="var(--ink)" stroke-width="3"></circle>
+          <path d="M40 440H960" stroke="var(--mut)" stroke-width="2"></path>
+          <path d="M80 470H599.1" stroke="var(--acc)" stroke-width="8"></path>
+          <path d="M80 500H289.2" stroke="var(--ink)" stroke-width="2"></path>
+          <circle cx="289.2" cy="500" r="8" fill="var(--bg)" stroke="var(--ink)" stroke-width="3"></circle>
+          <circle cx="400.9" cy="500" r="9" fill="var(--fill)" stroke="var(--ink)" stroke-width="3"></circle>
+          <path d="M80 500H599.1" stroke="var(--ink)" stroke-width="2"></path>
+          <g font-size="24" fill="currentColor" stroke="none"><text x="80" y="540" text-anchor="middle">0</text><text x="400.9" y="400" text-anchor="middle">x₁</text><text x="599.1" y="340" text-anchor="middle">x₂</text><text x="920" y="540" text-anchor="middle">4</text><text x="760" y="110" text-anchor="middle" fill="var(--mut)">відкинуто</text><text x="289.2" y="540" text-anchor="middle">нова x₁</text><text x="430" y="540">стара x₁ → x₂</text></g>
+        </svg>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Чому точка збігається</div>
+        <div style="font-family:var(--m);font-size:30px;line-height:1.5">a + τ · τL = a + (1 − τ)L = x₁</div>
+      </div>
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:10px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Скорочення</div>
+        <div style="font-family:var(--m);font-size:30px">Lₖ = τᵏL₀,  k_з = ⌈ln(2ε/L₀) / ln τ⌉</div>
+        <span style="font-size:24px;color:var(--mut)">Викликів: <span style="font-family:var(--m);color:var(--ink)">k + 1</span> — два на старті, далі по одному</span>
+      </div>
+      <div style="flex:1;padding:22px 30px;display:flex;flex-direction:column;justify-content:center;gap:10px;background:var(--fill);color:var(--acc-ink)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase">Відтворюваність</div>
+        <p style="margin:0;font-size:25px;line-height:1.4">Якщо кожен виклик — випадковий експеримент, повторне використання може закріпити невдале вимірювання</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Приклад · дихотомія" data-screen-label="07" data-speaker-notes="Шість скорочень, дванадцять викликів. Гарантія 0.041, фактично 0.015 — гарантія враховує всі можливі положення мінімуму." style="height:100%;display:flex;flex-direction:column;gap:24px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 64px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 20 · Приклад</span><span style="display:var(--hdr,inline);color:var(--mut)">06</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:64px;line-height:1.05;letter-spacing:-.015em">Дихотомія: δ = 0.02</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)"><span style="font-family:var(--m);color:var(--ink)">(x − 1.3)² + 1</span>, <span style="font-family:var(--m);color:var(--ink)">[0; 4]</span>, <span style="font-family:var(--m);color:var(--ink)">ε = 0.05</span> → довжина ≤ 0.1</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.7fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-columns:60px repeat(4,1fr) 1.6fr;grid-template-rows:auto repeat(6,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-family:var(--m);font-size:24px">
+      <sc-for list="{{ head }}" as="h" hint-placeholder-count="6"><div style="padding:10px 16px;background:var(--bg2);color:var(--mut);font-size:23px">{{ h }}</div></sc-for>
+      <sc-for list="{{ dich }}" as="r" hint-placeholder-count="6">
+        <div style="padding:0 16px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">{{ r.k }}</div>
+        <div style="padding:0 16px;display:flex;align-items:center;border-top:var(--hair)">{{ r.x1 }}</div>
+        <div style="padding:0 16px;display:flex;align-items:center;border-top:var(--hair)">{{ r.x2 }}</div>
+        <div style="padding:0 16px;display:flex;align-items:center;border-top:var(--hair)"><span style="background:{{ r.b1 }};padding:0 4px">{{ r.y1 }}</span></div>
+        <div style="padding:0 16px;display:flex;align-items:center;border-top:var(--hair)"><span style="background:{{ r.b2 }};padding:0 4px">{{ r.y2 }}</span></div>
+        <div style="padding:0 16px;display:flex;align-items:center;border-top:var(--hair);color:var(--acc)">{{ r.i }}</div>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Результат</div>
+        <div style="font-family:var(--m);font-size:34px">x̂ = 1.28484375</div>
+        <div style="font-family:var(--m);font-size:26px;line-height:1.5">L₆ = 0.0821875<br>гарантія 0.0411 · факт 0.0152</div>
+      </div>
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:20px 26px;display:flex;flex-direction:column;justify-content:center;gap:6px"><span style="font-family:var(--m);font-size:56px;color:var(--acc)">6</span><span style="font-size:24px">скорочень</span></div>
+        <div style="background:var(--bg2);padding:20px 26px;display:flex;flex-direction:column;justify-content:center;gap:6px"><span style="font-family:var(--m);font-size:56px;color:var(--acc)">12</span><span style="font-size:24px">викликів f</span></div>
+      </div>
+      <div style="padding:16px 26px;font-size:23px;line-height:1.4;background:var(--bg2);border:var(--hair)">Бурштином — менше з двох значень</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Приклад · золотий перетин" data-screen-label="08" data-speaker-notes="Вісім скорочень, але дев'ять викликів. Точка 1.304952 повторюється — її значення обчислене один раз. Алгоритм не зупиняється у вдалій точці: гарантія через довжину інтервалу." style="height:100%;display:flex;flex-direction:column;gap:24px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 64px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 20 · Приклад</span><span style="display:var(--hdr,inline);color:var(--mut)">07</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:64px;line-height:1.05;letter-spacing:-.015em">Золотий перетин</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Підкреслено — точка й значення, перенесені з попереднього кроку</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.7fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-columns:60px repeat(4,1fr) 1.6fr;grid-template-rows:auto repeat(8,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-family:var(--m);font-size:24px">
+      <sc-for list="{{ head }}" as="h" hint-placeholder-count="6"><div style="padding:10px 16px;background:var(--bg2);color:var(--mut);font-size:23px">{{ h }}</div></sc-for>
+      <sc-for list="{{ gold }}" as="r" hint-placeholder-count="8">
+        <div style="padding:0 16px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">{{ r.k }}</div>
+        <div style="padding:0 16px;display:flex;align-items:center;border-top:var(--hair);text-decoration:{{ r.u1 }}">{{ r.x1 }}</div>
+        <div style="padding:0 16px;display:flex;align-items:center;border-top:var(--hair);text-decoration:{{ r.u2 }}">{{ r.x2 }}</div>
+        <div style="padding:0 16px;display:flex;align-items:center;border-top:var(--hair)"><span style="background:{{ r.b1 }};padding:0 4px;text-decoration:{{ r.u1 }}">{{ r.y1 }}</span></div>
+        <div style="padding:0 16px;display:flex;align-items:center;border-top:var(--hair)"><span style="background:{{ r.b2 }};padding:0 4px;text-decoration:{{ r.u2 }}">{{ r.y2 }}</span></div>
+        <div style="padding:0 16px;display:flex;align-items:center;border-top:var(--hair);color:var(--acc)">{{ r.i }}</div>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Результат</div>
+        <div style="font-family:var(--m);font-size:34px">x̂ ≈ 1.294902</div>
+        <div style="font-family:var(--m);font-size:26px;line-height:1.5">L₈ ≈ 0.085145<br>факт ≈ 0.0051</div>
+      </div>
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:20px 26px;display:flex;flex-direction:column;justify-content:center;gap:6px"><span style="font-family:var(--m);font-size:56px">8</span><span style="font-size:24px">скорочень</span></div>
+        <div style="background:var(--bg2);padding:20px 26px;display:flex;flex-direction:column;justify-content:center;gap:6px"><span style="font-family:var(--m);font-size:56px;color:var(--acc)">9</span><span style="font-size:24px">викликів f</span></div>
+      </div>
+      <div style="padding:16px 26px;font-size:23px;line-height:1.4;background:var(--bg2);border:var(--hair)">Менша фактична похибка — <b style="font-weight:600">випадковість</b>, не гарантія методу</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Реалізація" data-screen-label="09" data-speaker-notes="Ключ — переносити координату разом зі значенням. Інакше порівняння стосуватиметься інших точок. Перевірка порядку точок ловить округлення. Зайвого останнього виклику немає." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 20 · Реалізація</span><span style="display:var(--hdr,inline);color:var(--mut)">08</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">goldenSection у C++17</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.35fr 1fr;gap:44px;min-height:0">
+    <pre style="margin:0;display:block;align-content:center;font-family:var(--m);font-size:21px;line-height:1.45;background:var(--bg2);padding:18px 24px;white-space:pre;border:var(--hair)"><span style="color:var(--acc);font-weight:600">const double</span> tau = (sqrt(5.0) - 1.0) / 2.0;
+<span style="color:var(--acc);font-weight:600">double</span> x1 = a + (1 - tau) * (b - a), x2 = a + tau * (b - a);
+<span style="color:var(--acc);font-weight:600">double</span> y1 = evaluate(x1, calls), y2 = evaluate(x2, calls);
+<span style="color:var(--acc);font-weight:600">while</span> (b - a &gt; 2 * eps) {
+    <span style="color:var(--acc);font-weight:600">if</span> (iterations &gt;= 1000) <span style="color:var(--acc);font-weight:600">throw</span> …;
+    <span style="color:var(--acc);font-weight:600">if</span> (y1 &lt;= y2) {
+        b = x2;  <span style="background:var(--fill);color:var(--acc-ink);padding:0 4px">x2 = x1;  y2 = y1;</span>
+        ++iterations;
+        <span style="color:var(--acc);font-weight:600">if</span> (b - a &lt;= 2 * eps) <span style="color:var(--acc);font-weight:600">break</span>;
+        x1 = a + (1 - tau) * (b - a);
+        <span style="color:var(--acc);font-weight:600">if</span> (!(a &lt; x1 &amp;&amp; x1 &lt; x2 &amp;&amp; x2 &lt; b)) <span style="color:var(--acc);font-weight:600">throw</span> …;
+        y1 = evaluate(x1, calls);
+    } <span style="color:var(--acc);font-weight:600">else</span> {
+        a = x1;  <span style="background:var(--fill);color:var(--acc-ink);padding:0 4px">x1 = x2;  y1 = y2;</span>
+        ++iterations;
+        <span style="color:var(--acc);font-weight:600">if</span> (b - a &lt;= 2 * eps) <span style="color:var(--acc);font-weight:600">break</span>;
+        x2 = a + tau * (b - a);
+        <span style="color:var(--acc);font-weight:600">if</span> (!(a &lt; x1 &amp;&amp; x1 &lt; x2 &amp;&amp; x2 &lt; b)) <span style="color:var(--acc);font-weight:600">throw</span> …;
+        y2 = evaluate(x2, calls);
+    }
+}
+<span style="color:var(--acc);font-weight:600">return</span> {a + (b - a) / 2, a, b, iterations, calls};</pre>
+    <div style="display:grid;grid-template-rows:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg2);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">Переносити пару</h3><p style="margin:0;font-size:24px;line-height:1.38">Координату <b style="font-weight:600">разом</b> зі значенням — інакше можна втратити мінімум</p></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Перевірка перед викликом</h3><p style="margin:0;font-size:24px;line-height:1.38">Довжину — до нової точки: без зайвого останнього виклику</p></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Порядок точок</h3><p style="margin:0;font-size:24px;line-height:1.38"><span style="font-family:var(--m)">a &lt; x₁ &lt; x₂ &lt; b</span> — ловить злиття через округлення</p></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Унімодальність</h3><p style="margin:0;font-size:24px;line-height:1.38">Передумова задачі — код її не перевіряє</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Порівняння" data-screen-label="10" data-speaker-notes="Дихотомія — менше ітерацій, золотий перетин — менше викликів. Якщо виклик функції найдорожчий, важить саме це. δ = 0.4ε у кожному рядку." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 20 · Порівняння</span><span style="display:var(--hdr,inline);color:var(--mut)">09</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Ітерації — не вартість</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)"><span style="font-family:var(--m);color:var(--ink)">L₀ = 4</span>, дихотомія з <span style="font-family:var(--m);color:var(--ink)">δ = 0.4ε</span></p>
+  </div>
+  <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr;grid-template-rows:auto repeat(4,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-size:26px">
+    <div style="padding:12px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Властивість</div>
+    <div style="padding:12px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Дихотомія</div>
+    <div style="padding:12px 26px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Золотий перетин</div>
+    <div style="padding:10px 26px;border-top:var(--hair)">Нових значень на крок</div><div style="padding:10px 26px;border-top:var(--hair);font-family:var(--m)">2</div><div style="padding:10px 26px;border-top:var(--hair);font-family:var(--m);color:var(--acc)">1 (після старту)</div>
+    <div style="padding:10px 26px;border-top:var(--hair)">Закон довжини</div><div style="padding:10px 26px;border-top:var(--hair);font-family:var(--m)">(Lₖ + δ)/2</div><div style="padding:10px 26px;border-top:var(--hair);font-family:var(--m);color:var(--acc)">τLₖ</div>
+    <div style="padding:10px 26px;border-top:var(--hair)">Викликів для k ≥ 1</div><div style="padding:10px 26px;border-top:var(--hair);font-family:var(--m)">2k</div><div style="padding:10px 26px;border-top:var(--hair);font-family:var(--m);color:var(--acc)">k + 1</div>
+    <div style="padding:10px 26px;border-top:var(--hair)">Параметр · похідні</div><div style="padding:10px 26px;border-top:var(--hair);font-family:var(--m)">δ · ні</div><div style="padding:10px 26px;border-top:var(--hair);font-family:var(--m);color:var(--acc)">немає · ні</div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:150px 1fr 1fr;grid-template-rows:auto repeat(5,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-family:var(--m);font-size:25px">
+    <div style="padding:10px 22px;background:var(--bg2);color:var(--mut);font-size:24px">ε</div>
+    <div style="padding:10px 22px;background:var(--bg2);color:var(--mut);font-size:24px">викликів · дихотомія</div>
+    <div style="padding:10px 22px;background:var(--bg2);color:var(--acc);font-size:24px">викликів · золотий перетин</div>
+    <sc-for list="{{ cmp }}" as="r" hint-placeholder-count="5">
+      <div style="padding:0 22px;display:flex;align-items:center;border-top:var(--hair)">{{ r.e }}</div>
+      <div style="padding:0 22px;display:flex;gap:16px;align-items:center;border-top:var(--hair)"><div style="height:22px;width:{{ r.dw }};background:var(--mut)"></div><span>{{ r.d }}</span><span style="font-size:22px;color:var(--mut)">{{ r.dk }}</span></div>
+      <div style="padding:0 22px;display:flex;gap:16px;align-items:center;border-top:var(--hair)"><div style="height:22px;width:{{ r.gw }};background:var(--acc)"></div><span style="color:var(--acc)">{{ r.g }}</span><span style="font-size:22px;color:var(--mut)">{{ r.gk }}</span></div>
+    </sc-for>
+  </div>
+</section>
+
+<section data-label="Фібоначчі і практика" data-screen-label="11" data-speaker-notes="Фібоначчі — наперед заданий бюджет. Відношення Fⱼ₋₁/Fⱼ → τ. Максимум — мінімізувати −f. У звіті: функція, межі, допуск, правило зупинки, δ, кількість викликів." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 20 · Практика</span><span style="display:var(--hdr,inline);color:var(--mut)">10</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Метод Фібоначчі й практичні поради</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="padding:28px 34px;display:flex;flex-direction:column;justify-content:center;gap:20px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Метод Фібоначчі</div>
+      <div style="font-family:var(--m);font-size:30px">F₀ = 0, F₁ = 1, Fⱼ₊₁ = Fⱼ + Fⱼ₋₁</div>
+      <div style="display:flex;gap:8px">
+        <sc-for list="{{ fib }}" as="f" hint-placeholder-count="9"><span style="flex:1;height:60px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:26px">{{ f }}</span></sc-for>
+      </div>
+      <div style="font-family:var(--m);font-size:30px;color:var(--acc)">Fⱼ₋₁ / Fⱼ → τ</div>
+      <p style="margin:0;font-size:25px;line-height:1.42">Пропорції залежать від <b style="font-weight:600">наперед заданого</b> числа кроків — зручно, коли бюджет обчислень відомий. Золотий перетин — стала гранична пропорція</p>
+    </div>
+    <div style="display:grid;grid-template-rows:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Інтервал і допуск</h3><p style="margin:0;font-size:24px;line-height:1.38">Фізично осмислені; надто широкий — може порушити унімодальність</p></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Максимум</h3><p style="margin:0;font-size:24px;line-height:1.38">Мінімізувати <span style="font-family:var(--m)">−f</span> або змінити порівняння в усіх гілках</p></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Тести</h3><p style="margin:0;font-size:24px;line-height:1.38">Внутрішній мінімум і монотонна функція з мінімумом на межі</p></div>
+      <div style="background:var(--bg2);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Звіт</h3><p style="margin:0;font-size:24px;line-height:1.38">Функція, межі, ε, зупинка, δ, кількість викликів і остаточні межі</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Підсумки" data-screen-label="12" data-speaker-notes="Сім пунктів. Остання лекція курсу." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 20 · Підсумки</span><span style="display:var(--hdr,inline);color:var(--mut)">11</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Що забрати з лекції</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">01</span><span style="font-size:26px;line-height:1.35">Оптимізація шукає координату мінімуму — це не пошук нуля</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">02</span><span style="font-size:26px;line-height:1.35">Унімодальність дозволяє за двома значеннями відкинути частину інтервалу</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">03</span><span style="font-size:26px;line-height:1.35">Дихотомія: <span style="font-family:var(--m)">Lₖ₊₁ = (Lₖ + δ)/2</span>, два виклики на крок</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">04</span><span style="font-size:26px;line-height:1.35">Довжина ≤ 2ε гарантує похибку середини ≤ ε</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">05</span><span style="font-size:26px;line-height:1.35">Золотий перетин повторно використовує точку й значення — один виклик на крок</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">06</span><span style="font-size:26px;line-height:1.35">Порівнювати методи за викликами функції за однакового критерію зупинки</span></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:25px;color:var(--mut);padding-top:16px;border-top:var(--hair)">
+    <span>Попередня · Лекція 19. Диференціювання та інтегрування</span>
+    <span style="font-family:var(--h);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Завершення курсу</span>
+  </div>
+</section>
+
+<section data-label="Контрольні запитання" data-screen-label="13" data-speaker-notes="Запитання 8 — показати на рисунку перенесення точки." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 20 · Перевірка</span><span style="display:var(--hdr,inline);color:var(--mut)">12</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Контрольні запитання</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.4fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Теорія</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;font-size:24px;line-height:1.3">
+        <sc-for list="{{ questions }}" as="q" hint-placeholder-count="11"><div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">{{ q.n }}</span><span>{{ q.t }}</span></div></sc-for>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:1.3fr 1fr;gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg2);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:16px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">8 · На дошці</div><p style="margin:0;font-size:30px;line-height:1.35">Яка точка та яке значення повторно використовуються, якщо золотий перетин відкидає праву частину?</p></div>
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Матеріали</div><a href="https://kaldra1.github.io/aimo/lectures/20-golden-section-bisection/" style="font-size:26px">Лекція 20 на сайті курсу</a></div>
+    </div>
+  </div>
+</section>
+
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Бурштин&quot;,&quot;М'ята&quot;],&quot;default&quot;:&quot;Бурштин&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Оформлення&quot;},&quot;showHeaderLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Оформлення&quot;}}">
+class Component extends DCLogic {
+  applyTweaks() {
+    const b = document.body.style;
+    b.setProperty("--fill", this.props.accent === "М'ята" ? "#5fd3bd" : "#f0b45a");
+    b.setProperty("--hdr", this.props.showHeaderLabels === false ? "none" : "inline");
+  }
+  componentDidMount() { this.applyTweaks(); }
+  componentDidUpdate() { this.applyTweaks(); }
+  renderVals() {
+    const F = "var(--fill)", N = "transparent";
+    const row = (k, x1, x2, y1, y2, i, extra) => Object.assign({ k, x1, x2, y1, y2, i, b1: parseFloat(y1) <= parseFloat(y2) ? F : N, b2: parseFloat(y1) <= parseFloat(y2) ? N : F, u1: "none", u2: "none" }, extra || {});
+    const gold = [
+      [1,"1.527864","2.472136","1.051922","2.373903","[0; 2.472136]"],
+      [2,"0.944272","1.527864","1.126542","1.051922","[0.944272; 2.472136]"],
+      [3,"1.527864","1.888544","1.051922","1.346384","[0.944272; 1.888544]"],
+      [4,"1.304952","1.527864","1.000025","1.051922","[0.944272; 1.527864]"],
+      [5,"1.167184","1.304952","1.017640","1.000025","[1.167184; 1.527864]"],
+      [6,"1.304952","1.390097","1.000025","1.008117","[1.167184; 1.390097]"],
+      [7,"1.252329","1.304952","1.002273","1.000025","[1.252329; 1.390097]"],
+      [8,"1.304952","1.337474","1.000025","1.001404","[1.252329; 1.337474]"]
+    ].map((r, idx, all) => {
+      const p = all[idx - 1];
+      const reused1 = p && (r[1] === p[1] || r[1] === p[2]);
+      const reused2 = p && (r[2] === p[1] || r[2] === p[2]);
+      return row(r[0], r[1], r[2], r[3], r[4], r[5], { u1: reused1 ? "underline" : "none", u2: reused2 ? "underline" : "none" });
+    });
+    const cmpRaw = [["0.1",5,10,7,8],["0.05",6,12,8,9],["0.01",8,16,12,13],["0.001",12,24,16,17],["0.0001",15,30,21,22]];
+    return {
+      head: ["k","x₁","x₂","f(x₁)","f(x₂)","новий інтервал"],
+      dich: [
+        [1,"1.990000","2.010000","1.476100","1.504100","[0; 2.010000]"],
+        [2,"0.995000","1.015000","1.093025","1.081225","[0.995000; 2.010000]"],
+        [3,"1.492500","1.512500","1.037056","1.045156","[0.995000; 1.512500]"],
+        [4,"1.243750","1.263750","1.003164","1.001314","[1.243750; 1.512500]"],
+        [5,"1.368125","1.388125","1.004641","1.007766","[1.243750; 1.388125]"],
+        [6,"1.305938","1.325938","1.000035","1.000673","[1.243750; 1.325938]"]
+      ].map(r => row.apply(null, r)),
+      gold,
+      cmp: cmpRaw.map(([e, dk, d, gk, g]) => ({ e, d, g, dk: dk + " кр.", gk: gk + " кр.", dw: (d / 30 * 62) + "%", gw: (g / 30 * 62) + "%" })),
+      fib: [0,1,1,2,3,5,8,13,21],
+      questions: [
+        [1, "Чим координата мінімуму відрізняється від мінімального значення?"],
+        [2, "Яке припущення про унімодальність використано в доведенні?"],
+        [3, "Чому за f(x₁) < f(x₂) можна відкинути частину правіше x₂?"],
+        [4, "Чому b − a ≤ 2ε забезпечує точність середини?"],
+        [5, "Чим дихотомія відрізняється від бісекції з лекції 16?"],
+        [6, "Як δ впливає на граничну довжину інтервалу дихотомії?"],
+        [7, "Як із пропорції золотого перетину отримати τ² = 1 − τ?"],
+        [9, "Як обчислити кількість скорочень золотого перетину?"],
+        [10, "Чому реалізації можуть мати різну кількість викликів наприкінці?"],
+        [11, "Чому близькість значень f не гарантує точності координати?"],
+        [12, "Чим метод Фібоначчі відрізняється від золотого перетину?"]
+      ].map(([n, t]) => ({ n, t }))
+    };
+  }
+}
+</script>
+</body>
+</html>

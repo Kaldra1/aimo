@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<script src="./resources.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/styles.css">
+<script src="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/_ds_bundle.js"></script>
+<link rel="stylesheet" href="fonts/fonts.css">
+<title>АІМО — Лекція 2 · Рекурсія</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  --h: "Manrope", system-ui, sans-serif;
+  --b: "IBM Plex Sans", system-ui, sans-serif;
+  --m: "IBM Plex Mono", ui-monospace, monospace;
+  --bg: #f5f7f5; --bg2: #e7efeb; --ink: #16262b; --mut: #56696d; --ln: rgba(22,38,43,.16);
+  --acc: #0d6e63; --fill: #f0b45a; --acc-ink: #1b2620;
+  --hair: 1px solid var(--ln);
+  --mk-c: rgba(22,38,43,.45);
+  --mk-img: linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c));
+  --mk-pos: 0 -7px, -7px 0, right 0 top -7px, right -7px top 0, 0 bottom -7px, -7px bottom 0, right 0 bottom -7px, right -7px bottom 0;
+  --mk-size: 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px;
+  --grid: linear-gradient(rgba(238,243,239,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(238,243,239,.045) 1px, transparent 1px);
+}
+a { color: var(--acc); text-decoration: none; }
+a:hover { color: var(--ink); }
+</style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" data-uneditable="">
+
+<section data-label="Титул" data-screen-label="01" data-speaker-notes="Матрьошка, дзеркало навпроти дзеркала, гілка, схожа на дерево. Функція викликає сама себе для меншої версії задачі. Як будувати, де доречна, де шкодить." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;gap:60px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
+    <div style="align-self:flex-start;border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Лекція 2 · Алгоритми і методи обчислень</div>
+    <div>
+      <h1 style="margin:0;font-family:var(--h);font-weight:800;font-size:120px;line-height:1.02;letter-spacing:-.02em"><span style="color:var(--acc)">Рекурсія</span></h1>
+      <p style="margin:30px 0 0;font-size:36px;line-height:1.3;color:var(--mut);max-width:900px">Концепція, базові приклади та застосування</p>
+    </div>
+    <div style="display:flex;gap:18px;font-size:24px;color:var(--mut)"><span>Змістовий модуль 1. Теорія алгоритмів</span><span>·</span><span>Тема 1. Основи теорії алгоритмів</span></div>
+  </div>
+  <div style="width:580px;flex:none;display:flex;flex-direction:column;justify-content:center">
+    <div style="padding:44px 48px;display:flex;flex-direction:column;gap:22px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m)">
+      <div style="font-size:34px">n! = n · (n − 1)!</div>
+      <div style="font-size:34px;color:var(--mut)">0! = 1</div>
+      <div style="padding-top:20px;border-top:var(--hair);font-size:40px;color:var(--acc)">4! = 4·3·2·1 = 24</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Що таке рекурсія" data-screen-label="02" data-speaker-notes="Дві частини будь-якої правильної рекурсії. Головне правило: кожен виклик має наближати до базового випадку." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 2 · Концепція</span><span style="display:var(--hdr,inline);color:var(--mut)">01</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Базовий випадок і рекурсивний крок</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:28px 36px;display:flex;flex-direction:column;justify-content:center;gap:14px"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Базовий випадок</span><p style="margin:0;font-size:27px;line-height:1.42">Задача настільки проста, що відповідь відома <b style="font-weight:600">без рекурсії</b></p><div style="font-family:var(--m);font-size:34px">0! = 1</div></div>
+      <div style="background:var(--bg);padding:28px 36px;display:flex;flex-direction:column;justify-content:center;gap:14px"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Рекурсивний крок</span><p style="margin:0;font-size:27px;line-height:1.42">Задачу зводять до тієї самої задачі <b style="font-weight:600">меншого розміру</b></p><div style="font-family:var(--m);font-size:34px">n! = n · (n − 1)!</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:30px;line-height:1.6;background:var(--bg2);padding:24px 30px;white-space:pre;border:var(--hair)"><span style="color:var(--acc);font-weight:600">long long</span> factorial(<span style="color:var(--acc);font-weight:600">int</span> n) {
+    <span style="color:var(--acc);font-weight:600">if</span> (n == 0) <span style="color:var(--acc);font-weight:600">return</span> 1;
+    <span style="color:var(--acc);font-weight:600">return</span> n * <span style="background:var(--fill);color:var(--acc-ink);padding:0 6px">factorial(n - 1)</span>;
+}</pre>
+      <div style="padding:24px 34px;font-size:27px;line-height:1.42;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">Кожен рекурсивний виклик має <b style="font-weight:600;color:var(--acc)">наближати до базового випадку</b> — інакше рекурсія нескінченна</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Стек викликів" data-screen-label="03" data-speaker-notes="Кожен виклик — окремий кадр стеку. Спуск до базового випадку, потім повернення у зворотному порядку. Глибина тут 5. Стек — кілька мегабайтів; надто глибока рекурсія — stack overflow." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 2 · Стек викликів</span><span style="display:var(--hdr,inline);color:var(--mut)">02</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Як виконується factorial(4)</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Останній створений кадр завершується <b style="font-weight:600;color:var(--ink)">першим</b></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-rows:auto repeat(5,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="padding:12px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Спуск ↓</div>
+      <sc-for list="{{ down }}" as="r" hint-placeholder-count="5">
+        <div style="padding:0 28px;display:flex;align-items:center;gap:20px;border-top:var(--hair);padding-left:{{ r.pad }}"><span style="font-family:var(--m);font-size:30px;padding:6px 14px;border:2px solid var(--ink);background:{{ r.bg }};color:{{ r.fg }}">{{ r.c }}</span><span style="font-size:24px;color:var(--mut)">{{ r.t }}</span></div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-rows:auto repeat(5,1fr);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="padding:12px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Повернення ↑</div>
+      <sc-for list="{{ up }}" as="r" hint-placeholder-count="5">
+        <div style="padding:0 28px;display:flex;align-items:center;justify-content:space-between;border-top:var(--hair)"><span style="font-family:var(--m);font-size:28px">{{ r.c }}</span><span style="font-family:var(--m);font-size:30px;color:var(--acc)">{{ r.v }}</span></div>
+      </sc-for>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:18px 30px;display:flex;gap:20px;align-items:baseline"><span style="font-family:var(--m);font-size:40px;color:var(--acc)">5</span><span style="font-size:25px">глибина рекурсії — одночасно відкритих викликів</span></div>
+    <div style="background:var(--fill);color:var(--acc-ink);padding:18px 30px;display:flex;align-items:center;font-size:25px">Надто глибока чи нескінченна — <b style="font-weight:600;margin-left:8px">stack overflow</b></div>
+  </div>
+</section>
+
+<section data-label="Базові приклади" data-screen-label="04" data-speaker-notes="Сума цифр, НСД, паліндром. Пройти трасування digitSum(4096) = 19." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 2 · Приклади</span><span style="display:var(--hdr,inline);color:var(--mut)">03</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Базові приклади</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:16px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Сума цифр</h3>
+      <pre style="margin:0;font-family:var(--m);font-size:23px;line-height:1.55;background:var(--bg2);padding:16px 20px;white-space:pre"><span style="color:var(--acc);font-weight:600">int</span> digitSum(<span style="color:var(--acc);font-weight:600">int</span> n) {
+  <span style="color:var(--acc);font-weight:600">if</span> (n &lt; 10) <span style="color:var(--acc);font-weight:600">return</span> n;
+  <span style="color:var(--acc);font-weight:600">return</span> n % 10
+       + digitSum(n / 10);
+}</pre>
+      <div style="margin-top:auto;font-family:var(--m);font-size:25px;line-height:1.5">4096 → 6 + 409<br>→ 6 + 9 + 40<br>→ 6 + 9 + 0 + 4 = <span style="color:var(--acc)">19</span></div>
+    </div>
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:16px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">НСД · Евклід</h3>
+      <pre style="margin:0;font-family:var(--m);font-size:23px;line-height:1.55;background:var(--bg2);padding:16px 20px;white-space:pre"><span style="color:var(--acc);font-weight:600">int</span> gcd(<span style="color:var(--acc);font-weight:600">int</span> a, <span style="color:var(--acc);font-weight:600">int</span> b) {
+  <span style="color:var(--acc);font-weight:600">if</span> (b == 0) <span style="color:var(--acc);font-weight:600">return</span> a;
+  <span style="color:var(--acc);font-weight:600">return</span> gcd(b, a % b);
+}</pre>
+      <div style="margin-top:auto;font-family:var(--m);font-size:25px;line-height:1.5">gcd(48, 18) → (18, 12)<br>→ (12, 6) → (6, 0)<br>= <span style="color:var(--acc)">6</span></div>
+    </div>
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:16px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Паліндром</h3>
+      <pre style="margin:0;font-family:var(--m);font-size:21px;line-height:1.55;background:var(--bg2);padding:16px 20px;white-space:pre"><span style="color:var(--acc);font-weight:600">bool</span> isPal(<span style="color:var(--acc);font-weight:600">const</span> string&amp; s,
+           <span style="color:var(--acc);font-weight:600">int</span> l, <span style="color:var(--acc);font-weight:600">int</span> r) {
+  <span style="color:var(--acc);font-weight:600">if</span> (l &gt;= r) <span style="color:var(--acc);font-weight:600">return true</span>;
+  <span style="color:var(--acc);font-weight:600">if</span> (s[l] != s[r]) <span style="color:var(--acc);font-weight:600">return false</span>;
+  <span style="color:var(--acc);font-weight:600">return</span> isPal(s, l + 1, r - 1);
+}</pre>
+      <div style="margin-top:auto;display:flex;gap:6px"><sc-for list="{{ pal }}" as="c" hint-placeholder-count="5"><span style="flex:1;height:58px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:28px;background:{{ c.bg }}">{{ c.v }}</span></sc-for></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Швидкий степінь" data-screen-label="05" data-speaker-notes="half обчислюємо один раз — інакше два виклики й жодного виграшу. Кожні два кроки показник щонайменше вдвічі менший: ~log₂ n викликів." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 2 · Приклади</span><span style="display:var(--hdr,inline);color:var(--mut)">04</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Швидке піднесення до степеня</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.1fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="display:grid;grid-template-columns:auto 1fr;grid-template-rows:repeat(3,1fr);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m);font-size:32px">
+        <div style="padding:16px 28px;color:var(--acc)">1</div><div style="padding:16px 28px;font-size:26px;display:flex;align-items:center;color:var(--mut)">n = 0</div>
+        <div style="padding:16px 28px;border-top:var(--hair);color:var(--acc)">(aⁿᐟ²)²</div><div style="padding:16px 28px;border-top:var(--hair);font-size:26px;display:flex;align-items:center;color:var(--mut)">n парне</div>
+        <div style="padding:16px 28px;border-top:var(--hair);color:var(--acc)">a · aⁿ⁻¹</div><div style="padding:16px 28px;border-top:var(--hair);font-size:26px;display:flex;align-items:center;color:var(--mut)">n непарне</div>
+      </div>
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:24px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><span style="font-size:24px;color:var(--mut)">наївно, n = 1000</span><span style="font-family:var(--m);font-size:52px">1000</span><span style="font-size:24px">множень</span></div>
+        <div style="background:var(--bg2);padding:24px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><span style="font-size:24px;color:var(--mut)">швидко, ~log₂ n</span><span style="font-family:var(--m);font-size:52px;color:var(--acc)">≈ 15</span><span style="font-size:24px">множень</span></div>
+      </div>
+    </div>
+    <pre style="margin:0;display:block;align-content:center;font-family:var(--m);font-size:28px;line-height:1.6;background:var(--bg2);padding:24px 30px;white-space:pre;border:var(--hair)"><span style="color:var(--acc);font-weight:600">double</span> power(<span style="color:var(--acc);font-weight:600">double</span> a, <span style="color:var(--acc);font-weight:600">int</span> n) {
+    <span style="color:var(--acc);font-weight:600">if</span> (n == 0) <span style="color:var(--acc);font-weight:600">return</span> 1;
+    <span style="color:var(--acc);font-weight:600">if</span> (n % 2 == 0) {
+        <span style="color:var(--acc);font-weight:600">double</span> half = <span style="background:var(--fill);color:var(--acc-ink);padding:0 6px">power(a, n / 2)</span>;
+        <span style="color:var(--acc);font-weight:600">return</span> half * half;
+    }
+    <span style="color:var(--acc);font-weight:600">return</span> a * power(a, n - 1);
+}
+<span style="color:var(--mut)">// half — обчислюємо один раз!</span></pre>
+  </div>
+</section>
+
+<section data-label="Ханойські вежі" data-screen-label="06" data-speaker-notes="Три кроки — і задача розв'язана для будь-якого n. 2ⁿ − 1 переміщень. 64 диски легенди — сотні мільярдів років навіть по одному за секунду." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 2 · Приклади</span><span style="display:var(--hdr,inline);color:var(--mut)">05</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Ханойські вежі</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.1fr 1fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="flex:1;padding:24px 30px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:end;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:80px;height:34px;background:var(--fill);border:2px solid var(--ink)"></span><span style="width:140px;height:34px;background:var(--fill);border:2px solid var(--ink)"></span><span style="width:200px;height:34px;background:var(--fill);border:2px solid var(--ink)"></span><span style="width:100%;height:6px;background:var(--ink)"></span><span style="font-family:var(--m);font-size:30px;margin-top:8px">A</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:100%;height:6px;background:var(--ink)"></span><span style="font-family:var(--m);font-size:30px;margin-top:8px;color:var(--mut)">B</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:100%;height:6px;background:var(--ink)"></span><span style="font-family:var(--m);font-size:30px;margin-top:8px;color:var(--acc)">C</span></div>
+      </div>
+      <div style="display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:14px 28px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">1</span><span style="font-size:25px">n − 1 верхніх: A → B (через C)</span></div>
+        <div style="background:var(--bg);padding:14px 28px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">2</span><span style="font-size:25px">найбільший: A → C</span></div>
+        <div style="background:var(--bg);padding:14px 28px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">3</span><span style="font-size:25px">n − 1: B → C (через A)</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <pre style="margin:0;font-family:var(--m);font-size:26px;line-height:1.6;background:var(--bg2);padding:22px 28px;white-space:pre;border:var(--hair)"><span style="color:var(--acc);font-weight:600">void</span> hanoi(<span style="color:var(--acc);font-weight:600">int</span> n, <span style="color:var(--acc);font-weight:600">char</span> from, <span style="color:var(--acc);font-weight:600">char</span> to, <span style="color:var(--acc);font-weight:600">char</span> via) {
+    <span style="color:var(--acc);font-weight:600">if</span> (n == 0) <span style="color:var(--acc);font-weight:600">return</span>;
+    hanoi(n - 1, from, via, to);
+    cout &lt;&lt; from &lt;&lt; <span style="color:var(--mut)">" -&gt; "</span> &lt;&lt; to &lt;&lt; <span style="color:var(--mut)">'\n'</span>;
+    hanoi(n - 1, via, to, from);
+}</pre>
+      <div style="padding:20px 28px;display:flex;flex-direction:column;gap:10px;border:var(--hair)"><span style="font-size:24px;color:var(--mut)">n = 3 · сім переміщень</span><span style="font-family:var(--m);font-size:26px">A→C A→B C→B A→C B→A B→C A→C</span></div>
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair)">
+        <div style="background:var(--bg);padding:18px 26px;display:flex;flex-direction:column;justify-content:center;gap:4px"><span style="font-size:23px;color:var(--mut)">переміщень</span><span style="font-family:var(--m);font-size:46px;color:var(--acc)">2ⁿ − 1</span></div>
+        <div style="background:var(--bg2);padding:18px 26px;display:flex;flex-direction:column;justify-content:center;gap:4px"><span style="font-size:23px;color:var(--mut)">64 диски</span><span style="font-family:var(--m);font-size:36px">1.8·10¹⁹</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Фібоначчі" data-screen-label="07" data-speaker-notes="fib(4) знову викликає fib(3) — повторні обчислення. 15 викликів для fib(5), 331 мільйон для fib(40). Мемоізація чи ітерація — O(n)." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 2 · Коли шкодить</span><span style="display:var(--hdr,inline);color:var(--mut)">06</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Числа Фібоначчі</h2>
+    <p style="margin:0 0 8px;font-family:var(--m);font-size:28px;color:var(--mut)">F₀ = 0, F₁ = 1, Fₙ = Fₙ₋₁ + Fₙ₋₂</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:26px 30px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Наївно</h3><span style="font-family:var(--m);font-size:26px;background:var(--fill);color:var(--acc-ink);padding:2px 10px">≈ 1.6ⁿ</span></div>
+      <pre style="margin:0;font-family:var(--m);font-size:22px;line-height:1.55;background:var(--bg2);padding:14px 18px;white-space:pre"><span style="color:var(--acc);font-weight:600">long long</span> fib(<span style="color:var(--acc);font-weight:600">int</span> n) {
+  <span style="color:var(--acc);font-weight:600">if</span> (n &lt;= 1) <span style="color:var(--acc);font-weight:600">return</span> n;
+  <span style="color:var(--acc);font-weight:600">return</span> fib(n-1) + fib(n-2);
+}</pre>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:8px;font-family:var(--m);font-size:22px">
+        <div style="display:flex;justify-content:center"><span style="padding:4px 10px;border:2px solid var(--ink)">f5</span></div>
+        <div style="display:flex;justify-content:space-around"><span style="padding:4px 10px;border:2px solid var(--ink)">f4</span><span style="padding:4px 10px;border:2px solid var(--ink);background:var(--fill)">f3</span></div>
+        <div style="display:flex;justify-content:space-around"><span style="padding:4px 10px;border:2px solid var(--ink);background:var(--fill)">f3</span><span style="padding:4px 10px;border:2px solid var(--ink)">f2</span><span style="padding:4px 10px;border:2px solid var(--ink)">f2</span><span style="padding:4px 10px;border:2px solid var(--ink)">f1</span></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:24px;padding-top:12px;border-top:var(--hair)"><span>fib(5) — <span style="font-family:var(--m)">15</span></span><span>fib(40) — <span style="font-family:var(--m)">331·10⁶</span></span></div>
+    </div>
+    <div style="background:var(--bg);padding:26px 30px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Мемоізація</h3><span style="font-family:var(--m);font-size:26px;color:var(--acc)">O(n)</span></div>
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:20px;line-height:1.55;background:var(--bg2);padding:14px 18px;white-space:pre"><span style="color:var(--acc);font-weight:600">long long</span> fibMemo(<span style="color:var(--acc);font-weight:600">int</span> n,
+        vector&lt;<span style="color:var(--acc);font-weight:600">long long</span>&gt;&amp; memo) {
+  <span style="color:var(--acc);font-weight:600">if</span> (n &lt;= 1) <span style="color:var(--acc);font-weight:600">return</span> n;
+  <span style="color:var(--acc);font-weight:600">if</span> (<span style="background:var(--fill);color:var(--acc-ink);padding:0 4px">memo[n] != -1</span>)
+      <span style="color:var(--acc);font-weight:600">return</span> memo[n];
+  <span style="color:var(--acc);font-weight:600">return</span> memo[n] =
+      fibMemo(n-1, memo)
+    + fibMemo(n-2, memo);
+}</pre>
+      <span style="font-size:24px;color:var(--mut)">Запам'ятовуємо обчислені значення</span>
+    </div>
+    <div style="background:var(--bg2);padding:26px 30px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Ітерація</h3><span style="font-family:var(--m);font-size:26px;color:var(--acc)">O(n)</span></div>
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:20px;line-height:1.55;background:var(--bg);padding:14px 18px;white-space:pre"><span style="color:var(--acc);font-weight:600">long long</span> fibIter(<span style="color:var(--acc);font-weight:600">int</span> n) {
+  <span style="color:var(--acc);font-weight:600">long long</span> prev = 0, cur = 1;
+  <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> i = 0; i &lt; n; i++) {
+    <span style="color:var(--acc);font-weight:600">long long</span> next = prev + cur;
+    prev = cur;
+    cur = next;
+  }
+  <span style="color:var(--acc);font-weight:600">return</span> prev;
+}</pre>
+      <span style="font-size:24px;color:var(--mut)">Від менших значень до більших</span>
+    </div>
+  </div>
+  <div style="padding:20px 32px;font-size:26px;line-height:1.4;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">Рекурсивне означення <b style="font-weight:600;color:var(--acc)">не завжди</b> означає, що рекурсивна реалізація ефективна</div>
+</section>
+
+<section data-label="Рекурсія та ітерація" data-screen-label="08" data-speaker-notes="Будь-яку рекурсію можна замінити циклом з явним стеком. Хвостова рекурсія — компілятор перетворює на цикл. Дерева, вирази, розділяй і володарюй — рекурсія; сума, факторіал — цикл." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 2 · Порівняння</span><span style="display:var(--hdr,inline);color:var(--mut)">07</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Рекурсія та ітерація</h2>
+  <div style="flex:1;display:grid;grid-template-columns:.7fr 1.3fr 1fr;grid-template-rows:auto repeat(4,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-size:26px">
+    <div style="padding:12px 28px;background:var(--bg2)"></div>
+    <div style="padding:12px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Рекурсія</div>
+    <div style="padding:12px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Ітерація</div>
+    <sc-for list="{{ cmp }}" as="r" hint-placeholder-count="4">
+      <div style="padding:8px 28px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:28px">{{ r.k }}</div>
+      <div style="padding:8px 28px;display:flex;align-items:center;border-top:var(--hair);line-height:1.35">{{ r.r }}</div>
+      <div style="padding:8px 28px;display:flex;align-items:center;border-top:var(--hair);line-height:1.35;color:var(--mut)">{{ r.i }}</div>
+    </sc-for>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px">
+    <div style="padding:22px 32px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Хвостова рекурсія</span><span style="font-size:25px;line-height:1.4">Виклик — остання дія (як у <span style="font-family:var(--m)">gcd</span>). Компілятор може перетворити на цикл без стеку</span></div>
+    <div style="padding:22px 32px;display:flex;flex-direction:column;gap:8px;background:var(--bg2);border:var(--hair)"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Взаємозамінність</span><span style="font-size:25px;line-height:1.4">Будь-яку рекурсію можна замінити циклом — у крайньому разі з явним стеком</span></div>
+  </div>
+</section>
+
+<section data-label="Застосування" data-screen-label="09" data-speaker-notes="Перебір підмножин: для кожного числа — взяти чи ні. pop_back повертає стан. Для n = 3 — 8 підмножин." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 2 · Застосування</span><span style="display:var(--hdr,inline);color:var(--mut)">08</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Де рекурсія природна</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.15fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <sc-for list="{{ uses }}" as="u" hint-placeholder-count="6"><div style="background:var(--bg);padding:20px 26px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">{{ u.t }}</h3><p style="margin:0;font-size:23px;line-height:1.35;color:var(--mut)">{{ u.d }}</p></div></sc-for>
+    </div>
+    <div style="padding:24px 30px;display:flex;flex-direction:column;gap:14px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Перебір · усі підмножини {1, …, n}</div>
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:22px;line-height:1.5;background:var(--bg2);padding:18px 24px;white-space:pre"><span style="color:var(--acc);font-weight:600">void</span> subsets(<span style="color:var(--acc);font-weight:600">int</span> k, <span style="color:var(--acc);font-weight:600">int</span> n, vector&lt;<span style="color:var(--acc);font-weight:600">int</span>&gt;&amp; chosen) {
+    <span style="color:var(--acc);font-weight:600">if</span> (k &gt; n) {
+        <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> x : chosen) cout &lt;&lt; x &lt;&lt; <span style="color:var(--mut)">' '</span>;
+        cout &lt;&lt; <span style="color:var(--mut)">'\n'</span>;
+        <span style="color:var(--acc);font-weight:600">return</span>;
+    }
+    subsets(k + 1, n, chosen);          <span style="color:var(--mut)">// не беремо k</span>
+    chosen.push_back(k);
+    subsets(k + 1, n, chosen);          <span style="color:var(--mut)">// беремо k</span>
+    <span style="background:var(--fill);color:var(--acc-ink);padding:0 4px">chosen.pop_back();</span>                  <span style="color:var(--mut)">// повертаємо стан</span>
+}</pre>
+      <span style="font-size:24px;color:var(--mut)"><span style="font-family:var(--m);color:var(--ink)">subsets(1, 3, chosen)</span> — 8 підмножин</span>
+    </div>
+  </div>
+</section>
+
+<section data-label="Типові помилки" data-screen-label="10" data-speaker-notes="factorial(-1) ніколи не дійде до нуля. Виклик без return — результат губиться." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 2 · Помилки</span><span style="display:var(--hdr,inline);color:var(--mut)">09</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Типові помилки</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <sc-for list="{{ errs }}" as="e" hint-placeholder-count="5"><div style="background:var(--bg);padding:28px 32px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--m);font-size:28px;color:var(--acc)">{{ e.n }}</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">{{ e.t }}</h3><p style="margin:0;font-size:24px;line-height:1.4">{{ e.d }}</p></div></sc-for>
+    <div style="background:var(--bg2);padding:28px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Перевірка</span><p style="margin:0;font-size:26px;line-height:1.4">Чи досяжний базовий випадок для <b style="font-weight:600">усіх</b> допустимих входів?</p></div>
+  </div>
+</section>
+
+<section data-label="Підсумки" data-screen-label="11" data-speaker-notes="Шість пунктів. Далі — тема 2, формальні моделі: машина Поста." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 2 · Підсумки</span><span style="display:var(--hdr,inline);color:var(--mut)">10</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Що забрати з лекції</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">01</span><span style="font-size:26px;line-height:1.35">Рекурсія — означення через самого себе для меншого випадку</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">02</span><span style="font-size:26px;line-height:1.35">Базовий випадок + рекурсивний крок, що наближає до нього</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">03</span><span style="font-size:26px;line-height:1.35">Кожен виклик — кадр стеку; спуск і повернення; глибина обмежена</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">04</span><span style="font-size:26px;line-height:1.35">Факторіал, сума цифр, НСД, швидкий степінь, паліндром, Ханой</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">05</span><span style="font-size:26px;line-height:1.35">Наївний Фібоначчі повторює обчислення — мемоізація або ітерація</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">06</span><span style="font-size:26px;line-height:1.35">Природна для «розділяй і володарюй», дерев, перебору, розбору виразів</span></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:25px;color:var(--mut);padding-top:16px;border-top:var(--hair)">
+    <span>Попередня · Лекція 1. Поняття алгоритму</span>
+    <span style="font-family:var(--h);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Далі · Лекція 3. Машина Поста</span>
+  </div>
+</section>
+
+<section data-label="Контрольні запитання" data-screen-label="12" data-speaker-notes="Запитання 12 — трасування на дошці." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 2 · Перевірка</span><span style="display:var(--hdr,inline);color:var(--mut)">11</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Контрольні запитання</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.4fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Теорія</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;font-size:24px;line-height:1.3">
+        <sc-for list="{{ questions }}" as="q" hint-placeholder-count="11"><div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">{{ q.n }}</span><span>{{ q.t }}</span></div></sc-for>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:1.3fr 1fr;gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg2);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:16px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">12 · На дошці</div><p style="margin:0;font-size:30px;line-height:1.35">Протрасуйте виклики</p><div style="font-family:var(--m);font-size:36px;line-height:1.5">gcd(84, 36)<br>digitSum(2024)</div></div>
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Матеріали</div><a href="https://kaldra1.github.io/aimo/lectures/02-recursion/" style="font-size:26px">Лекція 2 на сайті курсу</a></div>
+    </div>
+  </div>
+</section>
+
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Бурштин&quot;,&quot;М'ята&quot;],&quot;default&quot;:&quot;Бурштин&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Оформлення&quot;},&quot;showHeaderLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Оформлення&quot;}}">
+class Component extends DCLogic {
+  applyTweaks() {
+    const b = document.body.style;
+    b.setProperty("--fill", this.props.accent === "М'ята" ? "#5fd3bd" : "#f0b45a");
+    b.setProperty("--hdr", this.props.showHeaderLabels === false ? "none" : "inline");
+  }
+  componentDidMount() { this.applyTweaks(); }
+  componentDidUpdate() { this.applyTweaks(); }
+  renderVals() {
+    return {
+      down: [4,3,2,1,0].map((n, i) => ({ c: "factorial(" + n + ")", t: n === 0 ? "базовий випадок → 1" : "чекає на factorial(" + (n - 1) + ")", pad: (28 + i * 36) + "px", bg: n === 0 ? "var(--fill)" : "var(--bg)", fg: n === 0 ? "var(--acc-ink)" : "var(--ink)" })),
+      up: [["factorial(0)","1"],["factorial(1)","1 · 1 = 1"],["factorial(2)","2 · 1 = 2"],["factorial(3)","3 · 2 = 6"],["factorial(4)","4 · 6 = 24"]].map(([c, v]) => ({ c, v })),
+      pal: "радар".split("").map((v, i) => ({ v, bg: i === 2 ? "var(--fill)" : (i === 0 || i === 4) ? "var(--bg2)" : "var(--bg)" })),
+      cmp: [
+        { k: "Запис", r: "часто коротший, ближчий до математичного означення", i: "інколи довший" },
+        { k: "Пам'ять", r: "кадр стеку на кожен рівень", i: "зазвичай стала" },
+        { k: "Швидкодія", r: "накладні витрати на виклики", i: "без викликів" },
+        { k: "Ризики", r: "переповнення стеку, повторні обчислення", i: "помилки в керуванні циклом" }
+      ],
+      uses: [
+        { t: "Розділяй і володарюй", d: "бінарний пошук, злиття, швидке сортування" },
+        { t: "Обхід дерев", d: "розмір каталогу = файли + підкаталоги" },
+        { t: "Перебір варіантів", d: "підмножини, перестановки, головоломки" },
+        { t: "Розбір виразів", d: "вирази з дужками, компілятори" },
+        { t: "Фрактали", d: "сніжинка Коха, трикутник Серпінського" },
+        { t: "Теорія алгоритмів", d: "рекурсивні функції — модель алгоритму" }
+      ],
+      errs: [
+        { n: "01", t: "Немає базового випадку", d: "Або недосяжний: factorial(−1) ніколи не дійде до нуля" },
+        { n: "02", t: "Крок не зменшує задачу", d: "f(n) викликає f(n) з тим самим аргументом" },
+        { n: "03", t: "Повторні обчислення", d: "Як у наївному Фібоначчі" },
+        { n: "04", t: "Задовга рекурсія", d: "Рекурсивна сума мільйона чисел переповнить стек" },
+        { n: "05", t: "Втрачений результат", d: "Виклик f(n − 1); без return — значення нікуди не передається" }
+      ],
+      questions: [
+        [1, "Що таке рекурсивне означення? Приклад з математики"],
+        [2, "З яких двох частин складається правильна рекурсивна функція?"],
+        [3, "Стек викликів і кадр стеку; етапи спуску й повернення"],
+        [4, "Глибина рекурсії; чим небезпечна надто глибока?"],
+        [5, "Рекурсивна функція суми елементів масиву"],
+        [6, "Чому швидкий степінь виконує ~log n множень?"],
+        [7, "Скільки переміщень у ханойських вежах для 5 дисків?"],
+        [8, "Чому наївний Фібоначчі повільний? Як прискорити?"],
+        [9, "Що таке мемоізація?"],
+        [10, "Чим хвостова рекурсія відрізняється від звичайної?"],
+        [11, "Коли рекурсія доречна, а коли краще цикл?"]
+      ].map(([n, t]) => ({ n, t }))
+    };
+  }
+}
+</script>
+</body>
+</html>

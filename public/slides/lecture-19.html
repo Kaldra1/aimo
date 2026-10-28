@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<script src="./resources.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/styles.css">
+<script src="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/_ds_bundle.js"></script>
+<link rel="stylesheet" href="fonts/fonts.css">
+<title>АІМО — Лекція 19 · Чисельне диференціювання та інтегрування</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  --h: "Manrope", system-ui, sans-serif;
+  --b: "IBM Plex Sans", system-ui, sans-serif;
+  --m: "IBM Plex Mono", ui-monospace, monospace;
+  --bg: #f5f7f5; --bg2: #e7efeb; --ink: #16262b; --mut: #56696d; --ln: rgba(22,38,43,.16);
+  --acc: #0d6e63; --fill: #f0b45a; --acc-ink: #1b2620;
+  --hair: 1px solid var(--ln);
+  --mk-c: rgba(22,38,43,.45);
+  --mk-img: linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c));
+  --mk-pos: 0 -7px, -7px 0, right 0 top -7px, right -7px top 0, 0 bottom -7px, -7px bottom 0, right 0 bottom -7px, right -7px bottom 0;
+  --mk-size: 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px;
+  --grid: linear-gradient(rgba(238,243,239,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(238,243,239,.045) 1px, transparent 1px);
+}
+a { color: var(--acc); text-decoration: none; }
+a:hover { color: var(--ink); }
+</style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" data-uneditable="">
+
+<section data-label="Титул" data-screen-label="01" data-speaker-notes="Датчик температури — потрібна швидкість зміни; лічильник потужності — потрібна енергія. Похідна й інтеграл за значеннями у вузлах. Побачимо, чому надто малий крок погіршує результат." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;gap:60px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
+    <div style="align-self:flex-start;border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Лекція 19 · Алгоритми і методи обчислень</div>
+    <div>
+      <h1 style="margin:0;font-family:var(--h);font-weight:800;font-size:100px;line-height:1.02;letter-spacing:-.02em">Чисельне <span style="color:var(--acc)">диференціювання</span><br>та інтегрування</h1>
+      <p style="margin:30px 0 0;font-size:36px;line-height:1.3;color:var(--mut);max-width:960px">Скінченні різниці, вибір кроку, прямокутники, трапеції, Сімпсон, правило Рунге</p>
+    </div>
+    <div style="display:flex;gap:18px;font-size:24px;color:var(--mut)"><span>Змістовий модуль 2. Методи обчислень</span><span>·</span><span>Тема 4. Чисельні методи розв'язання прикладних задач</span></div>
+  </div>
+  <div style="width:560px;flex:none;display:flex;flex-direction:column;justify-content:center">
+    <div style="padding:44px 48px;display:flex;flex-direction:column;gap:22px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m)">
+      <div style="font-size:30px">f′ ≈ (f(x+h) − f(x−h)) / 2h</div>
+      <div style="font-size:30px">∫ f ≈ h · Σ wᵢ f(xᵢ)</div>
+      <div style="padding-top:20px;border-top:var(--hair);font-size:40px;color:var(--acc)">∫₀¹ 4/(1+x²) dx = π</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Скінченні різниці" data-screen-label="02" data-speaker-notes="Потік у реальному часі — ліва різниця, наступного відліку ще немає. Записаний масив — центральна всередині. Тейлор: члени першого порядку в центральній знищуються." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 19 · Похідна</span><span style="display:var(--hdr,inline);color:var(--mut)">01</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Перша похідна: три різниці</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Приклад: <span style="font-family:var(--m);color:var(--ink)">f = x³</span>, <span style="font-family:var(--m);color:var(--ink)">x = 1</span>, <span style="font-family:var(--m);color:var(--ink)">h = 0.1</span>, точно <span style="font-family:var(--m);color:var(--ink)">3</span></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <sc-for list="{{ diffs }}" as="d" hint-placeholder-count="3">
+      <div style="background:{{ d.bg }};padding:30px 34px;display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:36px">{{ d.n }}</h3><span style="font-family:var(--m);font-size:28px;color:var(--acc)">{{ d.o }}</span></div>
+        <div style="font-family:var(--m);font-size:28px;padding:14px 18px;background:var(--bg)">{{ d.f }}</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <sc-for list="{{ d.nodes }}" as="c" hint-placeholder-count="3"><span style="flex:1;height:54px;display:flex;align-items:center;justify-content:center;border:2px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font-family:var(--m);font-size:24px">{{ c.v }}</span></sc-for>
+        </div>
+        <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">{{ d.t }}</p>
+        <div style="margin-top:auto;display:flex;justify-content:space-between;align-items:baseline;padding-top:14px;border-top:var(--hair)"><span style="font-family:var(--m);font-size:40px">{{ d.v }}</span><span style="font-family:var(--m);font-size:26px;color:var(--mut)">{{ d.e }}</span></div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="padding:20px 32px;display:flex;gap:30px;align-items:center;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);flex:none">Тейлор</span>
+    <span style="font-family:var(--m);font-size:28px">D₀f = f′ + (h²/6)f‴ + O(h⁴)</span>
+    <span style="margin-left:auto;font-size:25px">h = 0.05 → <span style="font-family:var(--m)">3.0025</span>, похибка рівно вчетверо менша</span>
+  </div>
+</section>
+
+<section data-label="Друга похідна" data-screen-label="03" data-speaker-notes="Точний збіг — бо четверта похідна кубіка нульова. На краях таблиці — однобічні формули, точність неоднорідна. Нуль замість відсутнього значення підставляти не можна." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 19 · Похідна</span><span style="display:var(--hdr,inline);color:var(--mut)">02</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Друга похідна й табличні дані</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:26px 34px;display:flex;flex-direction:column;gap:14px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--m);font-size:34px;color:var(--acc)">D₂f = (f(x+h) − 2f(x) + f(x−h)) / h²</div>
+        <span style="font-size:25px;color:var(--mut)">= f″(x) + O(h²); потрібна обмежена f⁽⁴⁾</span>
+      </div>
+      <div style="padding:22px 34px;display:flex;justify-content:space-between;align-items:baseline;background:var(--bg2);border:var(--hair)"><span style="font-family:var(--m);font-size:28px">(1.331 − 2 + 0.729) / 0.01</span><span style="font-family:var(--m);font-size:36px;color:var(--acc)">= 6 = f″(1)</span></div>
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:23px;line-height:1.5;background:var(--bg2);padding:18px 24px;white-space:pre;border:var(--hair)"><span style="color:var(--acc);font-weight:600">const double</span> fm = f(x - h), f0 = f(x), fp = f(x + h);
+cout &lt;&lt; <span style="color:var(--mut)">"right: "</span>   &lt;&lt; (fp - f0) / h
+     &lt;&lt; <span style="color:var(--mut)">"left: "</span>    &lt;&lt; (f0 - fm) / h
+     &lt;&lt; <span style="color:var(--mut)">"central: "</span> &lt;&lt; (fp - fm) / (2 * h)
+     &lt;&lt; <span style="color:var(--mut)">"second: "</span>  &lt;&lt; <span style="background:var(--fill);color:var(--acc-ink);padding:0 4px">(fp - 2*f0 + fm) / (h*h)</span>;</pre>
+    </div>
+    <div style="display:grid;grid-template-rows:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Одиниці</h3><p style="margin:0;font-size:24px;line-height:1.38">°C і секунди → °C/с; друга різниця — °C/с². Мілісекунди замість секунд змінюють зміст</p></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Краї таблиці</h3><p style="margin:0;font-size:24px;line-height:1.38">Усередині — центральна, на краях — однобічні: точність масиву неоднорідна</p></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Нуль — це дані</h3><p style="margin:0;font-size:24px;line-height:1.38">Не підставляти 0 замість відсутнього вимірювання</p></div>
+      <div style="background:var(--bg2);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Нерівномірна сітка</h3><p style="margin:0;font-size:24px;line-height:1.38">Ці центральні формули безпосередньо не застосовують</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Вибір кроку" data-screen-label="04" data-speaker-notes="Центральна різниця для eˣ у x = 1. Спершу похибка падає як h², потім зростає через округлення η/h. Мінімум близько 10⁻⁶. На 10⁻¹⁶ — 1 + h = 1, різниця нульова." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 19 · Крок</span><span style="display:var(--hdr,inline);color:var(--mut)">03</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Найменший крок — не найкращий</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">D₀ для <span style="font-family:var(--m);color:var(--ink)">eˣ</span> у <span style="font-family:var(--m);color:var(--ink)">x = 1</span>, тип <span style="font-family:var(--m);color:var(--ink)">double</span></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.45fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-columns:130px 1fr 220px;grid-template-rows:auto repeat(9,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-family:var(--m);font-size:25px">
+      <div style="padding:10px 22px;background:var(--bg2);color:var(--mut);font-size:24px">h</div>
+      <div style="padding:10px 22px;background:var(--bg2);color:var(--mut);font-size:24px">lg похибки · −11 … 0</div>
+      <div style="padding:10px 22px;background:var(--bg2);color:var(--acc);font-size:24px">похибка</div>
+      <sc-for list="{{ stepErr }}" as="r" hint-placeholder-count="9">
+        <div style="padding:0 22px;display:flex;align-items:center;border-top:var(--hair)">{{ r.h }}</div>
+        <div style="padding:0 22px;display:flex;align-items:center;border-top:var(--hair)"><div style="height:24px;width:{{ r.w }};background:{{ r.c }}"></div></div>
+        <div style="padding:0 22px;display:flex;align-items:center;border-top:var(--hair);color:{{ r.tc }}">{{ r.e }}</div>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:26px 34px;display:flex;flex-direction:column;gap:14px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Модель похибки</div>
+        <div style="font-family:var(--m);font-size:38px">E(h) ≈ Ahᵖ + Bη / h</div>
+        <span style="font-size:24px;color:var(--mut)">η — похибка значень f. Баланс: <span style="font-family:var(--m);color:var(--ink)">h ∼ η^(1/(p+1))</span></span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair)">
+        <div style="background:var(--bg);padding:18px 26px;display:flex;flex-direction:column;gap:4px"><span style="font-size:23px;color:var(--mut)">однобічна</span><span style="font-family:var(--m);font-size:34px">~10⁻⁸</span></div>
+        <div style="background:var(--bg);padding:18px 26px;display:flex;flex-direction:column;gap:4px"><span style="font-size:23px;color:var(--mut)">центральна</span><span style="font-family:var(--m);font-size:34px;color:var(--acc)">~10⁻⁵</span></div>
+      </div>
+      <div style="flex:1;padding:22px 30px;display:flex;flex-direction:column;justify-content:center;gap:10px;background:var(--bg2);border:var(--hair)">
+        <p style="margin:0;font-size:25px;line-height:1.42">Почати з помірного кроку, зменшувати й шукати <b style="font-weight:600">діапазон стабільних</b> результатів. Для шумних даних — спершу згладити (лекція 18)</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Квадратури · розділ" data-screen-label="05" data-speaker-notes="Інтеграл — накопичений ефект: шлях за швидкістю, енергія за потужністю. Квадратура — зважена сума значень у вузлах." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:40px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Інтегрування</div><span style="display:var(--hdr,inline);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;color:var(--mut)">04</span></div>
+  <div>
+    <div style="font-family:var(--m);font-size:40px;color:var(--acc)">h = (b − a) / n,  xᵢ = a + ih</div>
+    <h2 style="margin:18px 0 0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Квадратурні формули</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:28px 32px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--h);font-weight:700;font-size:34px">Прямокутники</span><span style="font-size:24px;color:var(--mut)">стала на підінтервалі</span></div>
+    <div style="background:var(--bg);padding:28px 32px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--h);font-weight:700;font-size:34px">Трапеції</span><span style="font-size:24px;color:var(--mut)">відрізок через два вузли</span></div>
+    <div style="background:var(--bg);padding:28px 32px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--h);font-weight:700;font-size:34px">Сімпсон</span><span style="font-size:24px;color:var(--mut)">парабола через три вузли</span></div>
+  </div>
+</section>
+
+<section data-label="Прямокутники" data-screen-label="06" data-speaker-notes="Один параметр зсуву: 0 — ліві, 1 — праві, 0.5 — середні. Для зростаючої функції ліва занижує, права завищує. Середні вимагають значень у серединах — для готової таблиці їх може не бути." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 19 · Прямокутники</span><span style="display:var(--hdr,inline);color:var(--mut)">05</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Ліві, праві, середні</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:24px 30px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--m);font-size:28px">Lₙ = h Σ f(xᵢ), i = 0…n−1</span><span style="font-family:var(--m);font-size:24px;color:var(--mut)">L₂ = 0.125 · O(h)</span></div>
+    <div style="background:var(--bg);padding:24px 30px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--m);font-size:28px">Rₙ = h Σ f(xᵢ), i = 1…n</span><span style="font-family:var(--m);font-size:24px;color:var(--mut)">R₂ = 0.625 · O(h)</span></div>
+    <div style="background:var(--bg2);padding:24px 30px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--m);font-size:28px;color:var(--acc)">Mₙ = h Σ f(xᵢ + h/2)</span><span style="font-family:var(--m);font-size:24px;color:var(--mut)">M₂ = 0.3125 · O(h²)</span></div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:16px 28px;font-size:25px;background:var(--bg2);border:var(--hair)">Приклад: <span style="font-family:var(--m)">∫₀¹ x² dx = 1/3</span>, <span style="font-family:var(--m)">n = 2</span>, <span style="font-family:var(--m)">h = 0.5</span></div>
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:24px;line-height:1.55;background:var(--bg2);padding:20px 26px;white-space:pre;border:var(--hair)"><span style="color:var(--acc);font-weight:600">double</span> rectangles(<span style="color:var(--acc);font-weight:600">double</span> (*f)(<span style="color:var(--acc);font-weight:600">double</span>),
+                  <span style="color:var(--acc);font-weight:600">double</span> a, <span style="color:var(--acc);font-weight:600">double</span> b,
+                  <span style="color:var(--acc);font-weight:600">int</span> n, <span style="color:var(--acc);font-weight:600">double</span> shift) {
+    <span style="color:var(--acc);font-weight:600">const double</span> h = (b - a) / n;
+    <span style="color:var(--acc);font-weight:600">double</span> sum = 0.0;
+    <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> i = 0; i &lt; n; ++i)
+        sum += f(a + <span style="background:var(--fill);color:var(--acc-ink);padding:0 4px">(i + shift)</span> * h);
+    <span style="color:var(--acc);font-weight:600">return</span> h * sum;
+}  <span style="color:var(--mut)">// 0 — ліві, 1 — праві, 0.5 — середні</span></pre>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:14px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Глобальні оцінки · Mⱼ = max |f⁽ʲ⁾|</div>
+        <div style="font-family:var(--m);font-size:28px;line-height:1.6">|I − Lₙ|, |I − Rₙ| ≤ (b−a)h/2 · M₁<br>|I − Mₙ| ≤ (b−a)h²/24 · M₂</div>
+      </div>
+      <div style="flex:1;display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:16px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Монотонність</h3><p style="margin:0;font-size:24px;line-height:1.35">Зростає — ліва занижує, права завищує</p></div>
+        <div style="background:var(--bg);padding:16px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Локальна ≠ глобальна</h3><p style="margin:0;font-size:24px;line-height:1.35">Внески підінтервалів складаються: порядок знижується на 1</p></div>
+        <div style="background:var(--bg2);padding:16px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Готова таблиця</h3><p style="margin:0;font-size:24px;line-height:1.35">Середин може не бути — трапеції зручніші</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Трапеції" data-screen-label="07" data-speaker-notes="Внутрішній вузол належить двом трапеціям — дві половинні ваги дають одиницю. Tₙ = (Lₙ + Rₙ)/2. Для x² похибка 1/24 збігається з оцінкою." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 19 · Трапеції</span><span style="display:var(--hdr,inline);color:var(--mut)">06</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Метод трапецій</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:44px;min-height:0">
+    <div style="padding:24px 30px;display:flex;flex-direction:column;gap:10px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">4/(1 + x²) на [0; 1], n = 4</div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 1000 500" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" aria-hidden="true">
+          <path d="M80 440L80 60L290 82.4L500 136L710 196.8L920 250L920 440Z" fill="var(--fill)" stroke="none" opacity=".35"></path>
+          <path d="M80 60L290 82.4L500 136L710 196.8L920 250" stroke="var(--ink)" stroke-width="3"></path>
+          <path d="M290 440V82.4M500 440V136M710 440V196.8M920 440V250M80 440V60" stroke="var(--ink)" stroke-width="2"></path>
+          <path d="M80 60L185 65.8L290 82.4L395 106.9L500 136L605 166.7L710 196.8L815 224.8L920 250" stroke="var(--acc)" stroke-width="5"></path>
+          <path d="M40 440H970" stroke="var(--mut)" stroke-width="2"></path>
+          <g fill="var(--ink)" stroke="none"><circle cx="80" cy="60" r="8"></circle><circle cx="290" cy="82.4" r="8"></circle><circle cx="500" cy="136" r="8"></circle><circle cx="710" cy="196.8" r="8"></circle><circle cx="920" cy="250" r="8"></circle></g>
+          <g font-size="24" fill="currentColor" stroke="none" text-anchor="middle"><text x="80" y="475">0</text><text x="290" y="475">0.25</text><text x="500" y="475">0.5</text><text x="710" y="475">0.75</text><text x="920" y="475">1</text><text x="80" y="40">4</text><text x="920" y="230">2</text></g>
+        </svg>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:14px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--m);font-size:30px;color:var(--acc)">Tₙ = h((f(a) + f(b))/2 + Σ f(xᵢ))</div>
+        <div style="font-family:var(--m);font-size:28px">|I − Tₙ| ≤ (b−a)h²/12 · M₂</div>
+      </div>
+      <div style="padding:20px 32px;display:flex;gap:14px;align-items:center;border:var(--hair)">
+        <span style="font-size:24px;color:var(--mut);flex:none">ваги</span>
+        <sc-for list="{{ trapW }}" as="w" hint-placeholder-count="5"><span style="flex:1;height:56px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:28px;background:{{ w.bg }}">{{ w.v }}</span></sc-for>
+      </div>
+      <div style="flex:1;display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:16px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Tₙ = (Lₙ + Rₙ) / 2</h3><p style="margin:0;font-size:24px">Точна для лінійних функцій</p></div>
+        <div style="background:var(--bg);padding:16px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">∫₀¹ x², n = 2</h3><p style="margin:0;font-size:24px"><span style="font-family:var(--m)">T₂ = 0.375</span>, похибка 1/24 = оцінці з M₂ = 2</p></div>
+        <div style="background:var(--bg2);padding:16px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Знак</h3><p style="margin:0;font-size:24px">Нижче осі — від'ємний внесок; площа — інтеграл модуля</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Сімпсон" data-screen-label="08" data-speaker-notes="Парабола через три вузли дає ваги 1, 4, 1. n — парне число підінтервалів, вузлів непарна кількість. Точна для кубів. Потрібна гладкість: за зламів — розбити інтервал." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 19 · Сімпсон</span><span style="display:var(--hdr,inline);color:var(--mut)">07</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Формула Сімпсона</h2>
+  <div style="padding:26px 40px;display:flex;gap:50px;align-items:center;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <span style="font-family:var(--m);font-size:34px;color:var(--acc)">Sₙ = h/3 · (f₀ + fₙ + 4Σ f_непарні + 2Σ f_парні)</span>
+    <span style="margin-left:auto;font-family:var(--m);font-size:28px">|I − Sₙ| ≤ (b−a)h⁴/180 · M₄</span>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Ваги, n = 8 · вузли 0 … 8</div>
+        <div style="display:flex;gap:8px">
+          <sc-for list="{{ simpW }}" as="w" hint-placeholder-count="9"><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:100%;height:60px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:30px;background:{{ w.bg }};color:{{ w.fg }}">{{ w.v }}</span><span style="font-family:var(--m);font-size:20px;color:var(--mut)">{{ w.i }}</span></div></sc-for>
+        </div>
+      </div>
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:23px;line-height:1.5;background:var(--bg2);padding:18px 24px;white-space:pre;border:var(--hair)"><span style="color:var(--acc);font-weight:600">double</span> simpson(<span style="color:var(--acc);font-weight:600">double</span> a, <span style="color:var(--acc);font-weight:600">double</span> b, <span style="color:var(--acc);font-weight:600">int</span> n) {
+    <span style="color:var(--acc);font-weight:600">if</span> (n &lt;= 0 || <span style="background:var(--fill);color:var(--acc-ink);padding:0 4px">n % 2 != 0</span> || !(a &lt; b))
+        <span style="color:var(--acc);font-weight:600">throw</span> invalid_argument(<span style="color:var(--mut)">"…"</span>);
+    <span style="color:var(--acc);font-weight:600">const double</span> h = (b - a) / n;
+    <span style="color:var(--acc);font-weight:600">double</span> sum = f(a) + f(b);
+    <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> i = 1; i &lt; n; ++i)
+        sum += (i % 2 == 0 ? 2.0 : 4.0) * f(a + i * h);
+    <span style="color:var(--acc);font-weight:600">return</span> h * sum / 3.0;
+}</pre>
+    </div>
+    <div style="display:grid;grid-template-rows:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Парне n</h3><p style="margin:0;font-size:24px;line-height:1.38">Число підінтервалів; вузлів — непарна кількість <span style="font-family:var(--m)">n + 1</span></p></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Точна до кубів</h3><p style="margin:0;font-size:24px;line-height:1.38"><span style="font-family:var(--m)">S₂ = (0 + 4·0.25 + 1)/6 = 1/3</span> для x²</p></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Четвертий порядок</h3><p style="margin:0;font-size:24px;line-height:1.38">h/2 — провідний член приблизно в 16 разів менший</p></div>
+      <div style="background:var(--bg2);padding:20px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Потрібна гладкість</h3><p style="margin:0;font-size:24px;line-height:1.38">Розриви, злами — розбити інтервал у проблемних точках</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Число π" data-screen-label="09" data-speaker-notes="Трапеції — вчетверо щоподвоєння. Сімпсон швидше за типову четвертого порядку: f‴(0) = f‴(1) = 0, член h⁴ зникає. Особливість прикладу, не методу." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 19 · Приклад</span><span style="display:var(--hdr,inline);color:var(--mut)">08</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Обчислення π</h2>
+    <p style="margin:0 0 8px;font-family:var(--m);font-size:30px;color:var(--mut)">∫₀¹ 4/(1+x²) dx = 4·arctan 1 = π</p>
+  </div>
+  <div style="display:grid;grid-template-columns:90px repeat(5,1fr);grid-template-rows:auto repeat(4,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m);font-size:25px">
+    <div style="padding:10px 20px;background:var(--bg2);color:var(--mut);font-size:24px">n</div><div style="padding:10px 20px;background:var(--bg2);color:var(--mut);font-size:24px">Lₙ</div><div style="padding:10px 20px;background:var(--bg2);color:var(--mut);font-size:24px">Rₙ</div><div style="padding:10px 20px;background:var(--bg2);color:var(--mut);font-size:24px">Mₙ</div><div style="padding:10px 20px;background:var(--bg2);color:var(--mut);font-size:24px">Tₙ</div><div style="padding:10px 20px;background:var(--bg2);color:var(--acc);font-size:24px">Sₙ</div>
+    <sc-for list="{{ piTab }}" as="r" hint-placeholder-count="4">
+      <div style="padding:12px 20px;border-top:var(--hair);color:var(--mut)">{{ r.n }}</div><div style="padding:12px 20px;border-top:var(--hair)">{{ r.l }}</div><div style="padding:12px 20px;border-top:var(--hair)">{{ r.r }}</div><div style="padding:12px 20px;border-top:var(--hair)">{{ r.m }}</div><div style="padding:12px 20px;border-top:var(--hair)">{{ r.t }}</div><div style="padding:12px 20px;border-top:var(--hair);color:var(--acc)">{{ r.s }}</div>
+    </sc-for>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-columns:90px 1fr 1fr;grid-template-rows:auto repeat(4,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m);font-size:27px;min-height:0">
+      <div style="padding:10px 20px;background:var(--bg2);color:var(--mut);font-size:24px">n</div><div style="padding:10px 20px;background:var(--bg2);color:var(--mut);font-size:24px">|Tₙ − π|</div><div style="padding:10px 20px;background:var(--bg2);color:var(--acc);font-size:24px">|Sₙ − π|</div>
+      <sc-for list="{{ piErr }}" as="r" hint-placeholder-count="4">
+        <div style="padding:0 20px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">{{ r.n }}</div><div style="padding:0 20px;display:flex;align-items:center;border-top:var(--hair)">{{ r.t }}</div><div style="padding:0 20px;display:flex;align-items:center;border-top:var(--hair);color:var(--acc)">{{ r.s }}</div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:22px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Трапеції · ×4</h3><p style="margin:0;font-size:24px;line-height:1.38">Похибка вчетверо менша за кожне подвоєння — другий порядок</p></div>
+      <div style="background:var(--bg2);padding:22px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Сімпсон · швидше за ×16</h3><p style="margin:0;font-size:24px;line-height:1.38"><span style="font-family:var(--m)">f‴(0) = f‴(1) = 0</span> — член h⁴ зникає. Особливість прикладу</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Правило Рунге" data-screen-label="10" data-speaker-notes="Точний інтеграл зазвичай невідомий. Дві сітки — h і h/2 — усувають невідому сталу. Оцінка стосується дрібнішої сітки. Асимптотична, не безумовна гарантія." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 19 · Контроль точності</span><span style="display:var(--hdr,inline);color:var(--mut)">09</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Подвійний перерахунок</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:24px 32px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Оцінка Рунге</span><span style="font-family:var(--m);font-size:34px;color:var(--acc)">E ≈ |Q_{h/2} − Q_h| / (2ᵖ − 1)</span></div>
+    <div style="background:var(--bg);padding:24px 32px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Уточнення Річардсона</span><span style="font-family:var(--m);font-size:34px">I ≈ Q_{h/2} + (Q_{h/2} − Q_h) / (2ᵖ − 1)</span></div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.15fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="display:grid;grid-template-columns:1.4fr .6fr .6fr;grid-template-rows:auto repeat(3,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-size:25px">
+        <div style="padding:10px 22px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;color:var(--mut)">Метод</div><div style="padding:10px 22px;background:var(--bg2);font-family:var(--m);color:var(--mut)">p</div><div style="padding:10px 22px;background:var(--bg2);font-family:var(--m);color:var(--acc)">2ᵖ−1</div>
+        <div style="padding:10px 22px;border-top:var(--hair)">ліві / праві</div><div style="padding:10px 22px;border-top:var(--hair);font-family:var(--m)">1</div><div style="padding:10px 22px;border-top:var(--hair);font-family:var(--m);color:var(--acc)">1</div>
+        <div style="padding:10px 22px;border-top:var(--hair)">середні / трапеції</div><div style="padding:10px 22px;border-top:var(--hair);font-family:var(--m)">2</div><div style="padding:10px 22px;border-top:var(--hair);font-family:var(--m);color:var(--acc)">3</div>
+        <div style="padding:10px 22px;border-top:var(--hair)">Сімпсон</div><div style="padding:10px 22px;border-top:var(--hair);font-family:var(--m)">4</div><div style="padding:10px 22px;border-top:var(--hair);font-family:var(--m);color:var(--acc)">15</div>
+      </div>
+      <div style="flex:1;padding:22px 30px;display:flex;flex-direction:column;justify-content:center;gap:12px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Трапеції, n = 4 → 8</div>
+        <div style="font-family:var(--m);font-size:26px;line-height:1.5">E₈ ≈ |3.138988 − 3.131176| / 3<br>≈ 0.002604 · фактично 0.002604</div>
+        <span style="font-size:24px;color:var(--mut)">Уточнене: <span style="font-family:var(--m);color:var(--ink)">3.141592502459</span></span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:22px;line-height:1.5;background:var(--bg2);padding:18px 24px;white-space:pre;border:var(--hair)"><span style="color:var(--acc);font-weight:600">double</span> integrateRunge(<span style="color:var(--acc);font-weight:600">double</span> a, <span style="color:var(--acc);font-weight:600">double</span> b, <span style="color:var(--acc);font-weight:600">double</span> eps) {
+    <span style="color:var(--acc);font-weight:600">int</span> n = 4;
+    <span style="color:var(--acc);font-weight:600">double</span> coarse = trapezoid(a, b, n);
+    <span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> it = 0; it &lt; 18; ++it) {
+        n *= 2;
+        <span style="color:var(--acc);font-weight:600">double</span> fine = trapezoid(a, b, n);
+        <span style="color:var(--acc);font-weight:600">if</span> (<span style="background:var(--fill);color:var(--acc-ink);padding:0 4px">abs(fine - coarse) / 3.0 &lt;= eps</span>)
+            <span style="color:var(--acc);font-weight:600">return</span> fine;
+        coarse = fine;
+    }
+    <span style="color:var(--acc);font-weight:600">throw</span> runtime_error(<span style="color:var(--mut)">"Accuracy was not reached"</span>);
+}</pre>
+      <div style="padding:18px 28px;font-size:24px;line-height:1.4;background:var(--bg2);border:var(--hair)">Той самий метод, функція й межі — лише інша густота. Вузькі піки можуть дати <b style="font-weight:600">випадковий збіг</b></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Підсумки" data-screen-label="11" data-speaker-notes="Сім пунктів. Остання лекція — пошук мінімуму: золотий перетин і дихотомія." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 19 · Підсумки</span><span style="display:var(--hdr,inline);color:var(--mut)">10</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Що забрати з лекції</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">01</span><span style="font-size:26px;line-height:1.35">Однобічні різниці — <span style="font-family:var(--m)">O(h)</span>, центральна — <span style="font-family:var(--m)">O(h²)</span>; друга різниця чутлива до шуму</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">02</span><span style="font-size:26px;line-height:1.35">Крок — баланс похибки методу й округлення; найменший не найкращий</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">03</span><span style="font-size:26px;line-height:1.35">Ліві й праві прямокутники — перший порядок, середні й трапеції — другий</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">04</span><span style="font-size:26px;line-height:1.35">Сімпсон — парне n, четвертий порядок за достатньої гладкості</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">05</span><span style="font-size:26px;line-height:1.35">Рунге оцінює похибку на дрібнішій сітці, якщо виконується асимптотична модель</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">06</span><span style="font-size:26px;line-height:1.35">Вдалий приклад не змінює загального порядку методу</span></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:25px;color:var(--mut);padding-top:16px;border-top:var(--hair)">
+    <span>Попередня · Лекція 18. Метод найменших квадратів</span>
+    <span style="font-family:var(--h);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Далі · Лекція 20. Золотий перетин і дихотомія</span>
+  </div>
+</section>
+
+<section data-label="Контрольні запитання" data-screen-label="12" data-speaker-notes="Запитання 10 — обговорити на прикладі π." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 19 · Перевірка</span><span style="display:var(--hdr,inline);color:var(--mut)">11</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Контрольні запитання</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.4fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Теорія</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;font-size:25px;line-height:1.3">
+        <sc-for list="{{ questions }}" as="q" hint-placeholder-count="10"><div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">{{ q.n }}</span><span>{{ q.t }}</span></div></sc-for>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:1.3fr 1fr;gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg2);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:16px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">10 · Обговорення</div><p style="margin:0;font-size:30px;line-height:1.35">Чому для π похибка Сімпсона спадає швидше за модель четвертого порядку?</p></div>
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Матеріали</div><a href="https://kaldra1.github.io/aimo/lectures/19-numerical-differentiation-integration/" style="font-size:26px">Лекція 19 на сайті курсу</a></div>
+    </div>
+  </div>
+</section>
+
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Бурштин&quot;,&quot;М'ята&quot;],&quot;default&quot;:&quot;Бурштин&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Оформлення&quot;},&quot;showHeaderLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Оформлення&quot;}}">
+class Component extends DCLogic {
+  applyTweaks() {
+    const b = document.body.style;
+    b.setProperty("--fill", this.props.accent === "М'ята" ? "#5fd3bd" : "#f0b45a");
+    b.setProperty("--hdr", this.props.showHeaderLabels === false ? "none" : "inline");
+  }
+  componentDidMount() { this.applyTweaks(); }
+  componentDidUpdate() { this.applyTweaks(); }
+  renderVals() {
+    const on = { bd: "var(--ink)", bg: "var(--fill)", fg: "var(--acc-ink)" }, off = { bd: "var(--ln)", bg: "var(--bg2)", fg: "var(--mut)" }, ctr = { bd: "var(--ink)", bg: "var(--bg)", fg: "var(--ink)" };
+    const nodes = m => ["x−h", "x", "x+h"].map((v, i) => Object.assign({ v }, m[i] === 1 ? on : m[i] === 2 ? ctr : off));
+    const errs = [["10⁻¹",4.533e-3],["10⁻²",4.530e-5],["10⁻⁴",4.531e-9],["10⁻⁶",1.635e-10],["10⁻⁸",6.603e-9],["10⁻¹⁰",6.727e-7],["10⁻¹²",2.103e-4],["10⁻¹⁴",9.338e-3],["10⁻¹⁶",2.718]];
+    const fmt = e => { const p = Math.floor(Math.log10(e)); return p >= 0 ? e.toFixed(3) : (e / Math.pow(10, p)).toFixed(2) + "·10" + String(p).split("").map(c => ({"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"})[c]).join(""); };
+    const sup = s => s;
+    return {
+      diffs: [
+        { n: "Права", o: "O(h)", f: "(f(x+h) − f(x)) / h", nodes: nodes([0,1,1]), t: "Поточне й наступне значення", v: "3.31", e: "Δ 0.31", bg: "var(--bg)" },
+        { n: "Ліва", o: "O(h)", f: "(f(x) − f(x−h)) / h", nodes: nodes([1,1,0]), t: "Потік у реальному часі — наступного ще немає", v: "2.71", e: "Δ 0.29", bg: "var(--bg)" },
+        { n: "Центральна", o: "O(h²)", f: "(f(x+h) − f(x−h)) / 2h", nodes: nodes([1,0,1]), t: "Записаний масив, внутрішні вузли", v: "3.01", e: "Δ 0.01", bg: "var(--bg2)" }
+      ],
+      stepErr: errs.map(([h, e], i) => ({ h, e: fmt(e), w: Math.max(4, (Math.log10(e) + 11) / 11 * 100) + "%", c: i === 3 ? "var(--acc)" : i > 3 ? "var(--fill)" : "var(--mut)", tc: i === 3 ? "var(--acc)" : "var(--ink)" })),
+      trapW: ["½", "1", "1", "1", "½"].map((v, i) => ({ v, bg: (i === 0 || i === 4) ? "var(--fill)" : "var(--bg)" })),
+      simpW: [1,4,2,4,2,4,2,4,1].map((v, i) => ({ v, i, bg: v === 4 ? "var(--acc)" : v === 1 ? "var(--fill)" : "var(--bg)", fg: v === 4 ? "var(--bg)" : v === 1 ? "var(--acc-ink)" : "var(--ink)" })),
+      piTab: [
+        [4,"3.381176","2.881176","3.146801","3.131176","3.141568627"],
+        [8,"3.263988","3.013988","3.142895","3.138988","3.141592502"],
+        [16,"3.203442","3.078442","3.141918","3.140942","3.141592651"],
+        [32,"3.172680","3.110180","3.141674","3.141430","3.141592654"]
+      ].map(([n,l,r,m,t,s]) => ({ n, l, r, m, t, s })),
+      piErr: [[4,"1.04·10⁻²","2.40·10⁻⁵"],[8,"2.60·10⁻³","1.51·10⁻⁷"],[16,"6.51·10⁻⁴","2.36·10⁻⁹"],[32,"1.63·10⁻⁴","3.70·10⁻¹¹"]].map(([n,t,s]) => ({ n, t, s })),
+      questions: [
+        [1, "Які вузли потрібні для правої, лівої та центральної різниць?"],
+        [2, "Чому центральна різниця має вищий порядок за однобічні?"],
+        [3, "Як обчислити другу похідну за трьома значеннями?"],
+        [4, "Чому зменшення кроку може погіршити похідну?"],
+        [5, "Як побудувати ліві, праві й середні прямокутники?"],
+        [6, "Звідки половинні ваги крайніх вузлів у трапеціях?"],
+        [7, "Чому для Сімпсона число підінтервалів парне?"],
+        [8, "Які похідні потрібні для оцінок похибок квадратур?"],
+        [9, "Який результат оцінює правило Рунге? Як вибрати знаменник?"],
+        [11, "Коли мала різниця двох квадратур оманлива?"]
+      ].map(([n, t]) => ({ n, t }))
+    };
+  }
+}
+</script>
+</body>
+</html>

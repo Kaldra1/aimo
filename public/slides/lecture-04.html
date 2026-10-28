@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<script src="./resources.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/styles.css">
+<script src="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/_ds_bundle.js"></script>
+<link rel="stylesheet" href="fonts/fonts.css">
+<title>АІМО — Лекція 4 · Машина Тюрінга: означення</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  --h: "Manrope", system-ui, sans-serif;
+  --b: "IBM Plex Sans", system-ui, sans-serif;
+  --m: "IBM Plex Mono", ui-monospace, monospace;
+  --bg: #f5f7f5; --bg2: #e7efeb; --ink: #16262b; --mut: #56696d; --ln: rgba(22,38,43,.16);
+  --acc: #0d6e63; --fill: #f0b45a; --acc-ink: #1b2620;
+  --hair: 1px solid var(--ln);
+  --mk-c: rgba(22,38,43,.45);
+  --mk-img: linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c));
+  --mk-pos: 0 -7px, -7px 0, right 0 top -7px, right -7px top 0, 0 bottom -7px, -7px bottom 0, right 0 bottom -7px, right -7px bottom 0;
+  --mk-size: 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px;
+  --grid: linear-gradient(rgba(238,243,239,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(238,243,239,.045) 1px, transparent 1px);
+}
+a { color: var(--acc); text-decoration: none; }
+a:hover { color: var(--ink); }
+</style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" data-uneditable="">
+
+<section data-label="Титул" data-screen-label="01" data-speaker-notes="Найвідоміша модель алгоритму, прообраз комп'ютера. «Тюрінг-повна мова» — мова, якою можна запрограмувати будь-який алгоритм. Будова, команди, три способи задання, конфігурація." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;gap:60px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
+    <div style="align-self:flex-start;border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Лекція 4 · Алгоритми і методи обчислень</div>
+    <div>
+      <h1 style="margin:0;font-family:var(--h);font-weight:800;font-size:110px;line-height:1.02;letter-spacing:-.02em">Машина <span style="color:var(--acc)">Тюрінга</span></h1>
+      <p style="margin:30px 0 0;font-size:36px;line-height:1.3;color:var(--mut);max-width:900px">Означення та представлення</p>
+    </div>
+    <div style="display:flex;gap:18px;font-size:24px;color:var(--mut)"><span>Змістовий модуль 1. Теорія алгоритмів</span><span>·</span><span>Тема 2. Формальні моделі алгоритмічних машин</span></div>
+  </div>
+  <div style="width:580px;flex:none;display:flex;flex-direction:column;justify-content:center">
+    <div style="padding:44px 48px;display:flex;flex-direction:column;gap:22px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m)">
+      <div style="font-size:44px;color:var(--acc)">qᵢ a → a′ D qⱼ</div>
+      <div style="font-size:30px;color:var(--mut)">D ∈ {L, R, N}</div>
+      <div style="padding-top:20px;border-top:var(--hair);font-size:30px">q₀101 → … → 010 ! λ</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Історія" data-screen-label="02" data-speaker-notes="24-річний Тюрінг моделював людину-обчислювача з олівцем і папером: бачить кілька символів, пам'ятає етап, пише чи стирає, переводить погляд. Звідси — машина і доведення нерозв'язності." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 4 · Історія</span><span style="display:var(--hdr,inline);color:var(--mut)">01</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Людина-обчислювач як модель</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Алан Тюрінг, 1936 · «Про обчислювані числа»</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <sc-for list="{{ human }}" as="h" hint-placeholder-count="4"><div style="background:var(--bg);padding:30px 32px;display:flex;flex-direction:column;gap:16px"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">{{ h.n }}</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">{{ h.t }}</h3><p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">{{ h.d }}</p><div style="margin-top:auto;padding:12px 16px;background:var(--bg2);font-size:24px">{{ h.m }}</div></div></sc-for>
+  </div>
+  <div style="padding:22px 32px;font-size:26px;line-height:1.4;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">Результат: проблема розв'язності Гільберта <b style="font-weight:600;color:var(--acc)">не має розв'язку</b>. Пізніше — злам шифрів у Другу світову, перші комп'ютери, премія Тюрінга</div>
+</section>
+
+<section data-label="Будова" data-screen-label="03" data-speaker-notes="Три частини. На відміну від Поста: будь-який скінченний алфавіт і явне відокремлення станів від даних." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 4 · Будова</span><span style="display:var(--hdr,inline);color:var(--mut)">02</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Будова машини Тюрінга</h2>
+  <div style="padding:26px 40px;display:flex;flex-direction:column;gap:10px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="display:flex;gap:6px;align-items:flex-end">
+      <sc-for list="{{ demoTape }}" as="c" hint-placeholder-count="12"><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><span style="font-family:var(--m);font-size:26px;color:var(--acc);height:34px;font-weight:600">{{ c.car }}</span><span style="width:100%;height:76px;display:flex;align-items:center;justify-content:center;border:2px solid {{ c.bd }};font-family:var(--m);font-size:34px;background:{{ c.bg }};color:{{ c.fg }}">{{ c.v }}</span></div></sc-for>
+    </div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><div style="display:flex;gap:16px;align-items:baseline"><span style="font-family:var(--m);font-size:28px;color:var(--acc)">1</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Стрічка</h3></div><p style="margin:0;font-size:24px;line-height:1.4">Символи <b style="font-weight:600">зовнішнього алфавіту</b> <span style="font-family:var(--m)">A = {a₁, …, aₖ}</span> або <span style="font-family:var(--m)">λ</span>. Непорожніх — скінченна кількість</p></div>
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><div style="display:flex;gap:16px;align-items:baseline"><span style="font-family:var(--m);font-size:28px;color:var(--acc)">2</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Каретка</h3></div><p style="margin:0;font-size:24px;line-height:1.4">Читає символ, записує інший, зсувається на одну комірку</p></div>
+    <div style="background:var(--bg2);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><div style="display:flex;gap:16px;align-items:baseline"><span style="font-family:var(--m);font-size:28px;color:var(--acc)">3</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Керуючий пристрій</h3></div><p style="margin:0;font-size:24px;line-height:1.4">Стан з <b style="font-weight:600">внутрішнього алфавіту</b> <span style="font-family:var(--m)">Q = {q₀, …, qₙ}</span>. Старт — <span style="font-family:var(--m)">q₀</span>, зупинка — <span style="font-family:var(--m)">!</span></p></div>
+  </div>
+</section>
+
+<section data-label="Команда" data-screen-label="04" data-speaker-notes="Три дії за такт. Детермінованість: не більше однієї команди на пару. Немає команди — аварійна зупинка." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 4 · Команда</span><span style="display:var(--hdr,inline);color:var(--mut)">03</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Один такт — три дії</h2>
+  <div style="padding:30px 40px;display:grid;grid-template-columns:repeat(5,auto);gap:20px;align-items:center;justify-content:center;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m);font-size:64px">
+    <span style="padding:10px 24px;background:var(--bg2)">qᵢ a</span><span style="color:var(--mut)">→</span><span style="padding:10px 24px;background:var(--fill);color:var(--acc-ink)">a′</span><span style="padding:10px 24px;background:var(--fill);color:var(--acc-ink)">D</span><span style="padding:10px 24px;background:var(--fill);color:var(--acc-ink)">qⱼ</span>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px"><span style="font-family:var(--m);font-size:34px;color:var(--acc)">a′</span><p style="margin:0;font-size:25px;line-height:1.4">Записати символ (можливо, той самий)</p></div>
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px"><span style="font-family:var(--m);font-size:34px;color:var(--acc)">L · R · N</span><p style="margin:0;font-size:25px;line-height:1.4">Ліворуч, праворуч або на місці</p></div>
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:10px"><span style="font-family:var(--m);font-size:34px;color:var(--acc)">qⱼ</span><p style="margin:0;font-size:25px;line-height:1.4">Новий стан — той самий, інший чи зупинка</p></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:44px">
+    <div style="padding:20px 32px;display:flex;gap:24px;align-items:center;background:var(--bg2);border:var(--hair)"><span style="font-family:var(--m);font-size:30px;flex:none">q₀ 1 → 0 R q₁</span><span style="font-size:24px;color:var(--mut)">побачивши 1 у q₀ — записати 0, праворуч, у q₁</span></div>
+    <div style="padding:20px 32px;font-size:24px;line-height:1.4;border:var(--hair)"><b style="font-weight:600">Детермінована:</b> на пару (стан, символ) — не більше однієї команди. Немає — <b style="font-weight:600">аварійна</b> зупинка</div>
+  </div>
+</section>
+
+<section data-label="Способи задання" data-screen-label="05" data-speaker-notes="Та сама машина інвертування трьома способами. Скорочення: R — символ і стан без змін; 1R — записати 1; N! — зупинка. Порожня клітинка — аварійна зупинка." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 4 · Задання програми</span><span style="display:var(--hdr,inline);color:var(--mut)">04</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Три способи · машина інвертування</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">0 ↔ 1, рух праворуч до λ</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1.1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:26px 30px;display:flex;flex-direction:column;gap:16px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Список команд</h3>
+      <pre style="margin:0;font-family:var(--m);font-size:25px;line-height:1.7;background:var(--bg2);padding:18px 22px;white-space:pre">q0, 0 -&gt; 1, R, q0
+q0, 1 -&gt; 0, R, q0
+q0, λ -&gt; λ, N, !</pre>
+      <p style="margin:auto 0 0;font-size:24px;line-height:1.4;color:var(--mut)">Текстовий режим емулятора</p>
+    </div>
+    <div style="background:var(--bg2);padding:26px 30px;display:flex;flex-direction:column;gap:16px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px;color:var(--acc)">Таблиця переходів</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border:2px solid var(--ink);font-family:var(--m);font-size:28px;background:var(--bg)">
+        <span style="padding:12px 16px;border-bottom:2px solid var(--ink);color:var(--mut)"></span><span style="padding:12px 16px;border-bottom:2px solid var(--ink);border-left:var(--hair)">q₀</span><span style="padding:12px 16px;border-bottom:2px solid var(--ink);border-left:var(--hair);color:var(--mut);font-size:22px">скор.</span>
+        <span style="padding:12px 16px">0</span><span style="padding:12px 16px;border-left:var(--hair)">1Rq₀</span><span style="padding:12px 16px;border-left:var(--hair);color:var(--acc)">1R</span>
+        <span style="padding:12px 16px;border-top:var(--hair)">1</span><span style="padding:12px 16px;border-top:var(--hair);border-left:var(--hair)">0Rq₀</span><span style="padding:12px 16px;border-top:var(--hair);border-left:var(--hair);color:var(--acc)">0R</span>
+        <span style="padding:12px 16px;border-top:var(--hair)">λ</span><span style="padding:12px 16px;border-top:var(--hair);border-left:var(--hair)">λN!</span><span style="padding:12px 16px;border-top:var(--hair);border-left:var(--hair);color:var(--acc)">N!</span>
+      </div>
+      <p style="margin:auto 0 0;font-size:24px;line-height:1.4">Рядки — символи, стовпці — стани. Не змінюється — <b style="font-weight:600">не пишемо</b></p>
+    </div>
+    <div style="background:var(--bg);padding:26px 30px;display:flex;flex-direction:column;gap:16px">
+      <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Граф переходів</h3>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 520 320" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" aria-hidden="true">
+          <circle cx="160" cy="170" r="50" stroke-width="3"></circle>
+          <circle cx="410" cy="170" r="44" stroke-width="3"></circle><circle cx="410" cy="170" r="36" stroke-width="2"></circle>
+          <path d="M210 170H362" stroke-width="3"></path><path d="M350 160L366 170L350 180" stroke-width="3"></path>
+          <path d="M130 128C100 40 220 40 190 128" stroke="var(--acc)" stroke-width="3"></path><path d="M182 116L190 130L196 114" stroke="var(--acc)" stroke-width="3"></path>
+          <path d="M130 212C100 300 220 300 190 212" stroke="var(--acc)" stroke-width="3"></path><path d="M182 224L190 210L196 226" stroke="var(--acc)" stroke-width="3"></path>
+          <path d="M50 170H108" stroke-width="2"></path><path d="M96 162L110 170L96 178" stroke-width="2"></path>
+          <g font-size="28" fill="currentColor" stroke="none" text-anchor="middle"><text x="160" y="180">q₀</text><text x="410" y="180">!</text><text x="160" y="40" fill="var(--acc)">0/1,R</text><text x="160" y="310" fill="var(--acc)">1/0,R</text><text x="286" y="155">λ/λ,N</text></g>
+        </svg>
+      </div>
+      <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Наочні цикли й етапи; для великих машин заплутаний</p>
+    </div>
+  </div>
+</section>
+
+<section data-label="Конфігурація" data-screen-label="06" data-speaker-notes="α qᵢ β: перший символ β — під кареткою. Порожні по краях не пишемо. Послідовність конфігурацій — протокол; так його пише журнал емулятора." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 4 · Конфігурація</span><span style="display:var(--hdr,inline);color:var(--mut)">05</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Конфігурація — машинне слово</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px">
+    <div style="padding:28px 36px;display:flex;flex-direction:column;gap:14px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--m);font-size:60px;color:var(--acc)">α qᵢ β</div>
+      <p style="margin:0;font-size:25px;line-height:1.4"><span style="font-family:var(--m)">α</span> — ліворуч від каретки, <span style="font-family:var(--m)">qᵢ</span> — стан, <span style="font-family:var(--m)">β</span> — від каретки праворуч; перший символ <span style="font-family:var(--m)">β</span> — під кареткою</p>
+    </div>
+    <div style="padding:28px 36px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Приклад · 10 q₁ 11</div>
+      <div style="display:flex;gap:6px"><sc-for list="{{ cfgTape }}" as="c" hint-placeholder-count="4"><div style="display:flex;flex-direction:column;align-items:center;gap:4px"><span style="font-family:var(--m);font-size:22px;color:var(--acc);height:28px">{{ c.car }}</span><span style="width:70px;height:70px;display:flex;align-items:center;justify-content:center;border:2px solid {{ c.bd }};font-family:var(--m);font-size:32px;background:{{ c.bg }}">{{ c.v }}</span></div></sc-for></div>
+      <span style="font-size:24px;color:var(--mut)">На стрічці 1011, стан q₁, каретка на третьому символі</span>
+    </div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-rows:auto 1fr;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="padding:14px 30px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Протокол інвертування · слово 101</div>
+    <div style="padding:20px 30px;display:flex;gap:18px;align-items:center;justify-content:space-between;font-family:var(--m);font-size:38px">
+      <sc-for list="{{ proto }}" as="p" hint-placeholder-count="5"><span style="padding:12px 20px;border:2px solid var(--ink);background:{{ p.bg }}">{{ p.v }}</span><span style="color:var(--mut);display:{{ p.arr }}">→</span></sc-for>
+    </div>
+  </div>
+</section>
+
+<section data-label="Приклад +1" data-screen-label="07" data-speaker-notes="Як у стовпчик: 0 → 1 і все; 1 → 0 з перенесенням ліворуч; дійшли до λ — пишемо 1. 1011 + 1 = 1100, тобто 11 + 1 = 12. Для 111 — 1000." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 4 · Приклад</span><span style="display:var(--hdr,inline);color:var(--mut)">06</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Додати 1 до двійкового числа</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Каретка на молодшій цифрі, стан <span style="font-family:var(--m);color:var(--ink)">q₀</span></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:.8fr 1.2fr;gap:44px;min-height:0">
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="display:grid;grid-template-columns:1fr 1.4fr;grid-template-rows:auto repeat(3,1fr);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m);font-size:38px">
+        <span style="padding:14px 28px;background:var(--bg2);font-size:26px;color:var(--mut)">символ</span><span style="padding:14px 28px;background:var(--bg2);font-size:26px">q₀</span>
+        <span style="padding:18px 28px;border-top:var(--hair)">0</span><span style="padding:18px 28px;border-top:var(--hair);color:var(--acc)">1N!</span>
+        <span style="padding:18px 28px;border-top:var(--hair)">1</span><span style="padding:18px 28px;border-top:var(--hair);color:var(--acc)">0L</span>
+        <span style="padding:18px 28px;border-top:var(--hair)">λ</span><span style="padding:18px 28px;border-top:var(--hair);color:var(--acc)">1N!</span>
+      </div>
+      <div style="flex:1;display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:12px 26px;display:flex;align-items:center;font-size:24px"><span style="font-family:var(--m);width:90px">0</span>→ 1, кінець</div>
+        <div style="background:var(--bg);padding:12px 26px;display:flex;align-items:center;font-size:24px"><span style="font-family:var(--m);width:90px">1</span>→ 0, перенесення ліворуч</div>
+        <div style="background:var(--bg2);padding:12px 26px;display:flex;align-items:center;font-size:24px"><span style="font-family:var(--m);width:90px">λ</span>→ 1 у новий розряд</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:auto repeat(4,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="padding:14px 30px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Протокол · 1011 → 1100 (11 + 1 = 12)</div>
+      <sc-for list="{{ incTrace }}" as="r" hint-placeholder-count="4">
+        <div style="padding:0 30px;display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:center;border-top:var(--hair)">
+          <span style="font-family:var(--m);font-size:30px">{{ r.cfg }}</span>
+          <div style="display:flex;gap:6px"><sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="5"><div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="font-family:var(--m);font-size:20px;color:var(--acc);height:24px">{{ c.car }}</span><span style="width:56px;height:56px;display:flex;align-items:center;justify-content:center;border:2px solid {{ c.bd }};font-family:var(--m);font-size:26px;background:{{ c.bg }};color:{{ c.fg }}">{{ c.v }}</span></div></sc-for></div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<section data-label="Емулятор" data-screen-label="08" data-speaker-notes="Короткий тур емулятором перед лабораторною 2. Показати вбудований приклад «+1 до десяткового»: 0–8 → наступна, 9 → 0 з перенесенням." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 4 · Практика</span><span style="display:var(--hdr,inline);color:var(--mut)">07</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Робота в емуляторі</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--m);font-size:28px;color:var(--acc)">01</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Алфавіт</h3><p style="margin:0;font-size:24px;line-height:1.4">Поле «Зовнішній алфавіт A»; λ додається автоматично</p></div>
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--m);font-size:28px;color:var(--acc)">02</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Таблиця</h3><p style="margin:0;font-size:24px;line-height:1.4">Рядки — символи, стовпці — стани; «+ стан» і «− стан»</p></div>
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--m);font-size:28px;color:var(--acc)">03</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Вхідні дані</h3><p style="margin:0;font-size:24px;line-height:1.4"><span style="font-family:var(--m)">[x]</span> — каретка на символі x; <span style="font-family:var(--m)">λ</span> або <span style="font-family:var(--m)">_</span> — порожня</p></div>
+    <div style="background:var(--bg2);padding:28px 30px;display:flex;flex-direction:column;gap:14px"><span style="font-family:var(--m);font-size:28px;color:var(--acc)">04</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:30px">Журнал</h3><p style="margin:0;font-size:24px;line-height:1.4">Стан над кареткою, підсвічена клітинка, протокол конфігурацій</p></div>
+  </div>
+  <div style="padding:22px 32px;display:flex;justify-content:space-between;align-items:center;font-size:26px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)"><span>Вбудований приклад «+1 до десяткового»: <span style="font-family:var(--m)">0–8 → наступна</span>, <span style="font-family:var(--m)">9 → 0</span> з перенесенням</span><a href="https://kaldra1.github.io/aimo/emulators/turing/" style="font-family:var(--h);font-weight:700">Емулятор →</a></div>
+</section>
+
+<section data-label="Підсумки" data-screen-label="09" data-speaker-notes="Шість пунктів. Далі — обчислювані функції й задачі на побудову." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 4 · Підсумки</span><span style="display:var(--hdr,inline);color:var(--mut)">08</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Що забрати з лекції</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">01</span><span style="font-size:26px;line-height:1.35">Тюрінг, 1936: стрічка, каретка, керуючий пристрій зі скінченною множиною станів</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">02</span><span style="font-size:26px;line-height:1.35">Зовнішній алфавіт — символи з λ; внутрішній — стани й зупинка</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">03</span><span style="font-size:26px;line-height:1.35"><span style="font-family:var(--m)">qᵢ a → a′ D qⱼ</span>: записати, зсунутися, змінити стан</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">04</span><span style="font-size:26px;line-height:1.35">Список команд, таблиця переходів, граф</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">05</span><span style="font-size:26px;line-height:1.35">Конфігурація <span style="font-family:var(--m)">α qᵢ β</span>; послідовність — протокол</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">06</span><span style="font-size:26px;line-height:1.35">Немає команди для пари — аварійна зупинка</span></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:25px;color:var(--mut);padding-top:16px;border-top:var(--hair)">
+    <span>Попередня · Лекція 3. Машина Поста</span>
+    <span style="font-family:var(--h);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Далі · Лекція 5. Обчислювані функції</span>
+  </div>
+</section>
+
+<section data-label="Контрольні запитання" data-screen-label="10" data-speaker-notes="Запитання 10 — протокол на дошці." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 4 · Перевірка</span><span style="display:var(--hdr,inline);color:var(--mut)">09</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Контрольні запитання</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.4fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Теорія</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;font-size:24px;line-height:1.3">
+        <sc-for list="{{ questions }}" as="q" hint-placeholder-count="11"><div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">{{ q.n }}</span><span>{{ q.t }}</span></div></sc-for>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:1.3fr 1fr;gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg2);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:16px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">10 · На дошці</div><p style="margin:0;font-size:30px;line-height:1.35">Протокол машини «+1» для двійкового числа</p><div style="font-family:var(--m);font-size:44px">111</div></div>
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Матеріали</div><a href="https://kaldra1.github.io/aimo/lectures/04-turing-machine-definition/" style="font-size:26px">Лекція 4 на сайті курсу</a><a href="https://kaldra1.github.io/aimo/labs/2/" style="font-size:26px">Лабораторна робота №2</a></div>
+    </div>
+  </div>
+</section>
+
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Бурштин&quot;,&quot;М'ята&quot;],&quot;default&quot;:&quot;Бурштин&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Оформлення&quot;},&quot;showHeaderLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Оформлення&quot;}}">
+class Component extends DCLogic {
+  applyTweaks() {
+    const b = document.body.style;
+    b.setProperty("--fill", this.props.accent === "М'ята" ? "#5fd3bd" : "#f0b45a");
+    b.setProperty("--hdr", this.props.showHeaderLabels === false ? "none" : "inline");
+  }
+  componentDidMount() { this.applyTweaks(); }
+  componentDidUpdate() { this.applyTweaks(); }
+  renderVals() {
+    const tape = (s, st) => s.trim().split(/\s+/).map(t => {
+      const car = t.includes("["), hl = t.includes("*"), v = t.replace(/[\[\]*]/g, "");
+      return { v: v === "_" ? "λ" : v, car: car ? (st || "▼") : "", bd: car ? "var(--acc)" : "var(--ink)", bg: hl ? "var(--fill)" : v === "_" ? "var(--bg2)" : "var(--bg)", fg: hl ? "var(--acc-ink)" : v === "_" ? "var(--mut)" : "var(--ink)" };
+    });
+    const pr = ["q₀101","0 q₀01","01 q₀1","010 q₀λ","010 ! λ"];
+    return {
+      human: [
+        { n: "01", t: "Бачить символи", d: "Кілька символів на папері", m: "→ каретка читає комірку" },
+        { n: "02", t: "Пам'ятає етап", d: "На якому кроці роботи", m: "→ стан керуючого пристрою" },
+        { n: "03", t: "Пише чи стирає", d: "Олівцем за чіткими правилами", m: "→ запис символу" },
+        { n: "04", t: "Переводить погляд", d: "На сусідню клітинку", m: "→ зсув L / R / N" }
+      ],
+      demoTape: tape("_ _ a b [c] a _ b c _ _ _", "q₂"),
+      cfgTape: tape("1 0 [1] 1", "q₁"),
+      proto: pr.map((v, i) => ({ v, bg: i === pr.length - 1 ? "var(--fill)" : "var(--bg)", arr: i === pr.length - 1 ? "none" : "inline" })),
+      incTrace: [
+        { cfg: "101 q₀1", cells: tape("_ 1 0 1 [1]", "q₀") },
+        { cfg: "10 q₀10", cells: tape("_ 1 0 [1] *0", "q₀") },
+        { cfg: "1 q₀000", cells: tape("_ 1 [0] *0 *0", "q₀") },
+        { cfg: "1 ! 100", cells: tape("_ 1 [*1] 0 0", "!") }
+      ],
+      questions: [
+        [1, "Хто і коли запропонував машину? Яку роботу людини вона моделює?"],
+        [2, "З яких частин складається машина Тюрінга?"],
+        [3, "Зовнішній і внутрішній алфавіти; роль порожнього символу"],
+        [4, "Що машина виконує за такт? Загальний вигляд команди"],
+        [5, "Чому машину Тюрінга називають детермінованою?"],
+        [6, "Способи задання програми; порівняйте їх"],
+        [7, "Що означають скорочення R, 1R і N! у таблиці?"],
+        [8, "Конфігурація: на стрічці abc, каретка на b, стан q₂"],
+        [9, "Протокол машини інвертування для слова 0110"],
+        [11, "Коли машина Тюрінга зупиняється аварійно?"],
+        [12, "Чим машина Тюрінга відрізняється від машини Поста?"]
+      ].map(([n, t]) => ({ n, t }))
+    };
+  }
+}
+</script>
+</body>
+</html>

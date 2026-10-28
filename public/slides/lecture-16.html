@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<script src="./resources.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/styles.css">
+<script src="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/_ds_bundle.js"></script>
+<link rel="stylesheet" href="fonts/fonts.css">
+<title>АІМО — Лекція 16 · Нелінійні рівняння</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  --h: "Manrope", system-ui, sans-serif;
+  --b: "IBM Plex Sans", system-ui, sans-serif;
+  --m: "IBM Plex Mono", ui-monospace, monospace;
+  --bg: #f5f7f5; --bg2: #e7efeb; --ink: #16262b; --mut: #56696d; --ln: rgba(22,38,43,.16);
+  --acc: #0d6e63; --fill: #f0b45a; --acc-ink: #1b2620;
+  --hair: 1px solid var(--ln);
+  --mk-c: rgba(22,38,43,.45);
+  --mk-img: linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c));
+  --mk-pos: 0 -7px, -7px 0, right 0 top -7px, right -7px top 0, 0 bottom -7px, -7px bottom 0, right 0 bottom -7px, right -7px bottom 0;
+  --mk-size: 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px;
+  --grid: linear-gradient(rgba(238,243,239,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(238,243,239,.045) 1px, transparent 1px);
+}
+a { color: var(--acc); text-decoration: none; }
+a:hover { color: var(--ink); }
+</style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" data-uneditable="">
+
+<section data-label="Титул" data-screen-label="01" data-speaker-notes="Момент досягнення температури, робоча точка кола, параметр моделі — формули для кореня може не бути. Порівняємо чотири методи на одному рівнянні й навчимося зупинятися з контрольованою похибкою." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;gap:60px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
+    <div style="align-self:flex-start;border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Лекція 16 · Алгоритми і методи обчислень</div>
+    <div>
+      <h1 style="margin:0;font-family:var(--h);font-weight:800;font-size:108px;line-height:1.02;letter-spacing:-.02em"><span style="color:var(--acc)">Нелінійні</span><br>рівняння</h1>
+      <p style="margin:30px 0 0;font-size:36px;line-height:1.3;color:var(--mut);max-width:900px">Відокремлення коренів, бісекція, хорди, Ньютон, проста ітерація</p>
+    </div>
+    <div style="display:flex;gap:18px;font-size:24px;color:var(--mut)"><span>Змістовий модуль 2. Методи обчислень</span><span>·</span><span>Тема 4. Чисельні методи розв'язання прикладних задач</span></div>
+  </div>
+  <div style="width:640px;flex:none;display:flex;flex-direction:column;justify-content:center">
+    <div style="padding:44px 48px;display:flex;flex-direction:column;gap:22px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Наскрізний приклад</div>
+      <div style="font-family:var(--m);font-size:46px">x³ − 2x − 5 = 0</div>
+      <div style="padding-top:20px;border-top:var(--hair);font-family:var(--m);font-size:32px;color:var(--acc)">α ≈ 2.0945514815</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Постановка" data-screen-label="02" data-speaker-notes="Два етапи. Невдале відокремлення не виправити кількістю ітерацій. Точне α — лише для перевірки таблиць; алгоритм має власний критерій точності." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 16 · Постановка</span><span style="display:var(--hdr,inline);color:var(--mut)">01</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Знайти α: f(α) = 0</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)"><span style="font-family:var(--m);color:var(--ink)">g(x) = h(x)</span> → <span style="font-family:var(--m);color:var(--ink)">f(x) = g(x) − h(x)</span></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:40px 46px;display:flex;flex-direction:column;justify-content:center;gap:20px">
+      <span style="font-family:var(--m);font-size:34px;color:var(--acc)">Етап 1</span>
+      <h3 style="margin:0;font-family:var(--h);font-weight:800;font-size:52px">Відокремлення</h3>
+      <p style="margin:0;font-size:28px;line-height:1.42">Знайти інтервали, кожен з яких містить <b style="font-weight:600">рівно один</b> корінь</p>
+    </div>
+    <div style="background:var(--bg);padding:40px 46px;display:flex;flex-direction:column;justify-content:center;gap:20px">
+      <span style="font-family:var(--m);font-size:34px;color:var(--acc)">Етап 2</span>
+      <h3 style="margin:0;font-family:var(--h);font-weight:800;font-size:52px">Уточнення</h3>
+      <p style="margin:0;font-size:28px;line-height:1.42">Звузити інтервал або побудувати послідовність наближень до <b style="font-weight:600">потрібної точності</b></p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:44px">
+    <div style="padding:22px 32px;font-size:26px;line-height:1.4;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">Спершу — <b style="font-weight:600">область допустимих значень</b>. Корінь після ділення, квадрата чи логарифма перевіряти в початковому рівнянні</div>
+    <div style="padding:22px 32px;font-size:26px;line-height:1.4;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">Невдале відокремлення <b style="font-weight:600;color:var(--acc)">не виправляється</b> кількістю ітерацій</div>
+  </div>
+</section>
+
+<section data-label="Відокремлення" data-screen-label="03" data-speaker-notes="Таблиця, теорема, похідна. 1/x змінює знак, але кореня не має; (x−1)² має корінь без зміни знака. Для порівняння методів лишаємо широкий інтервал [2; 3]." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 16 · Відокремлення</span><span style="display:var(--hdr,inline);color:var(--mut)">02</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Таблиця, теорема, єдиність</h2>
+  <div style="flex:1;display:grid;grid-template-columns:.8fr 1.2fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto repeat(5,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-family:var(--m);font-size:32px">
+      <div style="padding:14px 30px;background:var(--bg2);color:var(--mut);font-size:28px">x</div>
+      <div style="padding:14px 30px;background:var(--bg2);color:var(--mut);font-size:28px">f(x)</div>
+      <sc-for list="{{ tab }}" as="r" hint-placeholder-count="5">
+        <div style="padding:6px 30px;display:flex;align-items:center;border-top:var(--hair);background:{{ r.bg }}">{{ r.x }}</div>
+        <div style="padding:6px 30px;display:flex;align-items:center;border-top:var(--hair);background:{{ r.bg }};color:{{ r.fc }}">{{ r.f }}</div>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:26px 34px;display:flex;flex-direction:column;gap:14px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Теорема Больцано–Коші</div>
+        <p style="margin:0;font-size:27px;line-height:1.42">Функція <b style="font-weight:600">неперервна</b> на <span style="font-family:var(--m)">[a; b]</span>, знаки на кінцях протилежні ⇒ всередині є <b style="font-weight:600">принаймні один</b> корінь</p>
+        <div style="font-family:var(--m);font-size:30px;padding:12px 20px;background:var(--bg2)">f(2) = −1, f(3) = 16</div>
+      </div>
+      <div style="padding:22px 34px;display:flex;flex-direction:column;gap:10px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Єдиність — окремо</div>
+        <div style="font-family:var(--m);font-size:32px">f′(x) = 3x² − 2 ≥ 10 &gt; 0</div>
+        <span style="font-size:24px;color:var(--mut)">строго зростає на [2; 3] — корінь один</span>
+      </div>
+      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:18px 26px;display:flex;flex-direction:column;justify-content:center;gap:6px"><span style="font-family:var(--m);font-size:30px">1/x</span><span style="font-size:23px;line-height:1.35">знак змінюється, кореня немає</span></div>
+        <div style="background:var(--bg);padding:18px 26px;display:flex;flex-direction:column;justify-content:center;gap:6px"><span style="font-family:var(--m);font-size:30px">(x − 1)²</span><span style="font-size:23px;line-height:1.35">корінь без зміни знака</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Чотири методи · розділ" data-screen-label="04" data-speaker-notes="Чотири методи на тому самому інтервалі [2; 3]. Дивимося не лише на кількість кроків, а й на те, чим метод обґрунтовує точність." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:40px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Уточнення</div><span style="display:var(--hdr,inline);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;color:var(--mut)">03</span></div>
+  <div>
+    <div style="font-family:var(--m);font-size:40px;color:var(--acc)">[2; 3] · ε = 10⁻⁶</div>
+    <h2 style="margin:18px 0 0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Чотири методи уточнення</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">1</span><span style="font-family:var(--h);font-weight:700;font-size:34px">Бісекція</span><span style="font-size:24px;line-height:1.38;color:var(--mut)">середина інтервалу</span></div>
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">2</span><span style="font-family:var(--h);font-weight:700;font-size:34px">Хорди</span><span style="font-size:24px;line-height:1.38;color:var(--mut)">перетин хорди з віссю</span></div>
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">3</span><span style="font-family:var(--h);font-weight:700;font-size:34px">Ньютон</span><span style="font-size:24px;line-height:1.38;color:var(--mut)">перетин дотичної</span></div>
+    <div style="background:var(--bg);padding:28px 30px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--m);font-size:26px;color:var(--acc)">4</span><span style="font-family:var(--h);font-weight:700;font-size:34px">Проста ітерація</span><span style="font-size:24px;line-height:1.38;color:var(--mut)">x = φ(x)</span></div>
+  </div>
+</section>
+
+<section data-label="Бісекція · ідея" data-screen-label="05" data-speaker-notes="Інваріант циклу: неперервність і різні знаки на кінцях. Повертаємо саме середину — гарантія через півширину. n рахує звуження; середин обчислюємо n + 1." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 16 · Бісекція</span><span style="display:var(--hdr,inline);color:var(--mut)">04</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Половинне ділення</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.15fr 1fr;gap:44px;min-height:0">
+    <div style="padding:24px 30px;display:flex;flex-direction:column;gap:10px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Перший крок · c = 2.5, f(c) &gt; 0</div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 1000 500" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" aria-hidden="true">
+          <rect x="60" y="30" width="440" height="420" fill="var(--fill)" stroke="none" opacity=".28"></rect>
+          <path d="M40 416.5H970" stroke="var(--mut)" stroke-width="2"></path>
+          <path d="M500 30V450" stroke="var(--mut)" stroke-width="2" stroke-dasharray="8 8"></path>
+          <path d="M60 440L148 415L236 387.1L324 356.1L412 321.8L500 284.1L588 242.9L676 198L764 149.4L852 96.7L940 40" stroke="var(--acc)" stroke-width="5"></path>
+          <circle cx="60" cy="440" r="9" fill="var(--ink)" stroke="none"></circle><circle cx="940" cy="40" r="9" fill="var(--ink)" stroke="none"></circle><circle cx="500" cy="284.1" r="11" fill="var(--fill)" stroke="var(--ink)" stroke-width="3"></circle><circle cx="143" cy="416.5" r="8" fill="var(--acc)" stroke="none"></circle>
+          <g font-size="26" fill="currentColor" stroke="none"><text x="60" y="485" text-anchor="middle">a = 2</text><text x="500" y="485" text-anchor="middle">c = 2.5</text><text x="940" y="485" text-anchor="middle">b = 3</text><text x="160" y="400" fill="var(--acc)">α</text><text x="520" y="275">f(c) = 5.625</text></g>
+        </svg>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <p style="margin:0;font-size:26px;line-height:1.42">Беремо <span style="font-family:var(--m)">c = (a + b)/2</span>, лишаємо половину зі <b style="font-weight:600">зміною знака</b>. Похідна не потрібна</p>
+      </div>
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Гарантія після n звужень</div>
+        <div style="font-family:var(--m);font-size:36px">|cₙ − α| ≤ (b₀ − a₀) / 2ⁿ⁺¹</div>
+      </div>
+      <div style="flex:1;padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Скільки звужень для ε</div>
+        <div style="font-family:var(--m);font-size:34px;color:var(--acc)">n ≥ ⌈log₂ ((b₀ − a₀) / 2ε)⌉</div>
+        <span style="font-size:24px;color:var(--mut)">ε = 10⁻⁴ → n = 13 · ε = 10⁻⁶ → n = 19</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Бісекція · трасування" data-screen-label="06" data-speaker-notes="Інтервали до поділу. Для 10⁻⁴ — 13 звужень, півширина 6.1·10⁻⁵. Фактична похибка ~8·10⁻⁶, але алгоритм на це не покладається." style="height:100%;display:flex;flex-direction:column;gap:24px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 64px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 16 · Бісекція</span><span style="display:var(--hdr,inline);color:var(--mut)">05</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:64px;line-height:1.05;letter-spacing:-.015em">Бісекція: ε = 10⁻⁴</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Бурштином — кінець, що змінився</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.6fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-columns:70px 1fr 1fr 1fr 1fr;grid-template-rows:auto repeat(14,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-family:var(--m);font-size:24px">
+      <div style="padding:8px 18px;background:var(--bg2);color:var(--mut)">k</div>
+      <div style="padding:8px 18px;background:var(--bg2);color:var(--mut)">aₖ</div>
+      <div style="padding:8px 18px;background:var(--bg2);color:var(--mut)">bₖ</div>
+      <div style="padding:8px 18px;background:var(--bg2);color:var(--acc)">cₖ</div>
+      <div style="padding:8px 18px;background:var(--bg2);color:var(--mut)">f(cₖ)</div>
+      <sc-for list="{{ bis }}" as="r" hint-placeholder-count="14">
+        <div style="padding:0 18px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">{{ r.k }}</div>
+        <div style="padding:0 18px;display:flex;align-items:center;border-top:var(--hair)"><span style="background:{{ r.ab }};padding:0 4px">{{ r.a }}</span></div>
+        <div style="padding:0 18px;display:flex;align-items:center;border-top:var(--hair)"><span style="background:{{ r.bb }};padding:0 4px">{{ r.b }}</span></div>
+        <div style="padding:0 18px;display:flex;align-items:center;border-top:var(--hair);color:var(--acc)">{{ r.c }}</div>
+        <div style="padding:0 18px;display:flex;align-items:center;border-top:var(--hair)">{{ r.f }}</div>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 30px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Після 13 звужень</div>
+        <div style="font-family:var(--m);font-size:32px">2⁻¹⁴ ≈ 6.1·10⁻⁵ ≤ 10⁻⁴</div>
+        <span style="font-size:24px;color:var(--mut)">фактично ≈ 8.0·10⁻⁶ — але це везіння</span>
+      </div>
+      <div style="flex:1;display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:16px 26px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Інваріант</h3><p style="margin:0;font-size:24px;line-height:1.35">Різні знаки на кінцях після кожного кроку</p></div>
+        <div style="background:var(--bg);padding:16px 26px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Знаки, а не добуток</h3><p style="margin:0;font-family:var(--m);font-size:23px">(fa &lt; 0) != (fc &lt; 0)</p></div>
+        <div style="background:var(--bg2);padding:16px 26px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Стагнація</h3><p style="margin:0;font-family:var(--m);font-size:23px">c == a || c == b → помилка</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Хорди · ідея" data-screen-label="07" data-speaker-notes="Метод хорд з нерухомим кінцем — не січні. f″ = 6x > 0: хорда над графіком, перетин ліворуч від кореня. Фіксуємо b = 3, бо f(b)f″(b) > 0." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 16 · Хорди</span><span style="display:var(--hdr,inline);color:var(--mut)">06</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Метод хорд з нерухомим кінцем</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.15fr 1fr;gap:44px;min-height:0">
+    <div style="padding:24px 30px;display:flex;flex-direction:column;gap:10px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Хорда через (x₀, f(x₀)) і (b, f(b))</div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 1000 500" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" aria-hidden="true">
+          <path d="M40 416.5H970" stroke="var(--mut)" stroke-width="2"></path>
+          <path d="M60 440L148 415L236 387.1L324 356.1L412 321.8L500 284.1L588 242.9L676 198L764 149.4L852 96.7L940 40" stroke="var(--acc)" stroke-width="5"></path>
+          <path d="M60 440L940 40" stroke="var(--fill)" stroke-width="4"></path>
+          <path d="M111.8 416.5V430" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 6"></path>
+          <circle cx="60" cy="440" r="9" fill="var(--ink)" stroke="none"></circle><circle cx="940" cy="40" r="11" fill="var(--fill)" stroke="var(--ink)" stroke-width="3"></circle><circle cx="111.8" cy="416.5" r="9" fill="var(--fill)" stroke="var(--ink)" stroke-width="2"></circle><circle cx="143" cy="416.5" r="8" fill="var(--acc)" stroke="none"></circle>
+          <g font-size="26" fill="currentColor" stroke="none"><text x="60" y="485" text-anchor="middle">x₀ = 2</text><text x="200" y="470">x₁ ≈ 2.0588</text><text x="900" y="90" text-anchor="end">b = 3 · нерухомий</text><text x="160" y="400" fill="var(--acc)">α</text></g>
+        </svg>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--m);font-size:32px;line-height:1.5;color:var(--acc)">xₖ₊₁ = xₖ − f(xₖ)(b − xₖ)<br>        / (f(b) − f(xₖ))</div>
+      </div>
+      <div style="flex:1;display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:18px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Опуклість</h3><p style="margin:0;font-size:24px;line-height:1.38"><span style="font-family:var(--m)">f″ = 6x &gt; 0</span>: наближення ростуть до кореня зліва</p></div>
+        <div style="background:var(--bg);padding:18px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Який кінець фіксувати</h3><p style="margin:0;font-size:24px;line-height:1.38">Той, де <span style="font-family:var(--m)">f(b) · f″(b) &gt; 0</span></p></div>
+        <div style="background:var(--bg2);padding:18px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Не січні</h3><p style="margin:0;font-size:24px;line-height:1.38">Січні беруть два останні наближення</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Хорди · трасування" data-screen-label="08" data-speaker-notes="Оцінка через нев'язку: f′ ≥ 10, тому |x − α| ≤ |f(x)|/10. На кроці 12 межа ≈ 6.9·10⁻⁷. Збіжність лінійна: малий крок ще не означає малу похибку." style="height:100%;display:flex;flex-direction:column;gap:24px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 64px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 16 · Хорди</span><span style="display:var(--hdr,inline);color:var(--mut)">07</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:64px;line-height:1.05;letter-spacing:-.015em">Хорди: ε = 10⁻⁶</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-columns:70px 1fr 1fr;grid-template-rows:auto repeat(13,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-family:var(--m);font-size:25px">
+      <div style="padding:8px 20px;background:var(--bg2);color:var(--mut)">k</div>
+      <div style="padding:8px 20px;background:var(--bg2);color:var(--acc)">xₖ</div>
+      <div style="padding:8px 20px;background:var(--bg2);color:var(--mut)">f(xₖ)</div>
+      <sc-for list="{{ chord }}" as="r" hint-placeholder-count="13">
+        <div style="padding:0 20px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">{{ r.k }}</div>
+        <div style="padding:0 20px;display:flex;align-items:center;border-top:var(--hair);background:{{ r.bg }}">{{ r.x }}</div>
+        <div style="padding:0 20px;display:flex;align-items:center;border-top:var(--hair);background:{{ r.bg }}">{{ r.f }}</div>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Оцінка · теорема про середнє</div>
+        <div style="font-family:var(--m);font-size:36px">|xₖ − α| ≤ |f(xₖ)| / 10</div>
+        <span style="font-size:24px;color:var(--mut)">крок 12: ≈ 6.9·10⁻⁷ ≤ 10⁻⁶</span>
+      </div>
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:22px;line-height:1.5;background:var(--bg2);padding:18px 24px;white-space:pre;border:var(--hair)"><span style="color:var(--acc);font-weight:600">for</span> (<span style="color:var(--acc);font-weight:600">int</span> k = 0; k &lt; 200; ++k) {
+    <span style="color:var(--acc);font-weight:600">double</span> fx = f(x);
+    <span style="color:var(--acc);font-weight:600">if</span> (<span style="background:var(--fill);color:var(--acc-ink);padding:0 4px">std::abs(fx) / m &lt;= eps</span>) <span style="color:var(--acc);font-weight:600">return</span> x;
+    <span style="color:var(--acc);font-weight:600">double</span> d = fb - fx;
+    <span style="color:var(--acc);font-weight:600">if</span> (d == 0.0) <span style="color:var(--acc);font-weight:600">throw</span> …;
+    <span style="color:var(--acc);font-weight:600">double</span> next = x - fx * (b - x) / d;
+    <span style="color:var(--acc);font-weight:600">if</span> (next &lt; 2.0 || next &gt; 3.0) <span style="color:var(--acc);font-weight:600">throw</span> …;
+    <span style="color:var(--acc);font-weight:600">if</span> (next == x) <span style="color:var(--acc);font-weight:600">throw</span> …;  <span style="color:var(--mut)">// стагнація</span>
+    x = next;
+}</pre>
+    </div>
+  </div>
+</section>
+
+<section data-label="Ньютон · ідея" data-screen-label="09" data-speaker-notes="Лінеаризація в поточній точці. Достатня умова: f′ ≠ 0, f″ сталого знака, старт з f(x₀)f″(x₀) > 0. Стартуємо з x₀ = 3." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 16 · Ньютон</span><span style="display:var(--hdr,inline);color:var(--mut)">08</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Метод Ньютона: дотична</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.15fr 1fr;gap:44px;min-height:0">
+    <div style="padding:24px 30px;display:flex;flex-direction:column;gap:10px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Дві дотичні з x₀ = 3</div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+        <svg viewBox="0 0 1000 500" style="display:block;height:100%;max-width:100%;color:var(--ink);font-family:var(--m)" fill="none" stroke="currentColor" aria-hidden="true">
+          <path d="M40 416.5H970" stroke="var(--mut)" stroke-width="2"></path>
+          <path d="M60 440L148 415L236 387.1L324 356.1L412 321.8L500 284.1L588 242.9L676 198L764 149.4L852 96.7L940 40" stroke="var(--acc)" stroke-width="5"></path>
+          <path d="M940 40L376.8 416.5" stroke="var(--fill)" stroke-width="4"></path>
+          <path d="M376.8 416.5V335.9" stroke="var(--ink)" stroke-width="2" stroke-dasharray="6 6"></path>
+          <path d="M376.8 335.9L172 416.5" stroke="var(--fill)" stroke-width="4"></path>
+          <circle cx="940" cy="40" r="10" fill="var(--fill)" stroke="var(--ink)" stroke-width="3"></circle><circle cx="376.8" cy="335.9" r="9" fill="var(--fill)" stroke="var(--ink)" stroke-width="3"></circle><circle cx="376.8" cy="416.5" r="7" fill="var(--ink)" stroke="none"></circle><circle cx="172" cy="416.5" r="7" fill="var(--ink)" stroke="none"></circle><circle cx="143" cy="416.5" r="8" fill="var(--acc)" stroke="none"></circle>
+          <g font-size="26" fill="currentColor" stroke="none"><text x="910" y="30" text-anchor="end">x₀ = 3</text><text x="376.8" y="470" text-anchor="middle">x₁ = 2.36</text><text x="190" y="470" text-anchor="middle">x₂ ≈ 2.127</text><text x="110" y="400" fill="var(--acc)">α</text></g>
+        </svg>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--m);font-size:44px;color:var(--acc)">xₖ₊₁ = xₖ − f(xₖ) / f′(xₖ)</div>
+        <span style="font-size:24px;color:var(--mut)">з <span style="font-family:var(--m);color:var(--ink)">f(x) ≈ f(xₖ) + f′(xₖ)(x − xₖ) = 0</span></span>
+      </div>
+      <div style="flex:1;padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Вибір старту</div>
+        <div style="font-family:var(--m);font-size:38px">f(x₀) · f″(x₀) &gt; 0</div>
+        <p style="margin:0;font-size:25px;line-height:1.4">Разом з умовами: <span style="font-family:var(--m)">f′ ≠ 0</span>, <span style="font-family:var(--m)">f″</span> сталого знака, зміна знака на інтервалі. Тут <span style="font-family:var(--m)">x₀ = 3</span></p>
+      </div>
+      <div style="padding:20px 32px;font-size:25px;line-height:1.4;background:var(--bg2);border:var(--hair)">Крок вийшов за інтервал — <b style="font-weight:600">підстрахувати бісекцією</b></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Ньютон · збіжність" data-screen-label="10" data-speaker-notes="Кількість правильних цифр приблизно подвоюється. Це локальна властивість. Кратний корінь — лише лінійно. Біля машинної точності режим закінчується." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 16 · Ньютон</span><span style="display:var(--hdr,inline);color:var(--mut)">09</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Квадратична збіжність</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Правильних цифр приблизно <b style="font-weight:600;color:var(--ink)">вдвічі більше</b> щокроку</p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.15fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-columns:70px 1fr 1fr;grid-template-rows:auto repeat(6,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-family:var(--m);font-size:30px">
+      <div style="padding:12px 22px;background:var(--bg2);color:var(--mut);font-size:26px">k</div>
+      <div style="padding:12px 22px;background:var(--bg2);color:var(--acc);font-size:26px">xₖ</div>
+      <div style="padding:12px 22px;background:var(--bg2);color:var(--mut);font-size:26px">f(xₖ)</div>
+      <sc-for list="{{ newton }}" as="r" hint-placeholder-count="6">
+        <div style="padding:0 22px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">{{ r.k }}</div>
+        <div style="padding:0 22px;display:flex;align-items:center;border-top:var(--hair);background:{{ r.bg }}">{{ r.x }}</div>
+        <div style="padding:0 22px;display:flex;align-items:center;border-top:var(--hair);background:{{ r.bg }}">{{ r.f }}</div>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Простий корінь, f′(α) ≠ 0</div>
+        <div style="font-family:var(--m);font-size:34px">|eₖ₊₁| ≈ |f″(α) / 2f′(α)| · |eₖ|²</div>
+        <span style="font-size:24px;color:var(--mut)">крок 4: |f(x₄)| / 10 ≈ 2.1·10⁻⁷ ≤ 10⁻⁶</span>
+      </div>
+      <div style="flex:1;display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="background:var(--bg);padding:16px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Локальна властивість</h3><p style="margin:0;font-size:24px;line-height:1.35">Далекий старт — цикл, вихід з області, інший корінь</p></div>
+        <div style="background:var(--bg);padding:16px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Кратний корінь</h3><p style="margin:0;font-size:24px;line-height:1.35">Звичайний Ньютон — лише лінійно</p></div>
+        <div style="background:var(--bg2);padding:16px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Перевіряйте похідну</h3><p style="margin:0;font-size:24px;line-height:1.35">Помилка в <span style="font-family:var(--m)">f′</span> дає правдоподібну, але повільну послідовність</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Проста ітерація" data-screen-label="11" data-speaker-notes="Дві умови: φ переводить інтервал у себе і стискає. Образ [2.080; 2.224] ⊂ [2; 3]. Максимум φ′ ≈ 0.154, беремо q = 0.16. Перетворення (x³ − 5)/2 має похідну ≥ 6 — не стискання." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 16 · Проста ітерація</span><span style="display:var(--hdr,inline);color:var(--mut)">10</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Проста ітерація: x = φ(x)</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)"><span style="font-family:var(--m);color:var(--ink)">xₖ₊₁ = φ(xₖ)</span></p>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:24px 32px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Умова 1 · у себе</span><span style="font-family:var(--m);font-size:32px">φ([a; b]) ⊂ [a; b]</span></div>
+    <div style="background:var(--bg);padding:24px 32px;display:flex;flex-direction:column;gap:10px"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Умова 2 · стискання</span><span style="font-family:var(--m);font-size:32px">|φ′(x)| ≤ q &lt; 1</span></div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 34px;display:flex;flex-direction:column;justify-content:center;gap:18px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Придатне · стискання</div>
+      <div style="font-family:var(--m);font-size:40px;color:var(--acc)">φ(x) = ∛(2x + 5)</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:10px 24px;font-size:25px">
+        <span style="color:var(--mut)">Образ</span><span style="font-family:var(--m)">[2.080; 2.224] ⊂ [2; 3]</span>
+        <span style="color:var(--mut)">max φ′</span><span style="font-family:var(--m)">≈ 0.154 → q = 0.16</span>
+      </div>
+    </div>
+    <div style="padding:26px 34px;display:flex;flex-direction:column;justify-content:center;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Непридатне · розбігається</div>
+      <div style="font-family:var(--m);font-size:40px">φ(x) = (x³ − 5) / 2</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:10px 24px;font-size:25px">
+        <span style="color:var(--mut)">φ′ = 3x²/2</span><span style="font-family:var(--m)"><span style="background:var(--fill);color:var(--acc-ink);padding:0 8px">≥ 6</span> на [2; 3]</span>
+      </div>
+      <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Проста формула ще не свідчить про придатність</p>
+    </div>
+  </div>
+</section>
+
+<section data-label="Проста ітерація · оцінка" data-screen-label="12" data-speaker-notes="Апостеріорна оцінка: різниця сусідніх наближень, помножена на q/(1 − q). Вона враховує весь залишок процесу — сума геометричної прогресії. q біля 1 — малий крок ще не мала похибка." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 16 · Проста ітерація</span><span style="display:var(--hdr,inline);color:var(--mut)">11</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Оцінка похибки через q</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-columns:70px 1fr 1fr;grid-template-rows:auto repeat(8,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-family:var(--m);font-size:27px">
+      <div style="padding:10px 22px;background:var(--bg2);color:var(--mut);font-size:25px">k</div>
+      <div style="padding:10px 22px;background:var(--bg2);color:var(--acc);font-size:25px">xₖ</div>
+      <div style="padding:10px 22px;background:var(--bg2);color:var(--mut);font-size:25px">f(xₖ)</div>
+      <sc-for list="{{ fixed }}" as="r" hint-placeholder-count="8">
+        <div style="padding:0 22px;display:flex;align-items:center;border-top:var(--hair);color:var(--mut)">{{ r.k }}</div>
+        <div style="padding:0 22px;display:flex;align-items:center;border-top:var(--hair);background:{{ r.bg }}">{{ r.x }}</div>
+        <div style="padding:0 22px;display:flex;align-items:center;border-top:var(--hair);background:{{ r.bg }}">{{ r.f }}</div>
+      </sc-for>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Апріорна</div>
+        <div style="font-family:var(--m);font-size:32px">|xₖ − α| ≤ qᵏ/(1 − q) · |x₁ − x₀|</div>
+      </div>
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Апостеріорна · зручна в програмі</div>
+        <div style="font-family:var(--m);font-size:32px;color:var(--acc)">|xₖ − α| ≤ q/(1 − q) · |xₖ − xₖ₋₁|</div>
+      </div>
+      <div style="flex:1;padding:24px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px;background:var(--bg2);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Крок 7</div>
+        <div style="font-family:var(--m);font-size:30px">0.16 / 0.84 · 9.95·10⁻⁷ ≈ 1.9·10⁻⁷</div>
+        <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">Множник принциповий: за <span style="font-family:var(--m);color:var(--ink)">q ≈ 1</span> малий крок — ще значна похибка</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Критерії зупинки" data-screen-label="13" data-speaker-notes="Ширина, крок і нев'язка вимірюють різне. Множення рівняння на малу сталу робить нев'язку малою всюди. Ліміт ітерацій — захист програми, не критерій успіху." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 16 · Зупинка</span><span style="display:var(--hdr,inline);color:var(--mut)">12</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Що насправді перевіряє програма</h2>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Ширина інтервалу</h3><p style="margin:0;font-size:24px;line-height:1.38"><b style="font-weight:600">Геометрична гарантія</b>, якщо корінь усередині</p></div>
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Крок |xₖ − xₖ₋₁|</h3><p style="margin:0;font-size:24px;line-height:1.38">Лише зміна наближення</p></div>
+    <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;gap:10px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Нев'язка f(xₖ)</h3><p style="margin:0;font-size:24px;line-height:1.38">Як добре виконується рівняння</p></div>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="padding:28px 34px;display:flex;flex-direction:column;justify-content:center;gap:18px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Від нев'язки до похибки</div>
+      <div style="font-family:var(--m);font-size:40px">|x − α| ≤ |f(x)| / m</div>
+      <p style="margin:0;font-size:25px;line-height:1.4">якщо <span style="font-family:var(--m)">|f′| ≥ m &gt; 0</span> між <span style="font-family:var(--m)">x</span> і <span style="font-family:var(--m)">α</span>. Неточність обчислення <span style="font-family:var(--m)">f</span> додають до чисельника</p>
+    </div>
+    <div style="display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:18px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Масштаб</h3><p style="margin:0;font-size:24px;line-height:1.35">Помножте рівняння на 10⁻⁹ — нев'язка мала майже всюди</p></div>
+      <div style="background:var(--bg);padding:18px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">next == x</h3><p style="margin:0;font-size:24px;line-height:1.35">Стагнація: перевірити оцінку або повідомити про невдачу</p></div>
+      <div style="background:var(--bg2);padding:18px 28px;display:flex;flex-direction:column;justify-content:center;gap:6px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Ліміт ітерацій</h3><p style="margin:0;font-size:24px;line-height:1.35">Захист програми, а не критерій успіху</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Порівняння" data-screen-label="14" data-speaker-notes="Кроків для ε = 10⁻⁶ на нашому рівнянні. Але один крок Ньютона може коштувати більше, якщо похідна дорога. Мета — обґрунтувати результат, а не обрати найкращий метод для всього." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 16 · Вибір методу</span><span style="display:var(--hdr,inline);color:var(--mut)">13</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Порівняння методів</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.25fr 1fr 1.15fr 1.15fr;grid-template-rows:auto repeat(4,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-size:24px">
+    <div style="padding:12px 22px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Метод</div>
+    <div style="padding:12px 22px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Потрібно</div>
+    <div style="padding:12px 22px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Збіжність</div>
+    <div style="padding:12px 22px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Сильне</div>
+    <div style="padding:12px 22px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Обмеження</div>
+    <sc-for list="{{ methods }}" as="r" hint-placeholder-count="4">
+      <div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:30px">{{ r.n }}</div>
+      <div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair);line-height:1.3">{{ r.need }}</div>
+      <div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair);line-height:1.3">{{ r.conv }}</div>
+      <div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair);line-height:1.3">{{ r.plus }}</div>
+      <div style="padding:6px 22px;display:flex;align-items:center;border-top:var(--hair);line-height:1.3;color:var(--mut)">{{ r.minus }}</div>
+    </sc-for>
+  </div>
+  <div style="padding:22px 32px;display:grid;grid-template-columns:auto repeat(4,1fr);gap:30px;align-items:center;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Кроків для 10⁻⁶</span>
+    <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4"><div style="display:flex;gap:16px;align-items:center"><span style="font-family:var(--m);font-size:40px;color:var(--acc);width:60px">{{ s.n }}</span><div style="flex:1;height:22px;background:var(--bg2)"><div style="height:100%;width:{{ s.w }};background:var(--acc)"></div></div><span style="font-size:24px;width:120px">{{ s.t }}</span></div></sc-for>
+  </div>
+</section>
+
+<section data-label="Підсумки" data-screen-label="15" data-speaker-notes="Сім пунктів. Наступна лекція — системи рівнянь, де Ньютон узагальнюється на вектори." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 16 · Підсумки</span><span style="display:var(--hdr,inline);color:var(--mut)">14</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Що забрати з лекції</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">01</span><span style="font-size:26px;line-height:1.35">Відокремлення дає область пошуку; Больцано–Коші — існування, похідна — єдиність</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">02</span><span style="font-size:26px;line-height:1.35">Бісекція зберігає корінь в інтервалі й дає явну кількість звужень</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">03</span><span style="font-size:26px;line-height:1.35">Хорди з нерухомим кінцем — перетин хорди з віссю, зазвичай лінійно</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">04</span><span style="font-size:26px;line-height:1.35">Ньютон — локально квадратично для простого кореня за придатного старту</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">05</span><span style="font-size:26px;line-height:1.35">Проста ітерація — відображення в себе і стискання; похибку оцінюють через q</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">06</span><span style="font-size:26px;line-height:1.35">Нев'язка, похибка аргументу й стагнація — різні поняття</span></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:25px;color:var(--mut);padding-top:16px;border-top:var(--hair)">
+    <span>Попередня · Лекція 15. Похибки обчислень</span>
+    <span style="font-family:var(--h);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Далі · Лекція 17. Системи рівнянь</span>
+  </div>
+</section>
+
+<section data-label="Контрольні запитання" data-screen-label="16" data-speaker-notes="Запитання 12 — обговорити гібрид бісекції й Ньютона." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 16 · Перевірка</span><span style="display:var(--hdr,inline);color:var(--mut)">15</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Контрольні запитання</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.4fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Теорія</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;font-size:24px;line-height:1.3">
+        <sc-for list="{{ questions }}" as="q" hint-placeholder-count="11"><div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">{{ q.n }}</span><span>{{ q.t }}</span></div></sc-for>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:1.3fr 1fr;gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg2);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:16px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">12 · Обговорення</div><p style="margin:0;font-size:30px;line-height:1.35">Як поєднати бісекцію та Ньютон для надійності пошуку?</p></div>
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Матеріали</div><a href="https://kaldra1.github.io/aimo/lectures/16-nonlinear-equations/" style="font-size:26px">Лекція 16 на сайті курсу</a></div>
+    </div>
+  </div>
+</section>
+
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Бурштин&quot;,&quot;М'ята&quot;],&quot;default&quot;:&quot;Бурштин&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Оформлення&quot;},&quot;showHeaderLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Оформлення&quot;}}">
+class Component extends DCLogic {
+  applyTweaks() {
+    const b = document.body.style;
+    b.setProperty("--fill", this.props.accent === "М'ята" ? "#5fd3bd" : "#f0b45a");
+    b.setProperty("--hdr", this.props.showHeaderLabels === false ? "none" : "inline");
+  }
+  componentDidMount() { this.applyTweaks(); }
+  componentDidUpdate() { this.applyTweaks(); }
+  renderVals() {
+    const HL = "var(--bg2)", NO = "transparent";
+    const bisRaw = [
+      ["2.0000000000","3.0000000000","2.5000000000","5.62500000"],
+      ["2.0000000000","2.5000000000","2.2500000000","1.89062500"],
+      ["2.0000000000","2.2500000000","2.1250000000","0.34570313"],
+      ["2.0000000000","2.1250000000","2.0625000000","-0.35131836"],
+      ["2.0625000000","2.1250000000","2.0937500000","-0.00894165"],
+      ["2.0937500000","2.1250000000","2.1093750000","0.16683578"],
+      ["2.0937500000","2.1093750000","2.1015625000","0.07856226"],
+      ["2.0937500000","2.1015625000","2.0976562500","0.03471428"],
+      ["2.0937500000","2.0976562500","2.0957031250","0.01286233"],
+      ["2.0937500000","2.0957031250","2.0947265625","0.00195435"],
+      ["2.0937500000","2.0947265625","2.0942382813","-0.00349515"],
+      ["2.0942382813","2.0947265625","2.0944824219","-0.00077078"],
+      ["2.0944824219","2.0947265625","2.0946044922","0.00059169"],
+      ["2.0944824219","2.0946044922","2.0945434570","-0.00008956"]
+    ];
+    const F = "var(--fill)";
+    const bis = bisRaw.map((r, k) => {
+      const p = bisRaw[k - 1];
+      return { k, a: r[0], b: r[1], c: r[2], f: r[3], ab: p && p[0] !== r[0] ? F : NO, bb: p && p[1] !== r[1] ? F : NO };
+    });
+    const chordRaw = [["2.0000000000","-1.0000000000"],["2.0588235294","-0.3907999186"],["2.0812636598","-0.1472040596"],["2.0896392101","-0.0546765033"],["2.0927395743","-0.0202028663"],["2.0938837085","-0.0074505059"],["2.0943054511","-0.0027456728"],["2.0944608458","-0.0010115739"],["2.0945180934","-0.0003726528"],["2.0945391823","-0.0001372763"],["2.0945469509","-0.0000505686"],["2.0945498126","-0.0000186279"],["2.0945508668","-0.0000068619"]];
+    const newtonRaw = [["3.000000000000","16"],["2.360000000000","3.424256"],["2.127196780159","0.3710998462"],["2.095136036934","0.0065266260"],["2.094551673824","2.1461·10⁻⁶"],["2.094551481542","2.3·10⁻¹³"]];
+    const fixedRaw = [["2.0000000000","-1.0000000000"],["2.0800838231","-0.1601676461"],["2.0923506778","-0.0245337095"],["2.0942169960","-0.0037326364"],["2.0945006522","-0.0005673124"],["2.0945437575","-0.0000862107"],["2.0945503078","-0.0000131006"],["2.0945513032","-0.0000019907"]];
+    const tbl = (raw, stop) => raw.map((r, k) => ({ k, x: r[0], f: r[1], bg: k === stop ? HL : NO }));
+    return {
+      tab: [["1.0","-6.000"],["2.0","-1.000"],["2.1","0.061"],["2.5","5.625"],["3.0","16.000"]].map((r, i) => ({ x: r[0], f: r[1], bg: (i === 1 || i === 2) ? HL : NO, fc: r[1][0] === "-" ? "var(--mut)" : "var(--acc)" })),
+      bis,
+      chord: tbl(chordRaw, 12),
+      newton: tbl(newtonRaw, 4),
+      fixed: tbl(fixedRaw, 7),
+      methods: [
+        { n: "Бісекція", need: "неперервність, зміна знака", conv: "лінійна за шириною", plus: "передбачувана гарантія", minus: "багато кроків" },
+        { n: "Хорди", need: "значення f, придатний кінець", conv: "зазвичай лінійна", plus: "без похідної", minus: "може просуватися повільно" },
+        { n: "Ньютон", need: "f, f′, вдалий старт", conv: "локально квадратична", plus: "швидке точне уточнення", minus: "мала похідна, далекий старт" },
+        { n: "Ітерація", need: "φ у себе, q < 1", conv: "лінійна, оцінка через q", plus: "проста, явна оцінка", minus: "треба знайти збіжне φ" }
+      ],
+      steps: [
+        { n: 19, w: "100%", t: "бісекція" },
+        { n: 12, w: "63%", t: "хорди" },
+        { n: 7, w: "37%", t: "ітерація" },
+        { n: 4, w: "21%", t: "Ньютон" }
+      ],
+      questions: [
+        [1, "Яка різниця між відокремленням і уточненням кореня?"],
+        [2, "Чому зміни знака без неперервності недостатньо?"],
+        [3, "Як довести єдиність кореня на [2; 3]?"],
+        [4, "Виведіть оцінку кількості звужень бісекції"],
+        [5, "Чим хорди з нерухомим кінцем відрізняються від січних?"],
+        [6, "Чому для хорд фіксуємо правий кінець, а Ньютона з нього починаємо?"],
+        [7, "Коли Ньютон збігається квадратично? А для кратного кореня?"],
+        [8, "Навіщо перевіряти і межу φ′, і відображення інтервалу в себе?"],
+        [9, "Як оцінити похибку простої ітерації з різниці наближень?"],
+        [10, "Чому мала нев'язка без оцінки похідної не гарантує точності?"],
+        [11, "Які ситуації мають завершувати програму повідомленням про невдачу?"]
+      ].map(([n, t]) => ({ n, t }))
+    };
+  }
+}
+</script>
+</body>
+</html>

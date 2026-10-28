@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<script src="./resources.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/styles.css">
+<script src="_ds/industry-0d29af8e-c912-4fab-8218-f830673496f3/_ds_bundle.js"></script>
+<link rel="stylesheet" href="fonts/fonts.css">
+<title>АІМО — Лекція 14 · Застосування сортування. Бібліотеки</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  --h: "Manrope", system-ui, sans-serif;
+  --b: "IBM Plex Sans", system-ui, sans-serif;
+  --m: "IBM Plex Mono", ui-monospace, monospace;
+  --bg: #f5f7f5; --bg2: #e7efeb; --ink: #16262b; --mut: #56696d; --ln: rgba(22,38,43,.16);
+  --acc: #0d6e63; --fill: #f0b45a; --acc-ink: #1b2620;
+  --hair: 1px solid var(--ln);
+  --mk-c: rgba(22,38,43,.45);
+  --mk-img: linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c)),linear-gradient(var(--mk-c),var(--mk-c));
+  --mk-pos: 0 -7px, -7px 0, right 0 top -7px, right -7px top 0, 0 bottom -7px, -7px bottom 0, right 0 bottom -7px, right -7px bottom 0;
+  --mk-size: 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px, 1px 15px, 15px 1px;
+  --grid: linear-gradient(rgba(238,243,239,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(238,243,239,.045) 1px, transparent 1px);
+}
+a { color: var(--acc); text-decoration: none; }
+a:hover { color: var(--ink); }
+</style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%" data-uneditable="">
+
+<section data-label="Титул" data-screen-label="01" data-speaker-notes="Сортування рідко є метою саме по собі: його виконують, щоб потім швидко знайти, згрупувати чи порівняти. Сьогодні — типові задачі, бінарний пошук і бібліотека алгоритмів C++." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;gap:60px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0">
+    <div style="align-self:flex-start;border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Лекція 14 · Алгоритми і методи обчислень</div>
+    <div>
+      <h1 style="margin:0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em"><span style="color:var(--acc)">Застосування</span><br>сортування.<br>Бібліотеки</h1>
+      <p style="margin:30px 0 0;font-size:36px;line-height:1.3;color:var(--mut);max-width:960px">Задачі, бінарний пошук, &lt;algorithm&gt;, компаратори, інші мови</p>
+    </div>
+    <div style="display:flex;gap:18px;font-size:24px;color:var(--mut)"><span>Змістовий модуль 1</span><span>·</span><span>Тема 3. Представлення та основні структури алгоритмів</span></div>
+  </div>
+  <div style="width:620px;flex:none;display:flex;flex-direction:column;justify-content:center">
+    <div style="padding:40px 44px;display:flex;flex-direction:column;gap:22px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);font-family:var(--m)">
+      <div style="font-size:26px;color:var(--mut)">#include &lt;algorithm&gt;</div>
+      <div style="font-size:34px;color:var(--acc)">sort(a.begin(), a.end());</div>
+      <div style="font-size:34px">lower_bound(…, x);</div>
+      <div style="padding-top:20px;border-top:var(--hair);font-family:var(--b);font-size:26px;line-height:1.4;color:var(--mut)">Сортуємо один раз — шукаємо багато разів</div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Навіщо сортувати" data-screen-label="02" data-speaker-notes="Після сортування однакові й близькі значення опиняються поруч. Пройтися таблицею: виграш — від квадрата до n log n, а пошук — від n до log n на запит." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 14 · Задачі</span><span style="display:var(--hdr,inline);color:var(--mut)">01</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Навіщо сортувати</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Однакові й близькі значення опиняються <b style="font-weight:600;color:var(--ink)">поруч</b></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.2fr 1fr 1.5fr;grid-template-rows:auto repeat(7,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-size:26px">
+    <div style="padding:12px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Задача</div>
+    <div style="padding:12px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Без сортування</div>
+    <div style="padding:12px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Із сортуванням</div>
+    <sc-for list="{{ why }}" as="r" hint-placeholder-count="7">
+      <div style="padding:4px 28px;display:flex;align-items:center;border-top:var(--hair);font-weight:600">{{ r.t }}</div>
+      <div style="padding:4px 28px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);color:var(--mut)">{{ r.a }}</div>
+      <div style="padding:4px 28px;display:flex;align-items:center;border-top:var(--hair)">{{ r.b }}</div>
+    </sc-for>
+  </div>
+</section>
+
+<section data-label="Дублікати" data-screen-label="03" data-speaker-notes="Передаємо копію, щоб не змінити оригінал. Після сортування повтори — сусіди, досить одного проходу." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 14 · Задачі</span><span style="display:var(--hdr,inline);color:var(--mut)">02</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Приклад: чи є в масиві повтори</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:44px;min-height:0">
+    <div style="padding:28px 34px;display:flex;flex-direction:column;gap:18px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++</div>
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:27px;line-height:1.55;background:var(--bg2);padding:22px 28px;white-space:pre"><span style="color:var(--acc);font-weight:600">bool</span> hasDuplicates(vector&lt;<span style="color:var(--acc);font-weight:600">int</span>&gt; a) {  <span style="color:var(--mut)">// копія</span>
+    sort(a.begin(), a.end());
+    <span style="color:var(--acc);font-weight:600">for</span> (size_t i = 1; i &lt; a.size(); i++)
+        <span style="color:var(--acc);font-weight:600">if</span> (<span style="background:var(--fill);color:var(--acc-ink);padding:0 6px">a[i] == a[i - 1]</span>)
+            <span style="color:var(--acc);font-weight:600">return true</span>;
+    <span style="color:var(--acc);font-weight:600">return false</span>;
+}</pre>
+    </div>
+    <div style="padding:28px 34px;display:flex;flex-direction:column;justify-content:center;gap:30px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="display:flex;flex-direction:column;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">До</div>
+        <div style="display:flex;gap:8px"><sc-for list="{{ dupBefore }}" as="c" hint-placeholder-count="7"><span style="width:62px;height:62px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:28px">{{ c }}</span></sc-for></div></div>
+      <div style="display:flex;flex-direction:column;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Після sort</div>
+        <div style="display:flex;gap:8px"><sc-for list="{{ dupAfter }}" as="c" hint-placeholder-count="7"><span style="width:62px;height:62px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:28px;background:{{ c.bg }};color:{{ c.fg }}">{{ c.v }}</span></sc-for></div></div>
+      <p style="margin:0;font-size:27px;line-height:1.4">Перебір пар — <span style="font-family:var(--m)">O(n²)</span>. Сортування + один прохід — <span style="font-family:var(--m);color:var(--acc)">O(n log n)</span></p>
+    </div>
+  </div>
+</section>
+
+<section data-label="Бінарний пошук · ідея" data-screen-label="04" data-speaker-notes="Порівнюємо x із серединою — і відкидаємо половину. Середину рахуємо як low + (high − low)/2: сума low + high може переповнити int." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 14 · Бінарний пошук</span><span style="display:var(--hdr,inline);color:var(--mut)">03</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Бінарний пошук</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1.3fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-rows:repeat(3,1fr) auto;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:20px 30px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">1</span><span style="font-size:26px;line-height:1.38">Порівняти <span style="font-family:var(--m)">x</span> із <b style="font-weight:600">середнім</b> елементом</span></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">2</span><span style="font-size:26px;line-height:1.38">Менший — шукати ліворуч, більший — праворуч</span></div>
+      <div style="background:var(--bg);padding:20px 30px;display:flex;gap:20px;align-items:center"><span style="font-family:var(--m);font-size:34px;color:var(--acc);flex:none">3</span><span style="font-size:26px;line-height:1.38">Область щоразу <b style="font-weight:600">зменшується вдвічі</b></span></div>
+      <div style="background:var(--bg2);padding:22px 30px;display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:26px">Порівнянь</span><span style="font-family:var(--m);font-size:44px;color:var(--acc)">O(log n)</span></div>
+    </div>
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:16px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++</div>
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:25px;line-height:1.55;background:var(--bg2);padding:20px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">int</span> binarySearch(<span style="color:var(--acc);font-weight:600">const</span> vector&lt;<span style="color:var(--acc);font-weight:600">int</span>&gt;&amp; a, <span style="color:var(--acc);font-weight:600">int</span> x) {
+    <span style="color:var(--acc);font-weight:600">int</span> low = 0, high = (<span style="color:var(--acc);font-weight:600">int</span>)a.size() - 1;
+    <span style="color:var(--acc);font-weight:600">while</span> (low &lt;= high) {
+        <span style="color:var(--acc);font-weight:600">int</span> mid = <span style="background:var(--fill);color:var(--acc-ink);padding:0 6px">low + (high - low) / 2</span>;
+        <span style="color:var(--acc);font-weight:600">if</span> (a[mid] == x) <span style="color:var(--acc);font-weight:600">return</span> mid;
+        <span style="color:var(--acc);font-weight:600">if</span> (a[mid] &lt; x) low = mid + 1;
+        <span style="color:var(--acc);font-weight:600">else</span> high = mid - 1;
+    }
+    <span style="color:var(--acc);font-weight:600">return</span> -1;   <span style="color:var(--mut)">// не знайдено</span>
+}</pre>
+    </div>
+  </div>
+</section>
+
+<section data-label="Бінарний пошук · трасування" data-screen-label="05" data-speaker-notes="Шукаємо 23. Бурштином — поточна область [low, high], зеленим — mid. Три кроки замість шести при лінійному пошуку. Мільйон — 20 кроків, мільярд — 30." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 14 · Бінарний пошук</span><span style="display:var(--hdr,inline);color:var(--mut)">04</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Трасування: x = 23</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)">Бурштином — область <span style="font-family:var(--m);color:var(--ink)">[low, high]</span>, зеленим — <span style="font-family:var(--m);color:var(--ink)">mid</span></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:110px auto 1fr;grid-template-rows:auto repeat(3,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="padding:12px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Крок</div>
+    <div style="padding:12px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Масив</div>
+    <div style="padding:12px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">low · high · mid → дія</div>
+    <sc-for list="{{ bsTrace }}" as="r" hint-placeholder-count="3">
+      <div style="padding:8px 28px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:34px;color:var(--acc)">{{ r.k }}</div>
+      <div style="padding:8px 28px;display:flex;gap:6px;align-items:center;border-top:var(--hair)">
+        <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="10"><span style="width:66px;height:66px;display:flex;align-items:center;justify-content:center;border:2px solid {{ c.bd }};font-family:var(--m);font-size:26px;background:{{ c.bg }};color:{{ c.fg }}">{{ c.v }}</span></sc-for>
+      </div>
+      <div style="padding:8px 28px;display:flex;flex-direction:column;justify-content:center;gap:4px;border-top:var(--hair)"><span style="font-family:var(--m);font-size:26px">{{ r.idx }}</span><span style="font-size:25px;color:var(--mut)">{{ r.act }}</span></div>
+    </sc-for>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <div style="background:var(--bg);padding:20px 30px;display:flex;gap:20px;align-items:baseline"><span style="font-family:var(--m);font-size:44px;color:var(--acc)">20</span><span style="font-size:25px">кроків для 10⁶</span></div>
+    <div style="background:var(--bg);padding:20px 30px;display:flex;gap:20px;align-items:baseline"><span style="font-family:var(--m);font-size:44px;color:var(--acc)">30</span><span style="font-size:25px">кроків для 10⁹</span></div>
+    <div style="background:var(--bg2);padding:20px 30px;display:flex;align-items:center;font-size:25px;line-height:1.38">Сортування <span style="font-family:var(--m);margin:0 8px">O(n log n)</span> окупається, якщо запитів багато</div>
+  </div>
+</section>
+
+<section data-label="Типові помилки" data-screen-label="06" data-speaker-notes="Три класичні помилки. Попросити студентів знайти, на якому вході кожна з них ламає пошук." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 14 · Бінарний пошук</span><span style="display:var(--hdr,inline);color:var(--mut)">05</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Типові помилки</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:34px 38px;display:flex;flex-direction:column;justify-content:center;gap:22px">
+      <div style="display:flex;flex-direction:column;gap:10px;font-family:var(--m);font-size:34px"><span style="color:var(--mut);text-decoration:line-through">low &lt; high</span><span style="color:var(--acc)">low &lt;= high</span></div>
+      <p style="margin:0;font-size:27px;line-height:1.42">Пропускає <b style="font-weight:600">останній</b> елемент області</p>
+    </div>
+    <div style="background:var(--bg);padding:34px 38px;display:flex;flex-direction:column;justify-content:center;gap:22px">
+      <div style="display:flex;flex-direction:column;gap:10px;font-family:var(--m);font-size:34px"><span style="color:var(--mut);text-decoration:line-through">low = mid</span><span style="color:var(--acc)">low = mid + 1</span></div>
+      <p style="margin:0;font-size:27px;line-height:1.42">Область не меншає — <b style="font-weight:600">нескінченний цикл</b></p>
+    </div>
+    <div style="background:var(--bg2);padding:34px 38px;display:flex;flex-direction:column;justify-content:center;gap:22px">
+      <div style="font-family:var(--m);font-size:34px">[9, 2, 7, 4, …]</div>
+      <p style="margin:0;font-size:27px;line-height:1.42">Пошук у <b style="font-weight:600">невідсортованому</b> масиві — відповідь безглузда</p>
+    </div>
+  </div>
+</section>
+
+<section data-label="algorithm · розділ" data-screen-label="07" data-speaker-notes="Десятки готових, ретельно оптимізованих алгоритмів. Усі працюють з напіввідкритим діапазоном: перший включно, останній — ні." style="--bg:#112f29;--ink:#eef3ef;--mut:#a7bdb5;--ln:rgba(238,243,239,.2);--acc:var(--fill);--mk-c:rgba(238,243,239,.55);--hair:1px solid rgba(238,243,239,.2);height:100%;display:flex;flex-direction:column;justify-content:space-between;gap:40px;background-color:var(--bg);background-image:var(--grid);background-size:48px 48px;color:var(--ink);font-family:var(--b);padding:84px 88px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="border:var(--hair);border-radius:999px;padding:10px 24px;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.08em;text-transform:uppercase">Бібліотека</div><span style="display:var(--hdr,inline);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;color:var(--mut)">06</span></div>
+  <div>
+    <div style="font-family:var(--m);font-size:40px;color:var(--acc)">#include &lt;algorithm&gt;</div>
+    <h2 style="margin:18px 0 0;font-family:var(--h);font-weight:800;font-size:104px;line-height:1.02;letter-spacing:-.02em">Бібліотека алгоритмів C++</h2>
+  </div>
+  <div style="padding:30px 40px;display:flex;gap:40px;align-items:center;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+    <span style="font-family:var(--m);font-size:56px;color:var(--acc);flex:none">[first, last)</span>
+    <div style="display:flex;gap:8px;flex:none"><span style="width:64px;height:64px;border:2px solid var(--acc);background:var(--acc)"></span><span style="width:64px;height:64px;border:2px solid var(--ink)"></span><span style="width:64px;height:64px;border:2px solid var(--ink)"></span><span style="width:64px;height:64px;border:2px solid var(--ink)"></span><span style="width:64px;height:64px;border:2px dashed var(--mut)"></span></div>
+    <span style="font-size:26px;line-height:1.4;color:var(--mut)">Вектор: <span style="font-family:var(--m);color:var(--ink)">a.begin(), a.end()</span><br>Масив: <span style="font-family:var(--m);color:var(--ink)">arr, arr + n</span></span>
+  </div>
+</section>
+
+<section data-label="Функції сортування" data-screen-label="08" data-speaker-notes="nth_element — найшвидший спосіб знайти медіану чи k-те значення без повного сортування." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 14 · Сортування</span><span style="display:var(--hdr,inline);color:var(--mut)">07</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Функції сортування</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:repeat(5,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <sc-for list="{{ sortFns }}" as="r" hint-placeholder-count="5">
+        <div style="padding:8px 24px;display:flex;align-items:center;border-bottom:var(--hair);font-family:var(--m);font-size:26px;color:var(--acc)">{{ r.f }}</div>
+        <div style="padding:8px 16px;display:flex;align-items:center;border-bottom:var(--hair);font-size:24px;line-height:1.3">{{ r.d }}</div>
+        <div style="padding:8px 24px;display:flex;align-items:center;border-bottom:var(--hair);font-family:var(--m);font-size:24px;white-space:nowrap">{{ r.o }}</div>
+      </sc-for>
+    </div>
+    <div style="padding:24px 30px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">a = {5, 2, 7, 1, 9, 3, 8, 4}</div>
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:23px;line-height:1.45;background:var(--bg2);padding:20px 24px;white-space:pre">sort(a.begin(), a.end());
+<span style="color:var(--acc)">// 1 2 3 4 5 7 8 9</span>
+sort(a.begin(), a.end(), greater&lt;<span style="color:var(--acc);font-weight:600">int</span>&gt;());
+<span style="color:var(--acc)">// 9 8 7 5 4 3 2 1</span>
+partial_sort(b.begin(), b.begin() + 3, b.end());
+<span style="color:var(--acc)">// три найменші попереду: 1 2 3 …</span>
+nth_element(c.begin(), c.begin() + 4, c.end());
+<span style="color:var(--acc)">// c[4] == 5 — як у відсортованому</span></pre>
+    </div>
+  </div>
+</section>
+
+<section data-label="lower_bound · upper_bound" data-screen-label="09" data-speaker-notes="lower_bound — перший не менший за x, upper_bound — перший більший. Різниця — кількість входжень. Обидва — бінарний пошук, O(log n)." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 14 · Пошук</span><span style="display:var(--hdr,inline);color:var(--mut)">08</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Пошук у відсортованому діапазоні</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-rows:repeat(4,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:18px 30px;display:flex;flex-direction:column;justify-content:center;gap:6px"><span style="font-family:var(--m);font-size:28px;color:var(--acc)">binary_search(f, l, x)</span><span style="font-size:24px">true, якщо x є</span></div>
+      <div style="background:var(--bg);padding:18px 30px;display:flex;flex-direction:column;justify-content:center;gap:6px"><span style="font-family:var(--m);font-size:28px;color:var(--acc)">lower_bound(f, l, x)</span><span style="font-size:24px">перший елемент, <b style="font-weight:600">не менший</b> за x</span></div>
+      <div style="background:var(--bg);padding:18px 30px;display:flex;flex-direction:column;justify-content:center;gap:6px"><span style="font-family:var(--m);font-size:28px;color:var(--acc)">upper_bound(f, l, x)</span><span style="font-size:24px">перший елемент, <b style="font-weight:600">більший</b> за x</span></div>
+      <div style="background:var(--bg2);padding:18px 30px;display:flex;flex-direction:column;justify-content:center;gap:6px"><span style="font-family:var(--m);font-size:28px;color:var(--acc)">equal_range(f, l, x)</span><span style="font-size:24px">пара lower_bound і upper_bound</span></div>
+    </div>
+    <div style="padding:30px 36px;display:flex;flex-direction:column;justify-content:center;gap:26px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Скільки разів трапляється 2</div>
+      <div style="display:flex;gap:8px"><sc-for list="{{ boundArr }}" as="c" hint-placeholder-count="6"><div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="width:72px;height:72px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ink);font-family:var(--m);font-size:32px;background:{{ c.bg }};color:{{ c.fg }}">{{ c.v }}</span><span style="font-family:var(--m);font-size:22px;color:var(--mut)">{{ c.i }}</span><span style="font-family:var(--m);font-size:22px;color:var(--acc);height:28px">{{ c.lab }}</span></div></sc-for></div>
+      <pre style="margin:0;font-family:var(--m);font-size:24px;line-height:1.5;background:var(--bg2);padding:18px 22px;white-space:pre"><span style="color:var(--acc);font-weight:600">auto</span> lo = lower_bound(a.begin(), a.end(), 2);
+<span style="color:var(--acc);font-weight:600">auto</span> hi = upper_bound(a.begin(), a.end(), 2);
+cout &lt;&lt; <span style="background:var(--fill);color:var(--acc-ink);padding:0 6px">hi - lo</span>;   <span style="color:var(--mut)">// 3</span></pre>
+    </div>
+  </div>
+</section>
+
+<section data-label="Інші алгоритми" data-screen-label="10" data-speaker-notes="unique прибирає лише сусідні повтори, тому спершу сортуємо. erase відрізає хвіст після нового кінця." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 14 · Бібліотека</span><span style="display:var(--hdr,inline);color:var(--mut)">09</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Інші корисні алгоритми</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.2fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-columns:auto 1fr;grid-template-rows:repeat(6,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+      <sc-for list="{{ otherFns }}" as="r" hint-placeholder-count="6">
+        <div style="padding:8px 28px;display:flex;align-items:center;border-bottom:var(--hair);font-family:var(--m);font-size:26px;color:var(--acc)">{{ r.f }}</div>
+        <div style="padding:8px 24px;display:flex;align-items:center;border-bottom:var(--hair);font-size:24px;line-height:1.3">{{ r.d }}</div>
+      </sc-for>
+    </div>
+    <div style="padding:28px 34px;display:flex;flex-direction:column;justify-content:center;gap:22px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Ідіома · лише унікальні</div>
+      <pre style="margin:0;font-family:var(--m);font-size:26px;line-height:1.6;background:var(--bg2);padding:20px 24px;white-space:pre">sort(a.begin(), a.end());
+a.erase(unique(a.begin(), a.end()),
+        a.end());</pre>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:12px 20px;align-items:center;font-size:25px">
+        <span style="font-family:var(--m);color:var(--acc)">sort</span><span>повтори стають сусідами</span>
+        <span style="font-family:var(--m);color:var(--acc)">unique</span><span>зсуває унікальні вперед, повертає новий кінець</span>
+        <span style="font-family:var(--m);color:var(--acc)">erase</span><span>відрізає залишок</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Компаратори" data-screen-label="11" data-speaker-notes="Компаратор повертає true, якщо перший має стояти раніше. Двоключове сортування: спершу бал за спаданням, потім прізвище за абеткою." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 14 · Компаратори</span><span style="display:var(--hdr,inline);color:var(--mut)">10</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:44px;align-items:end">
+    <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Власний порядок: компаратори</h2>
+    <p style="margin:0 0 8px;font-size:26px;line-height:1.4;color:var(--mut)"><span style="font-family:var(--m);color:var(--ink)">true</span>, якщо перший має стояти <b style="font-weight:600;color:var(--ink)">раніше</b></p>
+  </div>
+  <div style="flex:1;display:grid;grid-template-columns:1.5fr 1fr;gap:44px;min-height:0">
+    <div style="padding:24px 30px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">C++ · лямбда-вираз</div>
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:24px;line-height:1.55;background:var(--bg2);padding:20px 26px;white-space:pre"><span style="color:var(--acc);font-weight:600">struct</span> Student {
+    string surname;
+    <span style="color:var(--acc);font-weight:600">double</span> average;
+};
+
+sort(group.begin(), group.end(),
+     [](<span style="color:var(--acc);font-weight:600">const</span> Student&amp; x, <span style="color:var(--acc);font-weight:600">const</span> Student&amp; y) {
+    <span style="color:var(--acc);font-weight:600">if</span> (x.average != y.average)
+        <span style="color:var(--acc);font-weight:600">return</span> <span style="background:var(--fill);color:var(--acc-ink);padding:0 6px">x.average &gt; y.average</span>;  <span style="color:var(--mut)">// бал</span>
+    <span style="color:var(--acc);font-weight:600">return</span> <span style="background:var(--fill);color:var(--acc-ink);padding:0 6px">x.surname &lt; y.surname</span>;      <span style="color:var(--mut)">// прізвище</span>
+});</pre>
+    </div>
+    <div style="display:grid;grid-template-rows:auto repeat(4,1fr);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="padding:16px 30px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Результат</div>
+      <sc-for list="{{ students }}" as="s" hint-placeholder-count="4">
+        <div style="padding:8px 30px;display:flex;justify-content:space-between;align-items:center;border-top:var(--hair)"><span style="font-family:var(--h);font-weight:700;font-size:32px">{{ s.n }}</span><span style="font-family:var(--m);font-size:32px;color:var(--acc)">{{ s.a }}</span></div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<section data-label="Вимоги до компаратора" data-screen-label="12" data-speaker-notes="Компаратор із <= — поширена помилка: std::sort може працювати неправильно й навіть вийти за межі масиву. Альтернатива складному компаратору — два проходи зі stable_sort." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 14 · Компаратори</span><span style="display:var(--hdr,inline);color:var(--mut)">11</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Компаратор має бути строгим</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:44px;min-height:0">
+    <div style="display:grid;grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:28px 36px;display:flex;flex-direction:column;justify-content:center;gap:16px">
+        <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Поводиться як <span style="font-family:var(--m);color:var(--acc)">&lt;</span></h3>
+        <p style="margin:0;font-size:26px;line-height:1.42">Для однакових елементів — <span style="font-family:var(--m)">false</span>. Тому <span style="font-family:var(--m);color:var(--acc)">&lt;</span>, а не <span style="font-family:var(--m);text-decoration:line-through;color:var(--mut)">&lt;=</span></p>
+      </div>
+      <div style="background:var(--bg);padding:28px 36px;display:flex;flex-direction:column;justify-content:center;gap:16px">
+        <h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:34px">Узгоджений</h3>
+        <p style="margin:0;font-size:26px;line-height:1.42">Якщо <span style="font-family:var(--m)">x</span> раніше за <span style="font-family:var(--m)">y</span>, а <span style="font-family:var(--m)">y</span> — за <span style="font-family:var(--m)">z</span>, то <span style="font-family:var(--m)">x</span> раніше за <span style="font-family:var(--m)">z</span></p>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:24px;min-height:0">
+      <div style="padding:24px 32px;display:flex;flex-direction:column;gap:12px;background:var(--fill);color:var(--acc-ink);border:1px solid var(--fill)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase">Небезпечно</div>
+        <p style="margin:0;font-size:26px;line-height:1.42">З <span style="font-family:var(--m)">&lt;=</span> <span style="font-family:var(--m)">std::sort</span> може працювати неправильно й <b style="font-weight:600">вийти за межі масиву</b></p>
+      </div>
+      <div style="flex:1;padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:18px;border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+        <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">Альтернатива · стійкість</div>
+        <div style="display:grid;grid-template-columns:auto 1fr;gap:14px 22px;align-items:baseline;font-size:26px">
+          <span style="font-family:var(--m);color:var(--acc)">1</span><span><span style="font-family:var(--m)">sort</span> за прізвищем</span>
+          <span style="font-family:var(--m);color:var(--acc)">2</span><span><span style="font-family:var(--m)">stable_sort</span> за балом</span>
+        </div>
+        <p style="margin:0;font-size:24px;line-height:1.4;color:var(--mut)">У межах однакового бала прізвища лишаються за абеткою</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-label="qsort" data-screen-label="13" data-speaker-notes="qsort працює з void* і викликає компаратор через вказівник: повільніше, і помилку в типах компілятор не помітить." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 14 · Мова C</span><span style="display:var(--hdr,inline);color:var(--mut)">12</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Функція qsort мови C</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.3fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:16px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">&lt;cstdlib&gt;</div>
+      <pre style="margin:0;flex:1;display:block;align-content:center;font-family:var(--m);font-size:26px;line-height:1.55;background:var(--bg2);padding:22px 28px;white-space:pre"><span style="color:var(--acc);font-weight:600">int</span> compareInts(<span style="color:var(--acc);font-weight:600">const void</span>* x, <span style="color:var(--acc);font-weight:600">const void</span>* y) {
+    <span style="color:var(--acc);font-weight:600">int</span> a = *(<span style="color:var(--acc);font-weight:600">const int</span>*)x, b = *(<span style="color:var(--acc);font-weight:600">const int</span>*)y;
+    <span style="color:var(--acc);font-weight:600">return</span> <span style="background:var(--fill);color:var(--acc-ink);padding:0 6px">(a &gt; b) - (a &lt; b)</span>;
+}
+
+<span style="color:var(--acc);font-weight:600">int</span> arr[] = {5, 2, 7, 1};
+qsort(arr, 4, <span style="color:var(--acc);font-weight:600">sizeof</span>(<span style="color:var(--acc);font-weight:600">int</span>), compareInts);</pre>
+    </div>
+    <div style="display:grid;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg);padding:22px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Результат компаратора</h3><p style="margin:0;font-size:24px;line-height:1.38">Від'ємне, нуль або додатне</p></div>
+      <div style="background:var(--bg);padding:22px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px">Повільніший</h3><p style="margin:0;font-size:24px;line-height:1.38">Не знає типу, викликає компаратор через вказівник</p></div>
+      <div style="background:var(--bg2);padding:22px 30px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:28px;color:var(--acc)">У C++ — std::sort</h3><p style="margin:0;font-size:24px;line-height:1.38">Помилку в типах <span style="font-family:var(--m)">qsort</span> компілятор не помітить</p></div>
+    </div>
+  </div>
+</section>
+
+<section data-label="Інші мови" data-screen-label="14" data-speaker-notes="Java розрізняє примітиви і об'єкти: для примітивів стійкість не потрібна. Пастка JavaScript — порівняння як рядків." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 14 · Інші мови</span><span style="display:var(--hdr,inline);color:var(--mut)">13</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Сортування в інших мовах</h2>
+  <div style="flex:1;display:grid;grid-template-columns:.8fr 1.6fr 1.2fr .8fr;grid-template-rows:auto repeat(4,1fr);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0;font-size:26px">
+    <div style="padding:12px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Мова</div>
+    <div style="padding:12px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Функція</div>
+    <div style="padding:12px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Алгоритм</div>
+    <div style="padding:12px 28px;background:var(--bg2);font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)">Стійке</div>
+    <sc-for list="{{ langs }}" as="r" hint-placeholder-count="4">
+      <div style="padding:6px 28px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--h);font-weight:700;font-size:30px">{{ r.l }}</div>
+      <div style="padding:6px 28px;display:flex;align-items:center;border-top:var(--hair);font-family:var(--m);font-size:24px;color:var(--acc)">{{ r.f }}</div>
+      <div style="padding:6px 28px;display:flex;align-items:center;border-top:var(--hair)">{{ r.a }}</div>
+      <div style="padding:6px 28px;display:flex;align-items:center;border-top:var(--hair);font-weight:600;color:{{ r.sc }}">{{ r.s }}</div>
+    </sc-for>
+  </div>
+  <div style="padding:22px 32px;display:flex;gap:36px;align-items:center;background:var(--fill);color:var(--acc-ink)">
+    <span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;flex:none">Пастка JS</span>
+    <span style="font-family:var(--m);font-size:30px;flex:none">[10, 9, 1].sort() → [1, 10, 9]</span>
+    <span style="font-size:25px">без компаратора — порівняння <b style="font-weight:600">як рядків</b></span>
+  </div>
+</section>
+
+<section data-label="Практичні поради" data-screen-label="15" data-speaker-notes="П'ять порад. Власні реалізації — для навчання й особливих випадків." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 14 · Практика</span><span style="display:var(--hdr,inline);color:var(--mut)">14</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Практичні поради</h2>
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg2);padding:28px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">01</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Не пишіть власне сортування</h3><p style="margin:0;font-size:24px;line-height:1.4">Бібліотечне швидше, перевірене й стійке до «поганих» даних</p></div>
+    <div style="background:var(--bg);padding:28px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">02</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Не сортуйте без потреби</h3><p style="margin:0;font-size:24px;line-height:1.4"><span style="font-family:var(--m)">min_element</span>, <span style="font-family:var(--m)">partial_sort</span>, <span style="font-family:var(--m)">nth_element</span>, <span style="font-family:var(--m)">set</span></p></div>
+    <div style="background:var(--bg);padding:28px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">03</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Один раз сортуйте</h3><p style="margin:0;font-size:24px;line-height:1.4">…і шукайте багато разів</p></div>
+    <div style="background:var(--bg);padding:28px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">04</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Обережно з NaN</h3><p style="margin:0;font-size:24px;line-height:1.4">Дійсне NaN порушує порядок — компаратор перестає бути строгим</p></div>
+    <div style="background:var(--bg);padding:28px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><span style="font-family:var(--m);font-size:30px;color:var(--acc)">05</span><h3 style="margin:0;font-family:var(--h);font-weight:700;font-size:32px">Великі записи</h3><p style="margin:0;font-size:24px;line-height:1.4">Сортуйте масив індексів або вказівників, а не самі дані</p></div>
+    <div style="background:var(--bg);padding:28px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><span style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Детальніше</span><a href="https://kaldra1.github.io/aimo/lectures/14-sorting-applications/" style="font-size:26px">Лекція 14 на сайті курсу</a></div>
+  </div>
+</section>
+
+<section data-label="Підсумки" data-screen-label="16" data-speaker-notes="Шість пунктів. Наступна лекція відкриває модуль 2 — методи обчислень." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 14 · Підсумки</span><span style="display:var(--hdr,inline);color:var(--mut)">15</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Що забрати з лекції</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:1px;background-color:var(--ln);border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size);min-height:0">
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">01</span><span style="font-size:26px;line-height:1.35">Сортування спрощує пошук, дублікати, частоти, медіану, перетин множин</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">02</span><span style="font-size:26px;line-height:1.35">Бінарний пошук — <span style="font-family:var(--m)">O(log n)</span>; важливі точні межі циклу</span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">03</span><span style="font-size:26px;line-height:1.35"><span style="font-family:var(--m)">&lt;algorithm&gt;</span> працює з діапазоном <span style="font-family:var(--m)">[first, last)</span></span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">04</span><span style="font-size:26px;line-height:1.35">Компаратор строгий: <span style="font-family:var(--m)">&lt;</span>, а не <span style="font-family:var(--m)">&lt;=</span></span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">05</span><span style="font-size:26px;line-height:1.35"><span style="font-family:var(--m)">qsort</span> менш зручний і безпечний за <span style="font-family:var(--m)">std::sort</span></span></div>
+    <div style="background:var(--bg);padding:22px 32px;display:flex;gap:24px;align-items:center"><span style="font-family:var(--m);font-size:36px;color:var(--acc);flex:none">06</span><span style="font-size:26px;line-height:1.35">Python і Java для об'єктів — стійкий Timsort; JS без компаратора порівнює рядки</span></div>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;font-size:25px;color:var(--mut);padding-top:16px;border-top:var(--hair)">
+    <span>Попередня · Лекція 13. Складність алгоритмів сортування</span>
+    <span style="font-family:var(--h);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--acc)">Далі · Лекція 15. Похибки обчислень</span>
+  </div>
+</section>
+
+<section data-label="Контрольні запитання" data-screen-label="17" data-speaker-notes="Запитання 9 — написати компаратор на дошці. Решту — самостійно." style="height:100%;display:flex;flex-direction:column;gap:30px;background:var(--bg);color:var(--ink);font-family:var(--b);padding:64px 88px 72px;overflow:hidden">
+  <div style="display:flex;justify-content:space-between;font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)"><span>Лекція 14 · Перевірка</span><span style="display:var(--hdr,inline);color:var(--mut)">16</span></div>
+  <h2 style="margin:0;font-family:var(--h);font-weight:800;font-size:68px;line-height:1.05;letter-spacing:-.015em">Контрольні запитання</h2>
+  <div style="flex:1;display:grid;grid-template-columns:1.4fr 1fr;gap:44px;min-height:0">
+    <div style="padding:26px 32px;display:flex;flex-direction:column;gap:14px;border:var(--hair);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Теорія</div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;font-size:24px;line-height:1.3">
+        <sc-for list="{{ questions }}" as="q" hint-placeholder-count="11"><div style="display:flex;gap:16px"><span style="font-family:var(--m);color:var(--acc);width:36px;flex:none">{{ q.n }}</span><span>{{ q.t }}</span></div></sc-for>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-rows:1.3fr 1fr;gap:1px;background-color:var(--ln);border:1px solid var(--acc);background-origin:border-box;background-repeat:no-repeat;background-image:var(--mk-img);background-position:var(--mk-pos);background-size:var(--mk-size)">
+      <div style="background:var(--bg2);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:16px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--acc)">9 · На дошці</div><p style="margin:0;font-size:30px;line-height:1.35">Компаратор: рядки за довжиною, за однакової довжини — за абеткою</p><div style="font-family:var(--m);font-size:28px;color:var(--mut)">"кіт" "ліс" "дуб" "сонце"</div></div>
+      <div style="background:var(--bg);padding:26px 32px;display:flex;flex-direction:column;justify-content:center;gap:12px"><div style="font-family:var(--h);font-weight:700;font-size:24px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)">Матеріали</div><a href="https://kaldra1.github.io/aimo/lectures/14-sorting-applications/" style="font-size:26px">Лекція 14 на сайті курсу</a></div>
+    </div>
+  </div>
+</section>
+
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Бурштин&quot;,&quot;М'ята&quot;],&quot;default&quot;:&quot;Бурштин&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Оформлення&quot;},&quot;showHeaderLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Оформлення&quot;}}">
+class Component extends DCLogic {
+  applyTweaks() {
+    const b = document.body.style;
+    b.setProperty("--fill", this.props.accent === "М'ята" ? "#5fd3bd" : "#f0b45a");
+    b.setProperty("--hdr", this.props.showHeaderLabels === false ? "none" : "inline");
+  }
+  componentDidMount() { this.applyTweaks(); }
+  componentDidUpdate() { this.applyTweaks(); }
+  renderVals() {
+    const G = { bg: "var(--acc)", fg: "var(--bg)" }, A = { bg: "var(--fill)", fg: "var(--acc-ink)" }, P = { bg: "var(--bg)", fg: "var(--ink)" };
+    const arr = [2,5,8,12,16,23,38,56,72,91];
+    const bs = (lo, hi, mid) => arr.map((v, i) => i === mid ? Object.assign({ v, bd: "var(--acc)" }, G) : (i >= lo && i <= hi) ? Object.assign({ v, bd: "var(--ink)" }, A) : { v, bd: "var(--ln)", bg: "var(--bg2)", fg: "var(--mut)" });
+    return {
+      why: [
+        { t: "багаторазовий пошук", a: "O(n) на запит", b: "O(log n) на запит — бінарний пошук" },
+        { t: "чи є дублікати", a: "O(n²)", b: "порівняти сусідів — O(n log n)" },
+        { t: "кількість різних значень", a: "O(n²)", b: "O(n log n)" },
+        { t: "медіана, k-те значення", a: "—", b: "елемент з індексом k" },
+        { t: "перетин двох множин", a: "O(n · m)", b: "один спільний прохід — O(n + m)" },
+        { t: "найближча пара чисел", a: "O(n²)", b: "найменша різниця сусідів" },
+        { t: "чи є слова анаграмами", a: "—", b: "порівняти слова з відсортованими буквами" }
+      ],
+      dupBefore: [7,3,9,1,3,5,8],
+      dupAfter: [1,3,3,5,7,8,9].map((v, i) => Object.assign({ v }, (i === 1 || i === 2) ? A : P)),
+      bsTrace: [
+        { k: 1, cells: bs(0, 9, 4), idx: "0 · 9 · 4", act: "16 < 23 → праворуч" },
+        { k: 2, cells: bs(5, 9, 7), idx: "5 · 9 · 7", act: "56 > 23 → ліворуч" },
+        { k: 3, cells: bs(5, 6, 5), idx: "5 · 6 · 5", act: "знайдено, індекс 5" }
+      ],
+      sortFns: [
+        { f: "sort", d: "за зростанням (introsort)", o: "O(n log n)" },
+        { f: "stable_sort", d: "стійке (злиттям)", o: "O(n log n)" },
+        { f: "partial_sort", d: "лише перші k найменших", o: "O(n log k)" },
+        { f: "nth_element", d: "k-й на місце, менші ліворуч", o: "O(n) сер." },
+        { f: "is_sorted", d: "чи відсортовано", o: "O(n)" }
+      ],
+      boundArr: [1,2,2,2,5,7].map((v, i) => Object.assign({ v, i, lab: i === 1 ? "lo" : i === 4 ? "hi" : "" }, v === 2 ? A : P)),
+      otherFns: [
+        { f: "min_element", d: "найменший / найбільший — O(n), без сортування" },
+        { f: "count", d: "кількість елементів, рівних x" },
+        { f: "reverse", d: "обернути порядок" },
+        { f: "unique", d: "прибрати сусідні повтори" },
+        { f: "merge", d: "злити два відсортовані діапазони" },
+        { f: "accumulate", d: "сума елементів (<numeric>)" }
+      ],
+      students: [{ n: "Бойко", a: "4.8" }, { n: "Андрієнко", a: "4.5" }, { n: "Коваль", a: "4.5" }, { n: "Дмитренко", a: "3.9" }],
+      langs: [
+        { l: "Python", f: "sorted(xs, key=…)", a: "Timsort", s: "так" },
+        { l: "Java", f: "Arrays.sort (примітиви)", a: "швидке, два опорні", s: "ні" },
+        { l: "Java", f: "Arrays.sort (об'єкти)", a: "Timsort", s: "так" },
+        { l: "JS", f: "a.sort((a, b) => a - b)", a: "від рушія", s: "так, ES2019" }
+      ].map(r => Object.assign({ sc: r.s === "ні" ? "var(--mut)" : "var(--acc)" }, r)),
+      questions: [
+        [1, "Наведіть п'ять задач, що спрощуються після сортування"],
+        [2, "Опишіть бінарний пошук. Чому лише на відсортованих даних?"],
+        [3, "Скільки кроків бінарного пошуку для мільйона елементів?"],
+        [4, "Чому середину рахують як low + (high − low) / 2?"],
+        [5, "Чим sort відрізняється від stable_sort?"],
+        [6, "Навіщо partial_sort і nth_element? Медіана за O(n)?"],
+        [7, "Що повертають lower_bound і upper_bound?"],
+        [8, "Як залишити в масиві лише унікальні значення?"],
+        [10, "Чому компаратор не можна писати зі знаком <=?"],
+        [11, "Чим qsort гірший за std::sort?"],
+        [12, "Чому в JS [10, 9, 1].sort() дає [1, 10, 9]?"]
+      ].map(([n, t]) => ({ n, t }))
+    };
+  }
+}
+</script>
+</body>
+</html>
