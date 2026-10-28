@@ -1,5 +1,5 @@
 /** Острів сторінки задачі: підказки, емулятор, перевірка на всіх тестах і позначка «розв’язано». */
-import { useCallback, useMemo, useRef, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { FlowProgram, FlowSaved } from '../../lib/machines/flowchart';
 import type { MarkovProgram, MarkovSaved } from '../../lib/machines/markov';
 import type { PostProgram, PostSaved } from '../../lib/machines/post';
@@ -22,6 +22,7 @@ import {
   type TestResult,
 } from '../../lib/tasks/check';
 import { formatSolvedDate, taskStorageKey } from '../../lib/tasks/meta';
+import { pasteStats, trackPastes } from '../../lib/tasks/paste';
 import { formatNumber, removeStorage, type EmulatorApi } from '../emulator/support';
 import FlowchartEmulator from '../flowchart/FlowchartEmulator';
 import MarkovEmulator from '../markov/MarkovEmulator';
@@ -107,6 +108,14 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
   const [generation, setGeneration] = useState(0);
   const checkPanelRef = useRef<HTMLElement>(null);
   const emulatorRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const isVariant = parseVariantTaskId(task.id) !== null;
+
+  // Вставки готового тексту в редактор — для дашборду викладача.
+  useEffect(() => {
+    if (!isVariant || !rootRef.current) return;
+    return trackPastes(rootRef.current, task.id);
+  }, [isVariant, task.id]);
 
   const initialState = useMemo(() => initialOf(task), [task]);
   const empty =
@@ -142,8 +151,8 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
       if (next.solved) {
         store.markSolved(task.id);
         notifyProgress();
-        if (parseVariantTaskId(task.id)) {
-          saveSolve(task.id, programText(task.machine, current)).then(
+        if (isVariant) {
+          saveSolve(task.id, programText(task.machine, current), pasteStats(task.id)).then(
             (result) =>
               setCloud(
                 result === 'saved'
@@ -196,7 +205,7 @@ export default function TaskWorkbench({ task }: { task: TaskView }) {
         : `Пройдено ${report.passed} з ${plural(report.total, ['тесту', 'тестів', 'тестів'])}.`;
 
   return (
-    <div class="task-workbench">
+    <div class="task-workbench" ref={rootRef}>
       {task.hints.length > 0 && (
         <section class="task-hints" aria-labelledby="task-hints-title">
           <h2 id="task-hints-title" class="task-section-title">

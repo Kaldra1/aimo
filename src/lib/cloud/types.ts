@@ -25,6 +25,10 @@ export interface SolveRow {
   program: string;
   solved_at: string;
   updated_at: string;
+  /** Вставки готового тексту в редактор (немає, поки міграцію не застосовано). */
+  pastes?: number;
+  pasted_chars?: number;
+  file_loads?: number;
 }
 
 export interface StudentRow {

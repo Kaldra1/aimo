@@ -6,6 +6,7 @@
  */
 import type { Session, SupabaseClient } from '@supabase/supabase-js';
 import { loginFromEmail } from './accounts';
+import type { PasteStats } from '../tasks/paste';
 
 const URL =
   (import.meta.env.PUBLIC_SUPABASE_URL as string | undefined) ??
@@ -98,14 +99,21 @@ export function explain(error: { message: string } | null | undefined): string {
 export async function saveSolve(
   taskId: string,
   program: string,
+  stats?: PasteStats,
 ): Promise<'saved' | 'skipped' | 'foreign'> {
   if (!hasStoredSession()) return 'skipped';
   const client = await getClient();
   const { data } = await client.auth.getSession();
   if (!data.session) return 'skipped';
-  const { error } = await client
-    .from('solves')
-    .upsert({ user_id: data.session.user.id, task_id: taskId, program });
+  const row = { user_id: data.session.user.id, task_id: taskId, program };
+  const paste = stats
+    ? { pastes: stats.pastes, pasted_chars: stats.chars, file_loads: stats.files }
+    : {};
+  let { error } = await client.from('solves').upsert({ ...row, ...paste });
+  // База ще без стовпців вставок (міграцію не застосовано) — зберігаємо сам розв'язок.
+  if (error && stats && /pastes|pasted_chars|file_loads/.test(error.message)) {
+    ({ error } = await client.from('solves').upsert(row));
+  }
   // RLS не пускає чужий варіант: розв'язувати можна, але в кабінет він не потрапляє.
   if (error && /row-level security/i.test(error.message)) return 'foreign';
   if (error) throw new Error(explain(error));
