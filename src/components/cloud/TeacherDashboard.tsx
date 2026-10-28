@@ -1,12 +1,12 @@
 /**
  * Дашборд викладача: журнал оцінок (як таблиця групи), заняття × ★/★★/★★★ з датами й схемами,
- * повторна перевірка й однакові схеми, акаунти студентів. Оцінки спершу змінюються в чернетці
+ * повторна перевірка й позначки вставок, акаунти студентів. Оцінки спершу змінюються в чернетці
  * й потрапляють у базу лише після «Підтвердити зміни».
  */
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import { credentialsCsv, parseRoster } from '../../lib/cloud/accounts';
 import { explain, getClient } from '../../lib/cloud/client';
-import { fingerprint, recheck, type Recheck } from '../../lib/cloud/solutions';
+import { recheck, type Recheck } from '../../lib/cloud/solutions';
 import { pasteDescription, pasteLevel, type PasteLevel } from '../../lib/cloud/paste-level';
 import {
   formatStamp,
@@ -37,7 +37,7 @@ import {
   type Draft,
 } from '../../lib/grading/journal';
 import { testsKey } from '../../lib/variants/ids';
-import { downloadText } from '../emulator/support';
+import { downloadText, readStorage, writeStorage } from '../emulator/support';
 import LoginForm from './LoginForm';
 import { useAuth } from './useAuth';
 
@@ -100,6 +100,7 @@ function Dashboard({
   const [data, setData] = useState<Data | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('journal');
+  const [hidden, setHidden] = useHiddenStudents();
   const [groupId, setGroupId] = useState<string>('');
   const [sessionId, setSessionId] = useState<string>(
     sessions.find((s) => s.checkable)?.id ?? sessions[0]?.id ?? '',
@@ -228,21 +229,36 @@ function Dashboard({
   if (data === null || book === null) return <p class="panel__hint">Завантаження…</p>;
 
   const students = data.students.filter((s) => s.group_id === groupId);
+  // «Заняття»: усі групи, крім тих, кого вимкнули у фільтрі.
+  const groupOrder = new Map(data.groups.map((g, i) => [g.id, i]));
+  const sessionStudents = data.students
+    .filter((s) => !hidden.has(s.user_id))
+    .sort(
+      (a, b) =>
+        (groupOrder.get(a.group_id) ?? 0) - (groupOrder.get(b.group_id) ?? 0) ||
+        a.journal - b.journal,
+    );
   const session = sessions.find((s) => s.id === sessionId);
 
   return (
     <div class="cloud-stack">
       <div class="cloud-toolbar">
-        <label class="field field--inline">
-          <span class="field__label">Група</span>
-          <select class="input" value={groupId} onChange={(e) => setGroupId(e.currentTarget.value)}>
-            {data.groups.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.title}
-              </option>
-            ))}
-          </select>
-        </label>
+        {tab !== 'session' && (
+          <label class="field field--inline">
+            <span class="field__label">Група</span>
+            <select
+              class="input"
+              value={groupId}
+              onChange={(e) => setGroupId(e.currentTarget.value)}
+            >
+              {data.groups.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.title}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <div class="cloud-tabs" role="tablist" aria-label="Розділ дашборду">
           {(
             [
@@ -303,12 +319,18 @@ function Dashboard({
               ))}
             </select>
           </label>
+          <StudentFilter
+            groups={data.groups}
+            students={data.students}
+            hidden={hidden}
+            onChange={setHidden}
+          />
           {session && (
             <SessionTable
-              key={`${groupId}/${sessionId}`}
+              key={sessionId}
               session={session}
-              groupId={groupId}
-              students={students}
+              groups={data.groups}
+              students={sessionStudents}
               data={data}
               checks={checks}
               book={book}
@@ -575,9 +597,97 @@ const gradeText = (grade: Grade | null) => (grade ? `${grade} (${GRADE_LABELS[gr
 
 // ---------- Заняття ----------
 
+const HIDDEN_KEY = 'aimo:teacher:session-hidden';
+
+/** Кого не показувати у вкладці «Заняття» — пам’ятається в цьому браузері. */
+function useHiddenStudents(): [ReadonlySet<string>, (next: Set<string>) => void] {
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(() => {
+    try {
+      const ids = JSON.parse(readStorage(HIDDEN_KEY) ?? '[]') as unknown;
+      return new Set(Array.isArray(ids) ? ids.filter((id) => typeof id === 'string') : []);
+    } catch {
+      return new Set();
+    }
+  });
+  const update = (next: Set<string>) => {
+    setHidden(next);
+    writeStorage(HIDDEN_KEY, JSON.stringify([...next]));
+  };
+  return [hidden, update];
+}
+
+/** Фільтр: галочки груп (уся група) і студентів усередині. */
+function StudentFilter({
+  groups,
+  students,
+  hidden,
+  onChange,
+}: {
+  groups: GroupRow[];
+  students: StudentRow[];
+  hidden: ReadonlySet<string>;
+  onChange: (next: Set<string>) => void;
+}) {
+  const shown = students.filter((s) => !hidden.has(s.user_id)).length;
+  const toggle = (ids: string[], show: boolean) => {
+    const next = new Set(hidden);
+    for (const id of ids) {
+      if (show) next.delete(id);
+      else next.add(id);
+    }
+    onChange(next);
+  };
+  return (
+    <details class="cloud-filter">
+      <summary>
+        Кого показувати: {shown} з {students.length}
+      </summary>
+      <div class="cloud-filter__groups">
+        {groups.map((group) => {
+          const members = students.filter((s) => s.group_id === group.id);
+          if (members.length === 0) return null;
+          const visible = members.filter((s) => !hidden.has(s.user_id)).length;
+          return (
+            <fieldset key={group.id} class="cloud-filter__group">
+              <legend>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={visible === members.length}
+                    ref={(el) => {
+                      if (el) el.indeterminate = visible > 0 && visible < members.length;
+                    }}
+                    onChange={(e) =>
+                      toggle(
+                        members.map((s) => s.user_id),
+                        e.currentTarget.checked,
+                      )
+                    }
+                  />{' '}
+                  {group.title} ({visible} з {members.length})
+                </label>
+              </legend>
+              {members.map((s) => (
+                <label key={s.user_id} class="cloud-filter__student">
+                  <input
+                    type="checkbox"
+                    checked={!hidden.has(s.user_id)}
+                    onChange={(e) => toggle([s.user_id], e.currentTarget.checked)}
+                  />{' '}
+                  {s.journal}. {s.full_name}
+                </label>
+              ))}
+            </fieldset>
+          );
+        })}
+      </div>
+    </details>
+  );
+}
+
 function SessionTable({
   session,
-  groupId,
+  groups,
   students,
   data,
   checks,
@@ -585,50 +695,55 @@ function SessionTable({
   onChanged,
 }: {
   session: SessionMeta;
-  groupId: string;
+  groups: GroupRow[];
+  /** Показані студенти всіх груп. */
   students: StudentRow[];
   data: Data;
   checks: ReadonlyMap<string, Recheck>;
   book: GradeBook;
   onChanged: () => Promise<void>;
 }) {
-  const dateRow = data.dates.find((d) => d.group_id === groupId && d.session === session.id);
   const [open, setOpen] = useState<string | null>(null);
-
-  // Однакові схеми в межах заняття й рівня — серед усіх груп.
-  const twins = useMemo(() => {
-    const byKey = new Map<string, SolveRow[]>();
-    for (const solve of data.solves) {
-      if (solve.session !== session.id) continue;
-      const key = `${solve.stars}:${fingerprint(session.machine ?? 'markov', solve.program)}`;
-      byKey.set(key, [...(byKey.get(key) ?? []), solve]);
-    }
-    const loginOf = new Map(data.students.map((s) => [s.user_id, s.login]));
-    const result = new Map<string, string[]>();
-    for (const group of byKey.values()) {
-      if (group.length < 2) continue;
-      for (const solve of group) {
-        result.set(
-          `${solve.user_id}/${solve.stars}`,
-          group.filter((s) => s !== solve).map((s) => loginOf.get(s.user_id) ?? '?'),
-        );
-      }
-    }
-    return result;
-  }, [data.solves, data.students, session.id, session.machine]);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const shownGroups = groups.filter((g) => students.some((s) => s.group_id === g.id));
 
   const openSolve = open
     ? data.solves.find((s) => `${s.user_id}/${s.stars}` === open && s.session === session.id)
     : undefined;
+  const openStudent = openSolve
+    ? data.students.find((s) => s.user_id === openSolve.user_id)
+    : undefined;
 
+  const removeSolve = async (solve: SolveRow) => {
+    const who = openStudent?.full_name ?? '';
+    const what = `${'★'.repeat(solve.stars)} ${session.label}`;
+    if (!window.confirm(`Видалити розв’язок ${what} (${who})? Студент зможе розв’язати знову.`)) {
+      return;
+    }
+    const client = await getClient();
+    const { error } = await client
+      .from('solves')
+      .delete()
+      .match({ user_id: solve.user_id, task_id: solve.task_id });
+    setDeleteError(error ? explain(error) : null);
+    if (!error) setOpen(null);
+    await onChanged();
+  };
+
+  // Рядок для переходу стрілками між клітинками оцінок; студенти вже впорядковані за групами.
+  const rowOf = new Map(students.map((s, i) => [s.user_id, i]));
   return (
     <section class="panel cloud-card" aria-label={`${session.label}: розв’язки`}>
-      <SessionDate
-        groupId={groupId}
-        session={session.id}
-        value={dateRow?.date}
-        onChanged={onChanged}
-      />
+      {shownGroups.map((group) => (
+        <SessionDate
+          key={group.id}
+          groupId={group.id}
+          label={shownGroups.length > 1 ? group.title : null}
+          session={session.id}
+          value={data.dates.find((d) => d.group_id === group.id && d.session === session.id)?.date}
+          onChanged={onChanged}
+        />
+      ))}
       {!session.checkable && (
         <p class="panel__hint">
           Для цього заняття автоперевірки немає — розв’язки в базу не потрапляють, оцінку ставите
@@ -641,6 +756,7 @@ function SessionTable({
             <tr>
               <th scope="col">№</th>
               <th scope="col">Студент</th>
+              <th scope="col">Логін</th>
               <th scope="col">★</th>
               <th scope="col">★★</th>
               <th scope="col">★★★</th>
@@ -649,83 +765,97 @@ function SessionTable({
             </tr>
           </thead>
           <tbody>
-            {students.map((student, row) => {
-              const mine = data.solves.filter(
-                (s) => s.user_id === student.user_id && s.session === session.id,
-              );
-              const rec = book.recommend(student.user_id, session.id);
-              return (
-                <tr key={student.user_id}>
-                  <td>{student.journal}</td>
-                  <th scope="row">
-                    {student.full_name}
-                    <span class="cloud-muted"> · {student.login}</span>
-                  </th>
-                  {([1, 2, 3] as const).map((stars) => {
-                    const solve = mine.find((s) => s.stars === stars);
-                    if (!solve) return <td key={stars}>—</td>;
-                    const key = `${student.user_id}/${stars}`;
-                    const check = checks.get(solveKey(student.user_id, session.id, stars));
-                    const twin = twins.get(key);
-                    return (
-                      <td key={stars}>
-                        <button
-                          type="button"
-                          class={`cloud-solve${check === 'fail' ? ' is-failed' : ''}`}
-                          aria-expanded={open === key}
-                          onClick={() => setOpen(open === key ? null : key)}
-                          title={`${
-                            check === 'fail'
-                              ? 'Повторна перевірка не пройдена'
-                              : check === 'unknown'
-                                ? 'Тестів для повторної перевірки немає'
-                                : 'Повторна перевірка пройдена'
-                          }. Уперше розв’язано ${formatStamp(solve.solved_at)}, востаннє — ${formatStamp(solve.updated_at)}`}
-                        >
-                          {check === 'fail' ? '✗' : check === 'ok' ? '✓' : '?'}{' '}
-                          {formatStamp(solve.updated_at)}
-                        </button>
-                        <PasteMark solve={solve} />
-                        {twin && (
-                          <span class="cloud-twin" title={`Така сама схема: ${twin.join(', ')}`}>
-                            = {twin.join(', ')}
-                          </span>
-                        )}
+            {shownGroups.flatMap((group) => [
+              ...(shownGroups.length > 1
+                ? [
+                    <tr key={`group-${group.id}`} class="cloud-group-row">
+                      <th scope="colgroup" colSpan={8}>
+                        {group.title}
+                      </th>
+                    </tr>,
+                  ]
+                : []),
+              ...students
+                .filter((s) => s.group_id === group.id)
+                .map((student) => {
+                  const mine = data.solves.filter(
+                    (s) => s.user_id === student.user_id && s.session === session.id,
+                  );
+                  const rec = book.recommend(student.user_id, session.id);
+                  return (
+                    <tr key={student.user_id}>
+                      <td>{student.journal}</td>
+                      <th scope="row">{student.full_name}</th>
+                      <td class="cloud-muted">{student.login}</td>
+                      {([1, 2, 3] as const).map((stars) => {
+                        const solve = mine.find((s) => s.stars === stars);
+                        if (!solve) return <td key={stars}>—</td>;
+                        const key = `${student.user_id}/${stars}`;
+                        const check = checks.get(solveKey(student.user_id, session.id, stars));
+                        return (
+                          <td key={stars}>
+                            <button
+                              type="button"
+                              class={`cloud-solve${check === 'fail' ? ' is-failed' : ''}`}
+                              aria-expanded={open === key}
+                              onClick={() => setOpen(open === key ? null : key)}
+                              title={`${
+                                check === 'fail'
+                                  ? 'Повторна перевірка не пройдена'
+                                  : check === 'unknown'
+                                    ? 'Тестів для повторної перевірки немає'
+                                    : 'Повторна перевірка пройдена'
+                              }. Уперше розв’язано ${formatStamp(solve.solved_at)}, востаннє — ${formatStamp(solve.updated_at)}`}
+                            >
+                              {check === 'fail' ? '✗' : check === 'ok' ? '✓' : '?'}{' '}
+                              {formatStamp(solve.updated_at)}
+                            </button>
+                            <PasteMark solve={solve} />
+                          </td>
+                        );
+                      })}
+                      <td title={rec.reason}>{gradeText(rec.grade)}</td>
+                      <td>
+                        <GradeCell
+                          book={book}
+                          userId={student.user_id}
+                          item={session.id}
+                          label={`${student.full_name}: остаточна за ${session.label}`}
+                          hint={rec.grade === null ? '' : String(rec.grade)}
+                          row={rowOf.get(student.user_id) ?? 0}
+                          col={0}
+                        />
                       </td>
-                    );
-                  })}
-                  <td title={rec.reason}>{gradeText(rec.grade)}</td>
-                  <td>
-                    <GradeCell
-                      book={book}
-                      userId={student.user_id}
-                      item={session.id}
-                      label={`${student.full_name}: остаточна за ${session.label}`}
-                      hint={rec.grade === null ? '' : String(rec.grade)}
-                      row={row}
-                      col={0}
-                    />
-                  </td>
-                </tr>
-              );
-            })}
+                    </tr>
+                  );
+                }),
+            ])}
           </tbody>
         </table>
       </div>
-      {students.length === 0 && <p class="panel__hint">У групі ще немає студентів.</p>}
+      {students.length === 0 && <p class="panel__hint">У фільтрі нікого не вибрано.</p>}
       {openSolve && (
         <div class="cloud-program">
-          <p class="field__label">
-            {data.students.find((s) => s.user_id === openSolve.user_id)?.login} · варіант{' '}
-            {openSolve.variant} · {'★'.repeat(openSolve.stars)} · востаннє збережено{' '}
-            {formatStamp(openSolve.updated_at)}
-          </p>
+          <div class="panel__header">
+            <p class="field__label">
+              {openStudent?.login} · варіант {openSolve.variant} · {'★'.repeat(openSolve.stars)} ·
+              востаннє збережено {formatStamp(openSolve.updated_at)}
+            </p>
+            <button
+              type="button"
+              class="button button--secondary"
+              onClick={() => void removeSolve(openSolve)}
+            >
+              Видалити розв’язок
+            </button>
+          </div>
           <p class={`cloud-paste-note is-${pasteLevel(openSolve)}`}>
             {pasteDescription(openSolve)}
           </p>
           <pre>{openSolve.program}</pre>
         </div>
       )}
+      {deleteError && <p class="message message--error">{deleteError}</p>}
     </section>
   );
 }
@@ -753,11 +883,14 @@ function PasteMark({ solve }: { solve: SolveRow }) {
 
 function SessionDate({
   groupId,
+  label,
   session,
   value,
   onChanged,
 }: {
   groupId: string;
+  /** Назва групи, коли на сторінці кілька груп. */
+  label: string | null;
   session: string;
   value: string | undefined;
   onChanged: () => Promise<void>;
@@ -775,7 +908,9 @@ function SessionDate({
   return (
     <div class="cloud-row">
       <label class="field field--inline">
-        <span class="field__label">Дата заняття в групі</span>
+        <span class="field__label">
+          {label ? `Дата заняття: ${label}` : 'Дата заняття в групі'}
+        </span>
         <input
           class="input"
           type="date"

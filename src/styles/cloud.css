@@ -120,16 +120,6 @@
   color: var(--color-danger);
 }
 
-.cloud-twin {
-  display: block;
-  margin-top: var(--space-1);
-  padding: 0 var(--space-1);
-  border-radius: var(--radius-control);
-  background: var(--color-blue-card);
-  color: var(--color-blue-text);
-  font-size: var(--text-xs, 0.75rem);
-}
-
 .cloud-grade {
   min-height: 2.25rem;
   padding-block: var(--space-1);
@@ -231,4 +221,45 @@
 .cloud-subtitle {
   margin: var(--space-3) 0 0;
   font-size: var(--text-base);
+}
+
+.cloud-filter {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  padding: var(--space-2) var(--space-3);
+}
+
+.cloud-filter > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.cloud-filter__groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.cloud-filter__group {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.cloud-filter__group legend {
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: var(--space-1);
+}
+
+.cloud-filter__student {
+  font-size: var(--text-sm);
+}
+
+.cloud-group-row th {
+  background: var(--color-surface);
+  font-weight: 700;
 }

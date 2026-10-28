@@ -1,7 +1,6 @@
 /** Кабінет студента: вхід, пошта й пароль, розв’язані завдання з датами й оцінки. */
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import { explain, getClient } from '../../lib/cloud/client';
-import { parseVariantTaskId, programFromSaved, programText } from '../../lib/cloud/solutions';
 import {
   formatStamp,
   localDate,
@@ -12,11 +11,8 @@ import {
 } from '../../lib/cloud/types';
 import { GRADE_LABELS, type Grade } from '../../lib/grading/grade';
 import { JOURNAL_TOPICS, SEMESTER_ITEM } from '../../lib/grading/journal';
-import { LocalProgressStore } from '../../lib/tasks/progress';
-import { taskStorageKey } from '../../lib/tasks/meta';
 import { url } from '../../lib/url';
 import { variantTaskPath } from '../../lib/variants/ids';
-import { readStorage } from '../emulator/support';
 import LoginForm from './LoginForm';
 import { useAuth } from './useAuth';
 import type { Profile } from '../../lib/cloud/client';
@@ -124,12 +120,6 @@ function StudentView({
           <h2 id="solves-title" class="panel__title">
             Індивідуальні завдання
           </h2>
-          <LocalImport
-            journal={student.journal}
-            sessions={sessions}
-            solves={solves}
-            onDone={reload}
-          />
         </div>
         {loadError && <p class="message message--error">{loadError}</p>}
         {solves === null ? (
@@ -259,60 +249,6 @@ function AccountSettings({
         </p>
       )}
     </section>
-  );
-}
-
-/** Розв'язки свого варіанта, зроблені в цьому браузері до входу, — у базу. */
-function LocalImport({
-  journal,
-  sessions,
-  solves,
-  onDone,
-}: {
-  journal: number;
-  sessions: SessionMeta[];
-  solves: SolveRow[] | null;
-  onDone: () => Promise<void>;
-}) {
-  const [status, setStatus] = useState<string | null>(null);
-  const [pending, setPending] = useState<{ taskId: string; program: string }[]>([]);
-
-  useEffect(() => {
-    if (solves === null) return;
-    const known = new Set(solves.map((s) => s.task_id));
-    const local = Object.keys(new LocalProgressStore().get().solved);
-    setPending(
-      local.flatMap((taskId) => {
-        const ref = parseVariantTaskId(taskId);
-        if (!ref || ref.variant !== journal || known.has(taskId)) return [];
-        const saved = readStorage(taskStorageKey(taskId));
-        if (saved === null) return [];
-        const machine = sessions.find((s) => s.id === ref.session)?.machine;
-        if (!machine) return [];
-        const program = programFromSaved(machine, saved);
-        return program ? [{ taskId, program: programText(machine, program) }] : [];
-      }),
-    );
-  }, [solves, journal, sessions]);
-
-  if (pending.length === 0) return status ? <span class="panel__hint">{status}</span> : null;
-
-  const upload = async () => {
-    const client = await getClient();
-    const { data } = await client.auth.getSession();
-    const userId = data.session?.user.id;
-    if (!userId) return;
-    const { error } = await client
-      .from('solves')
-      .upsert(pending.map((p) => ({ user_id: userId, task_id: p.taskId, program: p.program })));
-    setStatus(error ? explain(error) : 'Надіслано.');
-    await onDone();
-  };
-
-  return (
-    <button type="button" class="button button--primary" onClick={upload}>
-      Надіслати розв’язки з цього браузера ({pending.length})
-    </button>
   );
 }
 
