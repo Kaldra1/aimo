@@ -13,9 +13,11 @@ export interface PasteStats {
   chars: number;
   /** Скільки разів завантажували програму з файлу. */
   files: number;
+  /** Найбільша вставка за один раз, символів. */
+  max: number;
 }
 
-const EMPTY: PasteStats = { pastes: 0, chars: 0, files: 0 };
+const EMPTY: PasteStats = { pastes: 0, chars: 0, files: 0, max: 0 };
 const key = (taskId: string) => `aimo:task-meta:${taskId}`;
 const NOT_CODE = /-(input|alphabet|comment)$/;
 
@@ -24,7 +26,12 @@ export function pasteStats(taskId: string): PasteStats {
     const value = JSON.parse(readStorage(key(taskId)) ?? 'null') as Partial<PasteStats> | null;
     if (!value) return { ...EMPTY };
     const n = (x: unknown) => (typeof x === 'number' && x >= 0 ? Math.floor(x) : 0);
-    return { pastes: n(value.pastes), chars: n(value.chars), files: n(value.files) };
+    return {
+      pastes: n(value.pastes),
+      chars: n(value.chars),
+      files: n(value.files),
+      max: n(value.max),
+    };
   } catch {
     return { ...EMPTY };
   }
@@ -38,6 +45,7 @@ function add(taskId: string, change: Partial<PasteStats>) {
       pastes: stats.pastes + (change.pastes ?? 0),
       chars: stats.chars + (change.chars ?? 0),
       files: stats.files + (change.files ?? 0),
+      max: Math.max(stats.max, change.max ?? 0),
     }),
   );
 }
@@ -50,12 +58,12 @@ export function trackPastes(root: HTMLElement, taskId: string): () => void {
   const onPaste = (event: ClipboardEvent) => {
     if (!isCode(event.target)) return;
     const text = event.clipboardData?.getData('text') ?? '';
-    if (text) add(taskId, { pastes: 1, chars: text.length });
+    if (text) add(taskId, { pastes: 1, chars: text.length, max: text.length });
   };
   const onDrop = (event: DragEvent) => {
     if (!isCode(event.target)) return;
     const text = event.dataTransfer?.getData('text') ?? '';
-    if (text) add(taskId, { pastes: 1, chars: text.length });
+    if (text) add(taskId, { pastes: 1, chars: text.length, max: text.length });
   };
   const onChange = (event: Event) => {
     const target = event.target;

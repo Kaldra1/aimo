@@ -441,7 +441,7 @@ function SolvesTable({
                       return (
                         <td key={stars}>
                           {solve ? (
-                            <span class="cloud-ok">✓ {formatStamp(solve.solved_at)}</span>
+                            <span class="cloud-ok">✓ {formatStamp(solve.updated_at)}</span>
                           ) : session.checkable ? (
                             <a href={url(variantTaskPath(session.id, journal, stars))}>Виконати</a>
                           ) : (

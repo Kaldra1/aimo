@@ -29,6 +29,8 @@ export interface SolveRow {
   pastes?: number;
   pasted_chars?: number;
   file_loads?: number;
+  /** Найбільша вставка за раз; null — збережено до повного стеження. */
+  max_paste?: number | null;
 }
 
 export interface StudentRow {

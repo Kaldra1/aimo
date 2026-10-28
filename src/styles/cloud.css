@@ -88,14 +88,35 @@
   margin-top: var(--space-1);
   padding: 0 var(--space-1);
   border-radius: var(--radius-control);
-  background: var(--color-danger-soft);
-  color: var(--color-danger);
   font-size: var(--text-sm);
   white-space: nowrap;
 }
 
+.cloud-paste.is-self {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.cloud-paste.is-small {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-text);
+}
+
+.cloud-paste.is-big {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-weight: 700;
+}
+
 .cloud-paste-note {
   margin: 0 0 var(--space-2);
+}
+
+.cloud-paste-note.is-small {
+  color: var(--color-accent-text);
+}
+
+.cloud-paste-note.is-big {
   color: var(--color-danger);
 }
 
@@ -104,8 +125,8 @@
   margin-top: var(--space-1);
   padding: 0 var(--space-1);
   border-radius: var(--radius-control);
-  background: var(--color-accent-soft);
-  color: var(--color-accent-text);
+  background: var(--color-blue-card);
+  color: var(--color-blue-text);
   font-size: var(--text-xs, 0.75rem);
 }
 

@@ -107,11 +107,16 @@ export async function saveSolve(
   if (!data.session) return 'skipped';
   const row = { user_id: data.session.user.id, task_id: taskId, program };
   const paste = stats
-    ? { pastes: stats.pastes, pasted_chars: stats.chars, file_loads: stats.files }
+    ? {
+        pastes: stats.pastes,
+        pasted_chars: stats.chars,
+        file_loads: stats.files,
+        max_paste: stats.max,
+      }
     : {};
   let { error } = await client.from('solves').upsert({ ...row, ...paste });
   // База ще без стовпців вставок (міграцію не застосовано) — зберігаємо сам розв'язок.
-  if (error && stats && /pastes|pasted_chars|file_loads/.test(error.message)) {
+  if (error && stats && /pastes|pasted_chars|file_loads|max_paste/.test(error.message)) {
     ({ error } = await client.from('solves').upsert(row));
   }
   // RLS не пускає чужий варіант: розв'язувати можна, але в кабінет він не потрапляє.

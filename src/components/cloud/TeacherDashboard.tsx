@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import { credentialsCsv, parseRoster } from '../../lib/cloud/accounts';
 import { explain, getClient } from '../../lib/cloud/client';
 import { fingerprint, recheck, type Recheck } from '../../lib/cloud/solutions';
-import { plural } from '../../lib/plural';
+import { pasteDescription, pasteLevel, type PasteLevel } from '../../lib/cloud/paste-level';
 import {
   formatStamp,
   localDate,
@@ -674,16 +674,16 @@ function SessionTable({
                           class={`cloud-solve${check === 'fail' ? ' is-failed' : ''}`}
                           aria-expanded={open === key}
                           onClick={() => setOpen(open === key ? null : key)}
-                          title={
+                          title={`${
                             check === 'fail'
                               ? 'Повторна перевірка не пройдена'
                               : check === 'unknown'
                                 ? 'Тестів для повторної перевірки немає'
                                 : 'Повторна перевірка пройдена'
-                          }
+                          }. Уперше розв’язано ${formatStamp(solve.solved_at)}, востаннє — ${formatStamp(solve.updated_at)}`}
                         >
                           {check === 'fail' ? '✗' : check === 'ok' ? '✓' : '?'}{' '}
-                          {formatStamp(solve.solved_at)}
+                          {formatStamp(solve.updated_at)}
                         </button>
                         <PasteMark solve={solve} />
                         {twin && (
@@ -720,7 +720,9 @@ function SessionTable({
             {openSolve.variant} · {'★'.repeat(openSolve.stars)} · востаннє збережено{' '}
             {formatStamp(openSolve.updated_at)}
           </p>
-          {pasteText(openSolve) && <p class="cloud-paste-note">{pasteText(openSolve)}</p>}
+          <p class={`cloud-paste-note is-${pasteLevel(openSolve)}`}>
+            {pasteDescription(openSolve)}
+          </p>
           <pre>{openSolve.program}</pre>
         </div>
       )}
@@ -728,32 +730,23 @@ function SessionTable({
   );
 }
 
-/** «Вставлено 3 рази, 412 символів (програма — 380); з файлу — 1» або null, якщо не вставляв. */
-function pasteText(solve: SolveRow): string | null {
-  const pastes = solve.pastes ?? 0;
-  const files = solve.file_loads ?? 0;
-  if (pastes === 0 && files === 0) return null;
-  const parts: string[] = [];
-  if (pastes > 0) {
-    parts.push(
-      `вставляв готовий текст ${pastes} ${plural(pastes, ['раз', 'рази', 'разів'])}, ` +
-        `${solve.pasted_chars ?? 0} симв. (у програмі ${solve.program.length})`,
-    );
-  }
-  if (files > 0) parts.push(`завантажував програму з файлу: ${files}`);
-  const text = parts.join('; ');
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
+const MARK: Record<Exclude<PasteLevel, 'unknown'>, string> = {
+  self: '✎ сам',
+  small: '⎘',
+  big: '⚠ ⎘',
+};
 
-/** Позначка біля розв’язку: студент вставляв готовий текст або завантажував файл. */
+/** Позначка біля розв’язку: набрано самостійно, дрібні вставки чи великий вставлений шмат. */
 function PasteMark({ solve }: { solve: SolveRow }) {
-  const text = pasteText(solve);
-  if (!text) return null;
+  const level = pasteLevel(solve);
+  if (level === 'unknown') return null;
+  const text = pasteDescription(solve);
   const pastes = solve.pastes ?? 0;
   return (
-    <span class="cloud-paste" title={text} aria-label={text}>
-      ⎘ {pastes > 0 ? `${pastes}×${solve.pasted_chars ?? 0}` : ''}
-      {(solve.file_loads ?? 0) > 0 ? ' 📄' : ''}
+    <span class={`cloud-paste is-${level}`} title={text} aria-label={text}>
+      {MARK[level]}
+      {level !== 'self' && pastes > 0 && ` ${pastes}×${solve.pasted_chars ?? 0}`}
+      {(solve.file_loads ?? 0) > 0 && ' 📄'}
     </span>
   );
 }
