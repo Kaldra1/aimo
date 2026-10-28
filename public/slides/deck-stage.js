@@ -223,18 +223,28 @@
       right: 22px;
       bottom: 22px;
       z-index: 2147483000;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 4px;
+      border-radius: 999px;
+      background: #000;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+    }
+    .narration button {
       appearance: none;
       border: 0;
       border-radius: 999px;
-      padding: 10px 18px;
-      background: #000;
+      padding: 6px 14px;
+      background: transparent;
       color: #fff;
       font: 600 14px/1.2 system-ui, sans-serif;
       cursor: pointer;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.35);
     }
-    .narration:hover { background: #222; }
-    .narration:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+    .narration button[hidden] { display: none; }
+    .narration button:hover { background: #2a2a2a; }
+    .narration button:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+    .narration .narration__speed { min-width: 4.2em; font-variant-numeric: tabular-nums; }
 
     .overlay {
       position: fixed;
@@ -1152,13 +1162,12 @@
       // АІМО: озвучка лекції. Сторінка задає window.__deckNarration = { src: '…/13-{nn}.mp3' }
       // (номер слайда з нулем попереду). Кнопка (видно завжди, праворуч унизу) вмикає аудіо
       // поточного слайда; коли воно догралося — перехід на наступний слайд і його аудіо.
+      // Поруч — «Стоп» і швидкість.
       let narrationButton = null;
       const narration = window.__deckNarration;
       if (narration && narration.src) {
-        narrationButton = document.createElement('button');
-        narrationButton.type = 'button';
+        narrationButton = document.createElement('div');
         narrationButton.className = 'narration export-hidden';
-        narrationButton.textContent = 'Почати лекцію';
         this._setupNarration(narrationButton, narration.src);
       }
 
@@ -1849,25 +1858,69 @@
       }
     }
 
-    _setupNarration(button, pattern) {
+    _setupNarration(bar, pattern) {
       const audio = new Audio();
       audio.preload = 'auto';
+      const makeButton = (cls) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = cls;
+        bar.append(b);
+        return b;
+      };
+      const button = makeButton('narration__main');
+      const stop = makeButton('narration__stop');
+      stop.textContent = 'Стоп';
+      stop.title = 'Зупинити озвучку';
+      const speed = makeButton('narration__speed');
+      speed.title = 'Швидкість озвучки';
+
+      const RATES = [0.75, 1, 1.25, 1.5, 1.75, 2];
+      const RATE_KEY = 'aimo:narration-rate';
+      let rate = 1;
+      try { rate = Number(localStorage.getItem(RATE_KEY)) || 1; } catch (e) {}
+      if (!RATES.includes(rate)) rate = 1;
+      const applyRate = () => {
+        audio.playbackRate = rate;
+        speed.textContent = String(rate).replace('.', ',') + '×';
+      };
+      applyRate();
+      // Нове джерело скидає playbackRate — повертаємо обрану швидкість.
+      audio.addEventListener('loadedmetadata', () => { audio.playbackRate = rate; });
+      speed.addEventListener('click', () => {
+        rate = RATES[(RATES.indexOf(rate) + 1) % RATES.length];
+        try { localStorage.setItem(RATE_KEY, String(rate)); } catch (e) {}
+        applyRate();
+      });
+
       let state = 'idle'; // 'idle' | 'playing' | 'paused'
       let loaded = -1;
       const label = { idle: 'Почати лекцію', playing: 'Пауза', paused: 'Продовжити' };
-      const set = (next) => { state = next; button.textContent = label[next]; };
+      const set = (next) => {
+        state = next;
+        button.textContent = label[next];
+        stop.hidden = next === 'idle';
+      };
+      set('idle');
       const srcFor = (i) => pattern.replace('{nn}', String(i + 1).padStart(2, '0'));
       const play = () => {
         if (loaded !== this._index) {
           audio.src = srcFor(this._index);
           loaded = this._index;
         }
+        audio.playbackRate = rate;
         set('playing');
         audio.play().catch(() => set('idle'));
       };
       button.addEventListener('click', () => {
         if (state === 'playing') { audio.pause(); set('paused'); }
         else play();
+      });
+      stop.addEventListener('click', () => {
+        audio.pause();
+        audio.currentTime = 0;
+        loaded = -1;
+        set('idle');
       });
       audio.addEventListener('ended', () => {
         if (state !== 'playing') return;
