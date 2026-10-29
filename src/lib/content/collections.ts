@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getCollection, type CollectionEntry } from 'astro:content';
 import courseSource from '../../data/course.yaml?raw';
@@ -57,6 +57,14 @@ export function slidesHref(lecture: Lecture): string | undefined {
     );
   }
   return url(slides);
+}
+
+/** Чи має HTML-презентація лекції озвучку (рядок window.__deckNarration у файлі слайдів). */
+export function hasNarration(lecture: Lecture): boolean {
+  const { slides } = lecture.data;
+  if (!slides?.startsWith('/') || !slides.endsWith('.html')) return false;
+  const file = join(process.cwd(), 'public', slides);
+  return existsSync(file) && readFileSync(file, 'utf8').includes('window.__deckNarration');
 }
 
 /** Опубліковані задачі, перевірені й упорядковані: за машиною, потім за номером. */
