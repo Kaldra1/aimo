@@ -1,0 +1,172 @@
+---
+import NextClass from '../components/NextClass.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { DAY_NAMES, KIND_LABELS, PERIODS, SLOTS, WEEKS_LABELS, ZOOM_URL } from '../lib/schedule';
+
+const days = ([1, 2, 3, 4, 5] as const).map((day) => ({
+  day,
+  name: DAY_NAMES[day],
+  slots: SLOTS.filter((s) => s.day === day).sort((a, b) => a.period - b.period),
+}));
+---
+
+<BaseLayout
+  title="Розклад"
+  description="Розклад пар курсу «Алгоритми і методи обчислень», чисельник і знаменник, посилання на Zoom."
+  section="schedule"
+  breadcrumbs={[{ label: 'Розклад' }]}
+>
+  <div class="container page">
+    <header class="page-header">
+      <h1>Розклад</h1>
+      <p class="lead">
+        Третій курс навчається в другу зміну. Непарні тижні (1, 3, 5…) — чисельник, парні (2, 4, 6…)
+        — знаменник. Усі пари — за одним посиланням у Zoom.
+      </p>
+    </header>
+
+    <NextClass />
+
+    <section class="section week-section" aria-labelledby="week-title">
+      <h2 id="week-title" class="section-title">
+        Пари на тиждень
+      </h2>
+      <ol class="week">
+        {days.map(({ day, name, slots }) => (
+          <li class="day" data-day={day}>
+            <h3 class="day__name">{name}</h3>
+            {slots.length ? (
+              <ul class="day__slots">
+                {slots.map((slot) => (
+                  <li class="slot" data-weeks={slot.weeks}>
+                    <span class="slot__time">
+                      <b>{slot.period} пара</b>
+                      {PERIODS[slot.period].start}–{PERIODS[slot.period].end}
+                    </span>
+                    <span class="slot__what">
+                      <b>{KIND_LABELS[slot.kind]}</b>
+                      {slot.who}
+                    </span>
+                    <span
+                      class={`badge ${slot.weeks === 'every' ? 'badge--draft' : 'badge--soon'}`}
+                    >
+                      {WEEKS_LABELS[slot.weeks]}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="day__empty">Пар немає</p>
+            )}
+          </li>
+        ))}
+      </ol>
+      <p class="week__note">
+        Пари, яких цього тижня немає, приглушено. Час пар другої зміни: 4 пара — 13:00–14:20, 5 пара
+        — 14:30–15:50, 6 пара — 16:00–17:20.
+      </p>
+    </section>
+
+    <section class="section" aria-labelledby="zoom-title">
+      <h2 id="zoom-title" class="section-title">
+        Підключення
+      </h2>
+      <p class="zoom">
+        Zoom:{' '}
+        <a href={ZOOM_URL} target="_blank" rel="noopener">
+          {ZOOM_URL}
+        </a>
+      </p>
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  import { isNumerator, weekNumber } from '../lib/schedule';
+
+  const now = new Date();
+  const week = weekNumber(now);
+  const odd = isNumerator(week);
+  for (const slot of document.querySelectorAll<HTMLElement>('.slot')) {
+    const weeks = slot.dataset.weeks;
+    if (week >= 1 && weeks !== 'every' && (weeks === 'odd') !== odd) slot.dataset.off = 'true';
+  }
+  document.querySelector(`.day[data-day="${now.getDay()}"]`)?.setAttribute('data-today', 'true');
+</script>
+
+<style>
+  .week-section {
+    margin-top: var(--space-7);
+  }
+  .week {
+    display: grid;
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+  }
+  .day {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-card);
+  }
+  .day[data-today='true'] {
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+  }
+  .day__name {
+    font-size: var(--text-base);
+  }
+  .day__empty {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+  .day__slots {
+    display: grid;
+    gap: var(--space-2);
+    list-style: none;
+    padding: 0;
+  }
+  .slot {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-border);
+    font-size: var(--text-sm);
+  }
+  .slot[data-off='true'] {
+    opacity: 0.45;
+  }
+  .slot__time,
+  .slot__what {
+    display: grid;
+    color: var(--color-text-muted);
+  }
+  .slot b {
+    color: var(--color-text);
+  }
+  .week__note {
+    margin-top: var(--space-3);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+  .zoom {
+    overflow-wrap: anywhere;
+  }
+  @media (min-width: 64rem) {
+    .week {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+    .slot {
+      grid-template-columns: 1fr;
+      gap: var(--space-1);
+    }
+    .slot .badge {
+      justify-self: start;
+    }
+  }
+</style>

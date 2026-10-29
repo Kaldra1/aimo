@@ -1,0 +1,128 @@
+---
+import { ZOOM_URL } from '../lib/schedule';
+import { url } from '../lib/url';
+import Icon from './Icon.astro';
+
+interface Props {
+  /** Показати посилання на сторінку розкладу. */
+  withLink?: boolean;
+}
+
+const { withLink = false } = Astro.props;
+---
+
+<section class="next-class" aria-label="Найближча пара" data-next-class>
+  <div class="next-class__copy">
+    <p class="next-class__week" data-week>
+      Навчальний тиждень
+    </p>
+    <p class="next-class__title" data-title>
+      Розклад пар
+    </p>
+    <p class="next-class__meta" data-meta></p>
+  </div>
+  <div class="next-class__actions">
+    <a class="button button--primary" href={ZOOM_URL} target="_blank" rel="noopener">
+      <Icon name="video" /> Підключитися в Zoom
+    </a>
+    {withLink && (
+      <a class="button button--secondary" href={url('/schedule/')}>
+        <Icon name="calendar" /> Розклад
+      </a>
+    )}
+  </div>
+</section>
+
+<script>
+  import {
+    DAY_NAMES,
+    isNumerator,
+    KIND_LABELS,
+    nextClass,
+    PERIODS,
+    weekNumber,
+  } from '../lib/schedule';
+
+  const dateFormat = new Intl.DateTimeFormat('uk-UA', { day: 'numeric', month: 'long' });
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-next-class]')) {
+    const now = new Date();
+    const week = weekNumber(now);
+    const weekEl = root.querySelector('[data-week]')!;
+    const titleEl = root.querySelector('[data-title]')!;
+    const metaEl = root.querySelector('[data-meta]')!;
+    weekEl.textContent =
+      week >= 1
+        ? `${week}-й тиждень · ${isNumerator(week) ? 'чисельник' : 'знаменник'}`
+        : 'Семестр ще не почався';
+    const next = nextClass(now);
+    if (next) {
+      const { slot, date, live } = next;
+      const { start, end } = PERIODS[slot.period];
+      const today = date.toDateString() === now.toDateString();
+      const when = live
+        ? 'Іде зараз'
+        : today
+          ? 'Сьогодні'
+          : `${DAY_NAMES[slot.day]}, ${dateFormat.format(date)}`;
+      titleEl.textContent = `${KIND_LABELS[slot.kind]} · ${slot.who}`;
+      metaEl.textContent = `${when} · ${slot.period} пара, ${start}–${end}`;
+      root.dataset.live = String(live);
+    }
+  }
+</script>
+
+<style>
+  .next-class {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    background: var(--color-card);
+    box-shadow: var(--shadow-card);
+  }
+  .next-class[data-live='true'] {
+    border-color: var(--color-primary);
+    box-shadow:
+      inset 4px 0 0 var(--color-primary),
+      var(--shadow-card);
+  }
+  .next-class__copy {
+    display: grid;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+  .next-class__week {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+  .next-class__title {
+    font-family: var(--font-heading);
+    font-size: var(--text-lg);
+    font-weight: 700;
+  }
+  .next-class__meta {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+  .next-class__meta:empty {
+    display: none;
+  }
+  .next-class__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  @media (max-width: 39.99rem) {
+    .next-class__actions,
+    .next-class__actions .button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

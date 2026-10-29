@@ -1,5 +1,6 @@
 ---
 import Icon from '../components/Icon.astro';
+import NextClass from '../components/NextClass.astro';
 import SectionCard from '../components/SectionCard.astro';
 import TapeMotif from '../components/TapeMotif.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -45,6 +46,10 @@ const route = [
         <p class="hero__caption">Великі ідеї починаються з простих кроків</p>
       </div>
     </section>
+
+    <div class="home-next">
+      <NextClass withLink />
+    </div>
 
     <section class="section explore" aria-labelledby="sections-title">
       <div class="section-heading">
@@ -224,6 +229,9 @@ const route = [
     font-size: 0.75rem;
     text-align: center;
     letter-spacing: 0.04em;
+  }
+  .home-next {
+    margin-top: var(--space-5);
   }
   .explore {
     margin-top: var(--space-7);

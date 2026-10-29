@@ -4,6 +4,7 @@ export const NAV_ITEMS = [
   { key: 'practicals', label: 'Практичні', href: '/practicals/' },
   { key: 'emulators', label: 'Емулятори', href: '/emulators/' },
   { key: 'tasks', label: 'Задачі', href: '/tasks/' },
+  { key: 'schedule', label: 'Розклад', href: '/schedule/' },
   { key: 'about', label: 'Про курс', href: '/about/' },
   { key: 'cabinet', label: 'Кабінет', href: '/cabinet/' },
 ] as const;
