@@ -63,13 +63,9 @@ const modules = groupByTopic(course, lectures, []);
                         title={hasNarration(lecture) ? 'Слайди з озвучкою' : undefined}
                       >
                         <Icon name="file" />
+                        {hasNarration(lecture) && <Icon name="sound" />}
                         Слайди
-                        {hasNarration(lecture) && (
-                          <>
-                            <Icon name="sound" />
-                            <span class="visually-hidden">з озвучкою</span>
-                          </>
-                        )}
+                        {hasNarration(lecture) && <span class="visually-hidden">з озвучкою</span>}
                       </a>
                     )}
                   </li>
