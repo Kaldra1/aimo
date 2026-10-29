@@ -89,11 +89,7 @@ type Progress = 'all' | 'ungraded' | 'review' | 'graded';
 const PROGRESS_FILTERS: [Progress, string, string][] = [
   ['all', 'Усі', 'Усі студенти з фільтра'],
   ['ungraded', 'Без оцінок', 'Остаточної оцінки за заняття ще немає'],
-  [
-    'review',
-    'Потрібно перевірити',
-    'Є розв’язки, а оцінки немає, або розв’язок змінено після оцінки',
-  ],
+  ['review', 'Потрібно перевірити', 'Є розв’язки, а остаточної оцінки ще немає'],
   ['graded', 'З оцінками', 'Остаточну оцінку вже поставлено'],
 ];
 
@@ -255,12 +251,9 @@ function Dashboard({
     );
   const session = sessions.find((s) => s.id === sessionId);
   const progressOf = (userId: string): Exclude<Progress, 'all'>[] => {
-    const grade = data.grades.find((g) => g.user_id === userId && g.item === sessionId);
-    const solves = data.solves.filter((s) => s.user_id === userId && s.session === sessionId);
-    if (!grade) return solves.length > 0 ? ['ungraded', 'review'] : ['ungraded'];
-    // Оцінку вже поставили, але студент потім змінив розв’язок.
-    const changed = solves.some((s) => !grade.updated_at || s.updated_at > grade.updated_at);
-    return changed ? ['graded', 'review'] : ['graded'];
+    if (data.grades.some((g) => g.user_id === userId && g.item === sessionId)) return ['graded'];
+    const solved = data.solves.some((s) => s.user_id === userId && s.session === sessionId);
+    return solved ? ['ungraded', 'review'] : ['ungraded'];
   };
   const progressCount = (p: Progress) =>
     p === 'all'

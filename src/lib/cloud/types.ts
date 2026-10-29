@@ -57,7 +57,6 @@ export interface GradeRow {
   user_id: string;
   item: string;
   grade: 2 | 3 | 4 | 5;
-  updated_at?: string;
 }
 
 /** Місцева дата з рядка YYYY-MM-DD (без зсуву часового поясу). */
