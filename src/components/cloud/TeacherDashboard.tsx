@@ -83,6 +83,20 @@ export default function TeacherDashboard(props: Props) {
 }
 
 /** Оцінки: збережені в базі, чернетка й рекомендації. Спільне для журналу й таблиці заняття. */
+/** Швидкий фільтр вкладки «Заняття» за остаточною оцінкою (збереженою, без чернетки). */
+type Progress = 'all' | 'ungraded' | 'review' | 'graded';
+
+const PROGRESS_FILTERS: [Progress, string, string][] = [
+  ['all', 'Усі', 'Усі студенти з фільтра'],
+  ['ungraded', 'Без оцінок', 'Остаточної оцінки за заняття ще немає'],
+  [
+    'review',
+    'Потрібно перевірити',
+    'Є розв’язки, а оцінки немає, або розв’язок змінено після оцінки',
+  ],
+  ['graded', 'З оцінками', 'Остаточну оцінку вже поставлено'],
+];
+
 interface GradeBook {
   saved: (userId: string, item: string) => Grade | null;
   value: (userId: string, item: string) => Grade | null;
@@ -101,6 +115,7 @@ function Dashboard({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('journal');
   const [hidden, setHidden] = useHiddenStudents();
+  const [progress, setProgress] = useState<Progress>('all');
   const [groupId, setGroupId] = useState<string>('');
   const [sessionId, setSessionId] = useState<string>(
     sessions.find((s) => s.checkable)?.id ?? sessions[0]?.id ?? '',
@@ -239,6 +254,22 @@ function Dashboard({
         a.journal - b.journal,
     );
   const session = sessions.find((s) => s.id === sessionId);
+  const progressOf = (userId: string): Exclude<Progress, 'all'>[] => {
+    const grade = data.grades.find((g) => g.user_id === userId && g.item === sessionId);
+    const solves = data.solves.filter((s) => s.user_id === userId && s.session === sessionId);
+    if (!grade) return solves.length > 0 ? ['ungraded', 'review'] : ['ungraded'];
+    // Оцінку вже поставили, але студент потім змінив розв’язок.
+    const changed = solves.some((s) => !grade.updated_at || s.updated_at > grade.updated_at);
+    return changed ? ['graded', 'review'] : ['graded'];
+  };
+  const progressCount = (p: Progress) =>
+    p === 'all'
+      ? sessionStudents.length
+      : sessionStudents.filter((s) => progressOf(s.user_id).includes(p)).length;
+  const shownStudents =
+    progress === 'all'
+      ? sessionStudents
+      : sessionStudents.filter((s) => progressOf(s.user_id).includes(progress));
 
   return (
     <div class="cloud-stack">
@@ -325,12 +356,26 @@ function Dashboard({
             hidden={hidden}
             onChange={setHidden}
           />
+          <div class="cloud-tabs" role="group" aria-label="Швидкий фільтр">
+            {PROGRESS_FILTERS.map(([key, label, hint]) => (
+              <button
+                key={key}
+                type="button"
+                aria-pressed={progress === key}
+                title={hint}
+                class={`button ${progress === key ? 'button--primary' : 'button--secondary'}`}
+                onClick={() => setProgress(key)}
+              >
+                {label} · {progressCount(key)}
+              </button>
+            ))}
+          </div>
           {session && (
             <SessionTable
               key={sessionId}
               session={session}
               groups={data.groups}
-              students={sessionStudents}
+              students={shownStudents}
               data={data}
               checks={checks}
               book={book}
@@ -833,7 +878,7 @@ function SessionTable({
           </tbody>
         </table>
       </div>
-      {students.length === 0 && <p class="panel__hint">У фільтрі нікого не вибрано.</p>}
+      {students.length === 0 && <p class="panel__hint">За цими фільтрами нікого немає.</p>}
       {openSolve && (
         <div class="cloud-program">
           <div class="panel__header">
