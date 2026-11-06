@@ -38,7 +38,13 @@ const days = ([1, 2, 3, 4, 5] as const).map((day) => ({
             {slots.length ? (
               <ul class="day__slots">
                 {slots.map((slot) => (
-                  <li class="slot" data-weeks={slot.weeks}>
+                  <li
+                    class="slot"
+                    data-weeks={slot.weeks}
+                    data-day={slot.day}
+                    data-period={slot.period}
+                  >
+                    <span class="slot__live">Іде зараз</span>
                     <span class="slot__time">
                       <b>{slot.period} пара</b>
                       {PERIODS[slot.period].start}–{PERIODS[slot.period].end}
@@ -62,9 +68,9 @@ const days = ([1, 2, 3, 4, 5] as const).map((day) => ({
         ))}
       </ol>
       <p class="week__note">
-        Лабораторні — по знаменниках. Пари, що йдуть саме цього тижня, підсвічено, а тих, яких цього
-        тижня немає, приглушено. Час пар другої зміни: 4 пара — 13:00–14:20, 5 пара — 14:30–15:50, 6
-        пара — 16:00–17:20.
+        Лабораторні — по знаменниках. Пари, що йдуть цього тижня, підсвічено зеленим, а тих, яких
+        цього тижня немає, — сірим. Пару, що йде просто зараз, обведено. Час пар другої зміни: 4
+        пара — 13:00–14:20, 5 пара — 14:30–15:50, 6 пара — 16:00–17:20.
       </p>
     </section>
 
@@ -83,7 +89,7 @@ const days = ([1, 2, 3, 4, 5] as const).map((day) => ({
 </BaseLayout>
 
 <script>
-  import { isNumerator, weekNumber } from '../lib/schedule';
+  import { isNumerator, nextClass, weekNumber } from '../lib/schedule';
 
   const now = new Date();
   const week = weekNumber(now);
@@ -95,6 +101,12 @@ const days = ([1, 2, 3, 4, 5] as const).map((day) => ({
     else slot.dataset.off = 'true';
   }
   document.querySelector(`.day[data-day="${now.getDay()}"]`)?.setAttribute('data-today', 'true');
+  const current = nextClass(now);
+  if (current?.live) {
+    document
+      .querySelector(`.slot[data-day="${current.slot.day}"][data-period="${current.slot.period}"]`)
+      ?.setAttribute('data-live', 'true');
+  }
 </script>
 
 <style>
@@ -117,7 +129,7 @@ const days = ([1, 2, 3, 4, 5] as const).map((day) => ({
   }
   .day[data-today='true'] {
     border-color: var(--color-primary);
-    background: var(--color-primary-soft);
+    box-shadow: inset 0 0 0 1px var(--color-primary);
   }
   .day__name {
     font-size: var(--text-base);
@@ -146,15 +158,38 @@ const days = ([1, 2, 3, 4, 5] as const).map((day) => ({
     padding: var(--space-2);
     border-top-color: transparent;
     border-radius: var(--radius-control);
-    background: var(--color-accent-soft);
-    box-shadow: inset 3px 0 0 var(--color-accent);
+    background: var(--color-primary-soft);
+    box-shadow: inset 3px 0 0 var(--color-primary);
   }
   .slot[data-on='true'] .badge {
-    background: var(--color-accent);
-    color: var(--color-on-accent);
+    background: var(--color-primary);
+    color: var(--color-on-primary);
   }
   .slot[data-off='true'] {
-    opacity: 0.45;
+    margin-inline: calc(-1 * var(--space-2));
+    padding: var(--space-2);
+    border-top-color: transparent;
+    border-radius: var(--radius-control);
+    background: var(--color-surface-strong);
+    opacity: 0.55;
+  }
+  .slot__live {
+    display: none;
+  }
+  .slot[data-live='true'] {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  .slot[data-live='true'] .slot__live {
+    display: inline-flex;
+    grid-column: 1 / -1;
+    justify-self: start;
+    padding: 0.1em 0.6em;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    font-size: var(--text-sm);
+    font-weight: 700;
   }
   .slot__time,
   .slot__what {
