@@ -30,13 +30,13 @@ export interface Slot {
 export const SLOTS: Slot[] = [
   { day: 1, period: 6, weeks: 'even', kind: 'lecture', who: 'Потік' },
   { day: 2, period: 6, weeks: 'every', kind: 'lecture', who: 'Потік' },
-  { day: 3, period: 4, weeks: 'every', kind: 'seminar', who: 'КІ-2406' },
-  { day: 5, period: 4, weeks: 'every', kind: 'seminar', who: 'КІ-2407' },
-  { day: 5, period: 5, weeks: 'every', kind: 'seminar', who: 'КІ-2408' },
+  { day: 3, period: 4, weeks: 'even', kind: 'seminar', who: 'КІ-2406' },
+  { day: 5, period: 5, weeks: 'even', kind: 'seminar', who: 'КІ-2407' },
+  { day: 5, period: 6, weeks: 'even', kind: 'seminar', who: 'КІ-2408' },
 ];
 
 export const DAY_NAMES = ['', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', "П'ятниця"] as const;
-export const KIND_LABELS = { lecture: 'Лекція', seminar: 'ЛР або ПР' } as const;
+export const KIND_LABELS = { lecture: 'Лекція', seminar: 'Лабораторна' } as const;
 export const WEEKS_LABELS = { every: 'Щотижня', odd: 'Чисельник', even: 'Знаменник' } as const;
 
 const DAY_MS = 24 * 60 * 60 * 1000;

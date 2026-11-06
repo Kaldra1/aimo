@@ -62,8 +62,9 @@ const days = ([1, 2, 3, 4, 5] as const).map((day) => ({
         ))}
       </ol>
       <p class="week__note">
-        Пари, яких цього тижня немає, приглушено. Час пар другої зміни: 4 пара — 13:00–14:20, 5 пара
-        — 14:30–15:50, 6 пара — 16:00–17:20.
+        Лабораторні — по знаменниках. Пари, що йдуть саме цього тижня, підсвічено, а тих, яких цього
+        тижня немає, приглушено. Час пар другої зміни: 4 пара — 13:00–14:20, 5 пара — 14:30–15:50, 6
+        пара — 16:00–17:20.
       </p>
     </section>
 
@@ -89,7 +90,9 @@ const days = ([1, 2, 3, 4, 5] as const).map((day) => ({
   const odd = isNumerator(week);
   for (const slot of document.querySelectorAll<HTMLElement>('.slot')) {
     const weeks = slot.dataset.weeks;
-    if (week >= 1 && weeks !== 'every' && (weeks === 'odd') !== odd) slot.dataset.off = 'true';
+    if (week < 1 || weeks === 'every') continue;
+    if ((weeks === 'odd') === odd) slot.dataset.on = 'true';
+    else slot.dataset.off = 'true';
   }
   document.querySelector(`.day[data-day="${now.getDay()}"]`)?.setAttribute('data-today', 'true');
 </script>
@@ -137,6 +140,18 @@ const days = ([1, 2, 3, 4, 5] as const).map((day) => ({
     padding-top: var(--space-2);
     border-top: 1px solid var(--color-border);
     font-size: var(--text-sm);
+  }
+  .slot[data-on='true'] {
+    margin-inline: calc(-1 * var(--space-2));
+    padding: var(--space-2);
+    border-top-color: transparent;
+    border-radius: var(--radius-control);
+    background: var(--color-accent-soft);
+    box-shadow: inset 3px 0 0 var(--color-accent);
+  }
+  .slot[data-on='true'] .badge {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
   }
   .slot[data-off='true'] {
     opacity: 0.45;
