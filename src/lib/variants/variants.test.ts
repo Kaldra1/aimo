@@ -60,8 +60,12 @@ describe('тести автоперевірки варіантів', () => {
   const testFiles = readdirSync(DATA_DIR).filter((f) => f.endsWith('.tests.yaml'));
   it.each(testFiles)('%s — є для кожного з 90 завдань', (file) => {
     const tests = parseVariantTests(readFileSync(join(DATA_DIR, file), 'utf8'));
+    const name = file.replace('.tests.yaml', '');
+    const machine = parseVariants(readFileSync(join(DATA_DIR, `${name}.yaml`), 'utf8')).machine;
+    // Сортування: тренажер лише для ★ (трасування).
+    const levels = machine === 'sorting' ? [1] : [1, 2, 3];
     const keys = Array.from({ length: VARIANTS }, (_, i) => i + 1).flatMap((n) =>
-      [1, 2, 3].map((stars) => testsKey(n, stars)),
+      levels.map((stars) => testsKey(n, stars)),
     );
     expect(keys.filter((key) => !tests[key])).toEqual([]);
   });
@@ -71,6 +75,8 @@ describe('тести автоперевірки варіантів', () => {
     const solutionsFile = join(SOLUTIONS_DIR, `${name}.yaml`);
     if (!existsSync(solutionsFile)) return;
     const machine = parseVariants(readFileSync(join(DATA_DIR, `${name}.yaml`), 'utf8')).machine;
+    // Сортування перевіряє src/lib/sorting/exercise.test.ts.
+    if (machine === 'sorting') return;
     const tests = parseVariantTests(readFileSync(join(DATA_DIR, file), 'utf8'));
     const failures = checkReferences(
       solutionsFile,

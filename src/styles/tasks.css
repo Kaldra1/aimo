@@ -307,3 +307,97 @@
   padding-block: var(--space-1);
   font-size: var(--text-sm);
 }
+
+/* Тренажер трасування сортувань (варіанти ПР-3, ПР-4) */
+
+.sort-ex {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.sort-ex__algo {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-card);
+}
+
+.sort-ex__algo legend {
+  padding-inline: var(--space-2);
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+.sort-ex__stages {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sort-ex__stages li,
+.sort-ex__counts label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.sort-ex__stages label {
+  display: grid;
+  flex: 1 1 22rem;
+  grid-template-columns: 12rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.sort-ex__stages label span,
+.sort-ex__counts label span {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.sort-ex input {
+  min-height: 2.5rem;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  font-family: var(--font-mono);
+}
+
+.sort-ex__counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-6);
+}
+
+.sort-ex__counts input {
+  width: 6rem;
+}
+
+.sort-ex__mark {
+  font-weight: 700;
+}
+
+.sort-ex__mark.is-ok {
+  color: var(--color-primary);
+}
+
+.sort-ex__mark.is-bad,
+.sort-ex__note {
+  color: var(--color-danger);
+}
+
+@media (max-width: 39.99rem) {
+  .sort-ex__stages label {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+}

@@ -14,6 +14,7 @@ import {
   DEFAULT_MAX_STEPS,
   type TaskTest,
 } from '../tasks/check';
+import { recheckSorting } from '../sorting/exercise';
 import { splitExample } from '../variants/ids';
 
 export type TaskMachine = 'post' | 'turing' | 'markov' | 'flowchart';
@@ -115,11 +116,12 @@ export type Recheck = 'ok' | 'fail' | 'unknown';
 
 /** Повторна перевірка збереженої програми на тестах варіанта. */
 export function recheck(
-  machine: TaskMachine,
+  machine: TaskMachine | 'sorting',
   text: string,
   lines: readonly string[] | undefined,
 ): Recheck {
   if (!lines) return 'unknown';
+  if (machine === 'sorting') return recheckSorting(text, lines) ? 'ok' : 'fail';
   const program = parseProgram(machine, text);
   if (!program) return 'fail';
   const limit = machine === 'markov' ? DEFAULT_MAX_STEPS : LONG_MAX_STEPS;

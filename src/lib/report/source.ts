@@ -11,7 +11,10 @@ import type { LabReportInput } from './model';
 import { extractSections } from './sections';
 
 /** Заняття, для яких кабінет формує звіт: усі з автоперевіркою варіантів. */
-export const REPORT_SESSIONS = new Set(checkableSessions());
+// Сортування (ПР-3, ПР-4) мають лише тренажер трасування для ★ — звіту з кабінету для них поки немає.
+export const REPORT_SESSIONS = new Set(
+  checkableSessions().filter((id) => loadVariants(id).machine !== 'sorting'),
+);
 
 export interface ReportLevelSource {
   stars: 1 | 2 | 3;

@@ -11,7 +11,9 @@ import MarkovHelp from '../../../../components/markov/MarkovHelp.astro';
 import PostHelp from '../../../../components/post/PostHelp.astro';
 import TuringHelp from '../../../../components/turing/TuringHelp.astro';
 import PrevNext from '../../../../components/PrevNext.astro';
+import SortingExercise from '../../../../components/sorting/SortingExercise';
 import TaskWorkbench, { type TaskView } from '../../../../components/tasks/TaskWorkbench';
+import { exerciseFromLine } from '../../../../lib/sorting/exercise';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import { loadContent } from '../../../../lib/content/collections';
 import { sessionPath, sessionShortLabel } from '../../../../lib/content/course';
@@ -39,31 +41,35 @@ export async function getStaticPaths() {
       machine !== 'markov' &&
       machine !== 'post' &&
       machine !== 'turing' &&
-      machine !== 'flowchart'
+      machine !== 'flowchart' &&
+      machine !== 'sorting'
     ) {
       throw new Error(`Варіанти «${id}»: автоперевірки для машини «${machine}» немає`);
     }
     const tests = loadVariantTests(id)!;
     return Array.from({ length: VARIANTS }, (_, i) => i + 1).flatMap((n) =>
-      tasksOf(data, n).map((task, s) => {
-        const stars = s + 1;
-        const lines = tests[testsKey(n, stars)];
-        if (!lines) throw new Error(`Варіанти «${id}»: немає тестів для ${testsKey(n, stars)}`);
-        return {
-          params: { session: id, n: String(n), stars: String(stars) },
-          props: {
-            id,
-            title: session.data.title,
-            kind: session.data.kind,
-            number: session.data.number,
-            n,
-            stars,
-            task,
-            lines,
-            machine,
-          },
-        };
-      }),
+      // Для сортувань тренажер є лише для ★ (трасування); ★★ і ★★★ — програми на C++.
+      tasksOf(data, n)
+        .slice(0, machine === 'sorting' ? 1 : 3)
+        .map((task, s) => {
+          const stars = s + 1;
+          const lines = tests[testsKey(n, stars)];
+          if (!lines) throw new Error(`Варіанти «${id}»: немає тестів для ${testsKey(n, stars)}`);
+          return {
+            params: { session: id, n: String(n), stars: String(stars) },
+            props: {
+              id,
+              title: session.data.title,
+              kind: session.data.kind,
+              number: session.data.number,
+              n,
+              stars,
+              task,
+              lines,
+              machine,
+            },
+          };
+        }),
     );
   });
 }
@@ -74,9 +80,13 @@ const sessionHref = sessionPath(kind, number);
 const label = sessionShortLabel(kind, number);
 const starText = '★'.repeat(stars);
 
+const exercise = machine === 'sorting' ? exerciseFromLine(lines[0]!) : null;
+if (machine === 'sorting' && !exercise)
+  throw new Error(`Варіанти «${id}»: не розбирається «${lines[0]}»`);
+
 const view: TaskView = {
   id: variantTaskId(id, n, stars),
-  machine,
+  machine: machine === 'sorting' ? 'markov' : machine,
   // «0–9» в умові — це всі цифри від 0 до 9.
   alphabet: (task.alphabet ?? '')
     .replace(/(\d)–(\d)/g, (_: string, a: string, b: string) =>
@@ -117,17 +127,20 @@ const neighbour = (s: number) =>
       <h1>
         Варіант {n} · {starText}
       </h1>
-      <nav class="variant-levels" aria-label="Рівні завдання">
-        {[1, 2, 3].map((s) => (
-          <a
-            class={`button ${s === stars ? 'button--primary' : 'button--secondary'}`}
-            href={url(variantTaskPath(id, n, s))}
-            aria-current={s === stars ? 'page' : undefined}
-          >
-            {'★'.repeat(s)}
-          </a>
-        ))}
-      </nav>
+      {/* Для сортувань на сайті перевіряється лише ★ (трасування), тож перемикача рівнів немає. */}
+      {machine !== 'sorting' && (
+        <nav class="variant-levels" aria-label="Рівні завдання">
+          {[1, 2, 3].map((s) => (
+            <a
+              class={`button ${s === stars ? 'button--primary' : 'button--secondary'}`}
+              href={url(variantTaskPath(id, n, s))}
+              aria-current={s === stars ? 'page' : undefined}
+            >
+              {'★'.repeat(s)}
+            </a>
+          ))}
+        </nav>
+      )}
       <ul class="task-meta">
         <li>
           {stars === 1
@@ -163,9 +176,13 @@ const neighbour = (s: number) =>
       </p>
     </div>
 
-    <TaskWorkbench client:load task={view} />
+    {exercise ? (
+      <SortingExercise client:load id={view.id} exercise={exercise} />
+    ) : (
+      <TaskWorkbench client:load task={view} />
+    )}
 
-    {machine === 'post' ? (
+    {machine === 'sorting' ? null : machine === 'post' ? (
       <PostHelp />
     ) : machine === 'turing' ? (
       <TuringHelp />
@@ -177,7 +194,7 @@ const neighbour = (s: number) =>
 
     <PrevNext
       prev={neighbour(stars - 1)}
-      next={neighbour(stars + 1)}
+      next={machine === 'sorting' ? undefined : neighbour(stars + 1)}
       prevLabel="Попереднє завдання"
       nextLabel="Наступне завдання"
     />
