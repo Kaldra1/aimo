@@ -8,7 +8,6 @@ import {
   makePreset,
   MAX_LENGTH,
   MIN_LENGTH,
-  parseArray,
   traceSort,
   type Preset,
   type SortAlgorithm,
@@ -48,14 +47,12 @@ export interface SortingVisualizerProps {
 
 export default function SortingVisualizer({ hotkeys = true }: SortingVisualizerProps) {
   const [algorithm, setAlgorithm] = useState<SortAlgorithm>('bubble');
-  const [text, setText] = useState(DEFAULT_ARRAY.join(', '));
   const [values, setValues] = useState<number[]>(DEFAULT_ARRAY);
   const [count, setCount] = useState('8');
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
 
-  const parsed = useMemo(() => parseArray(text), [text]);
   const steps = useMemo(() => traceSort(algorithm, values), [algorithm, values]);
   const step = steps[Math.min(index, steps.length - 1)]!;
   const atEnd = index >= steps.length - 1;
@@ -98,15 +95,10 @@ export default function SortingVisualizer({ hotkeys = true }: SortingVisualizerP
     return () => window.removeEventListener('keydown', onKey);
   }, [steps, hotkeys]);
 
-  const applyText = () => {
-    if (parsed.ok) setValues(parsed.values);
-  };
-
   const applyPreset = (preset: Preset) => {
     const n = clampCount(Number(count) || 8);
     setCount(String(n));
     const next = makePreset(preset, n);
-    setText(next.join(', '));
     setValues(next);
   };
 
@@ -143,28 +135,6 @@ export default function SortingVisualizer({ hotkeys = true }: SortingVisualizerP
           ))}
         </div>
 
-        <form
-          class="sorting__input"
-          onSubmit={(event) => {
-            event.preventDefault();
-            applyText();
-          }}
-        >
-          <label class="field" for="sort-array">
-            <span class="field__label">Масив</span>
-            <input
-              id="sort-array"
-              class="input input--mono"
-              value={text}
-              aria-invalid={!parsed.ok}
-              onInput={(event) => setText(event.currentTarget.value)}
-            />
-          </label>
-          <button type="submit" class="button button--secondary" disabled={!parsed.ok}>
-            Застосувати
-          </button>
-        </form>
-
         <div class="sorting__generate">
           <label class="field sorting__count" for="sort-count">
             <span class="field__label">Кількість чисел</span>
@@ -192,7 +162,10 @@ export default function SortingVisualizer({ hotkeys = true }: SortingVisualizerP
             ))}
           </div>
         </div>
-        {!parsed.ok && <p class="message message--error">{parsed.error}</p>}
+        {/* Свого масиву ввести не можна: варіанти практичних студент трасує сам, а не переписує з візуалізатора. */}
+        <p class="sorting__note">
+          Масив — лише згенерований: власні масиви з варіантів практичних трасуйте вручну.
+        </p>
       </div>
 
       <section class="sorting__stage" aria-label="Масив">

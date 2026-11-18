@@ -394,3 +394,8 @@
 .sorting__text.is-error {
   color: var(--color-danger);
 }
+
+.sorting__note {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
